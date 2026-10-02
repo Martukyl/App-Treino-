@@ -5,6 +5,7 @@ import * as treino from './telas/treino.js';
 import * as exercicios from './telas/exercicios.js';
 import * as historico from './telas/historico.js';
 import * as ajustes from './telas/ajustes.js';
+import { retomarDescanso } from './cronometro.js';
 
 // [padrão do hash, módulo da tela, aba ativa na nav]
 const ROTAS = [
@@ -37,6 +38,7 @@ function renderizarTela() {
 definirRenderizador(renderizarTela);
 window.addEventListener('hashchange', () => { renderizarTela(); window.scrollTo(0, 0); });
 renderizarTela();
+retomarDescanso();
 
 if (avisoInicial() === 'corrompido') mostrarAviso('Os dados salvos estavam danificados. Comecei do zero; uma cópia foi guardada.');
 if (avisoInicial() === 'indisponivel') mostrarAviso('Não estou conseguindo salvar neste navegador — faça backups.');

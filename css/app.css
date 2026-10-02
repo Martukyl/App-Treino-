@@ -201,3 +201,27 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Treino em andamento */
+.treino-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.ex-nome { font-size: 18px; margin-bottom: 4px; }
+.card-cab { cursor: pointer; min-height: 48px; }
+.card-resumo { display: none; margin: 4px 0 0; color: var(--ok); font-weight: 600; }
+.exercicio.recolhido .corpo { display: none; }
+.exercicio.recolhido .card-resumo { display: block; }
+.exercicio.concluido { border-left: 3px solid var(--ok); }
+.card-botoes { display: flex; gap: 8px; margin: 8px 0; }
+.card-botoes .btn { flex: 1; }
+.btn-selo {
+  margin-left: 8px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 999px;
+  background: var(--surface-2); color: var(--text);
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.serie-n { text-align: center; color: var(--muted); font-weight: 700; }
+.serie .btn-icone { width: 56px; height: 52px; min-height: 52px; font-size: 22px; }
+.serie .serie-ok[aria-pressed="true"] { background: var(--ok); color: #05150d; }
+
+/* Cronômetro: tempo e botões */
+.cron-tempo { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cron-botoes { display: flex; gap: 6px; }
+.cron-botoes .btn { padding: 0 10px; font-size: 14px; }
