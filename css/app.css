@@ -255,3 +255,11 @@ input.invalido, textarea.invalido { outline: 2px solid var(--danger); }
 .lista-sessoes li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 .lista-sessoes li span:last-child { text-align: right; overflow-wrap: anywhere; }
 .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* Histórico e editor de treino */
+.linha-sessao { align-items: flex-start; }
+.linha-sessao .linha-info { text-align: right; }
+.sec-exercicios { margin-top: 16px; }
+.campos-presc { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 12px; }
+.campos-presc input { font-size: 20px; text-align: center; }
+.item-treino .card-botoes .btn { min-width: 48px; }
