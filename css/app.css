@@ -1,12 +1,12 @@
 /* Estilos do app de treino: tema escuro, mobile-first. */
 :root {
-  --bg: #0e0e13;
-  --surface: #18181f;
-  --surface-2: #22222b;
-  --text: #f4f4f6;
-  --muted: #9a9aa8;
-  --accent: #ff5c7a;
-  --accent-2: #ffb36b;
+  --bg: #090b12;
+  --surface: rgba(26, 28, 40, 0.72);
+  --surface-2: rgba(255, 255, 255, 0.085);
+  --text: #f7f6fb;
+  --muted: #aaa9ba;
+  --accent: #ff6685;
+  --accent-2: #ffb77c;
   --ok: #3ddc97;
   --warn: #ffb020;
   --danger: #ff4d4f;
@@ -14,10 +14,19 @@
   color-scheme: dark;
 }
 
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 8% 7%, rgba(114, 82, 173, 0.2), transparent 36rem),
+    radial-gradient(ellipse at 95% 31%, rgba(255, 92, 122, 0.13), transparent 32rem),
+    radial-gradient(ellipse at 40% 100%, rgba(59, 91, 148, 0.13), transparent 34rem),
+    var(--bg);
+  background-attachment: fixed;
+}
+
 * { box-sizing: border-box; }
 
 body {
-  background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   margin: 0;
@@ -269,3 +278,110 @@ input.invalido, textarea.invalido { outline: 2px solid var(--danger); }
 .campos-presc { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 12px; }
 .campos-presc input { font-size: 20px; text-align: center; }
 .item-treino .card-botoes .btn { min-width: 48px; }
+
+/* Camada visual translúcida, desenhada em CSS para continuar disponível offline. */
+.titulo {
+  font-size: 28px;
+  letter-spacing: -0.04em;
+  margin: 8px 0 20px;
+  text-shadow: 0 4px 24px rgba(255, 255, 255, 0.08);
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.035) 48%), var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  backdrop-filter: blur(22px) saturate(145%);
+}
+
+.card-destaque {
+  isolation: isolate;
+  min-height: 260px;
+  padding: 22px;
+  border-color: rgba(255, 161, 183, 0.28);
+  background:
+    radial-gradient(ellipse at 93% 4%, rgba(255, 130, 158, 0.25), transparent 17rem),
+    radial-gradient(ellipse at 0% 100%, rgba(112, 87, 165, 0.2), transparent 19rem),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.025) 56%),
+    rgba(24, 24, 35, 0.78);
+}
+
+.card-destaque::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 190px;
+  height: 190px;
+  top: -100px;
+  right: -52px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  box-shadow: 0 0 0 22px rgba(255, 255, 255, 0.025), 0 0 70px rgba(255, 102, 133, 0.12);
+}
+
+.treino-topo { gap: 16px; margin: 10px 0 18px; }
+.treino-letra {
+  width: 68px;
+  height: 68px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.06)), linear-gradient(135deg, var(--accent), #aa70c8);
+  box-shadow: 0 10px 30px rgba(255, 92, 122, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.48);
+}
+.treino-nome { font-size: 21px; letter-spacing: -0.025em; }
+.lista-ex li { border-color: rgba(255, 255, 255, 0.09); }
+
+.nav {
+  left: 12px;
+  right: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  width: min(536px, calc(100% - 24px));
+  height: 68px;
+  margin: 0 auto;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  background: rgba(24, 25, 36, 0.72);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+}
+.nav a { border-radius: 18px; transition: background 180ms ease, color 180ms ease; }
+.nav a span { font-size: 20px; }
+.nav a.ativa { color: #fff; background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.045)); }
+.nav a.ativa span { filter: drop-shadow(0 0 8px rgba(255, 102, 133, 0.6)); }
+
+.btn { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; }
+.btn-principal {
+  color: #261018;
+  border-color: rgba(255, 255, 255, 0.26);
+  background: linear-gradient(135deg, #ff7690, #ffbd82);
+  box-shadow: 0 8px 24px rgba(255, 92, 122, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.chip, input, select, textarea, .linha-ex {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background-color: rgba(255, 255, 255, 0.065);
+}
+.linha-lista { border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.055); }
+.cronometro, .toast {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(31, 32, 45, 0.82);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+}
+.sheet {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(28, 29, 42, 0.94);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+}
+
+@media (max-width: 380px) {
+  .card-destaque { padding: 18px; }
+  .titulo { font-size: 26px; }
+}
