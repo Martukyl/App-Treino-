@@ -241,3 +241,17 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .check-linha input { width: 24px; min-height: 24px; height: 24px; flex: 0 0 auto; }
 .form-erro { color: var(--danger); margin: 12px 0; font-size: 14px; }
 input.invalido, textarea.invalido { outline: 2px solid var(--danger); }
+
+/* Exercícios: lista e detalhe */
+.linha-lista { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 10px 12px; margin-bottom: 6px; background: var(--surface); border-radius: 12px; color: var(--text); text-decoration: none; font-size: 16px; }
+.linha-nome { min-width: 0; overflow-wrap: anywhere; }
+.linha-info { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.voltar { display: inline-flex; align-items: center; min-height: 48px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.sec-card { font-size: 16px; margin: 0 0 8px; }
+.dica { white-space: pre-line; overflow-wrap: anywhere; }
+.grafico-legenda { min-height: 1.4em; margin: 8px 0 0; }
+.grafico circle { cursor: pointer; }
+.lista-sessoes { list-style: none; margin: 0; padding: 0; }
+.lista-sessoes li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.lista-sessoes li span:last-child { text-align: right; overflow-wrap: anywhere; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
