@@ -1,6 +1,6 @@
 // Tela de treino em andamento (#/treino) e resumo ao finalizar (#/resumo/<id>).
 import {
-  esc, parseCarga, parseReps, formatarKg, formatarNumero,
+  esc, parseCarga, parseReps, formatarKg, formatarNumero, formatarCampo,
   formatarDescanso, formatarDuracao, formatarData
 } from '../util.js';
 import { GRUPOS, EQUIPAMENTOS } from '../dados.js';
@@ -43,7 +43,7 @@ function renderSerie(r, s) {
   return `
     <div class="serie${r.feita ? ' feita' : ''}" data-s="${s}">
       <span class="serie-n">${n}</span>
-      <input class="carga" inputmode="decimal" placeholder="kg" value="${r.carga == null ? '' : formatarNumero(r.carga)}" aria-label="Carga série ${n}"${r.feita ? ' disabled' : ''}>
+      <input class="carga" inputmode="decimal" placeholder="kg" value="${r.carga == null ? '' : formatarCampo(r.carga)}" aria-label="Carga série ${n}"${r.feita ? ' disabled' : ''}>
       <input class="reps" inputmode="numeric" placeholder="reps" value="${r.reps == null ? '' : r.reps}" aria-label="Repetições série ${n}"${r.feita ? ' disabled' : ''}>
       <button type="button" class="btn btn-icone serie-ok" data-acao="feita" aria-pressed="${r.feita}" aria-label="Série ${n} feita">✓</button>
     </div>`;

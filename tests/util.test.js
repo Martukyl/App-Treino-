@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  arredondar, parseNumero, parseCarga, parseReps, formatarNumero, formatarKg,
+  arredondar, parseNumero, parseCarga, parseReps, formatarNumero, formatarCampo, formatarKg,
   formatarData, formatarDataCompleta, formatarDuracao, formatarDescanso, gerarId, esc
 } from '../js/util.js';
 
@@ -20,6 +20,21 @@ test('parseNumero aceita vírgula e rejeita lixo', () => {
   assert.equal(parseNumero('4a'), null);
   assert.equal(parseNumero('-3'), null);
   assert.equal(parseNumero(null), null);
+});
+
+test('parseNumero aceita estados intermediários de digitação', () => {
+  assert.equal(parseNumero('42,'), 42);
+  assert.equal(parseNumero('42.'), 42);
+  assert.equal(parseNumero(',5'), 0.5);
+  assert.equal(parseNumero('.5'), 0.5);
+  assert.equal(parseNumero(','), null);
+  assert.equal(parseNumero('1,2,3'), null);
+});
+
+test('formatarCampo: pt-BR, 1 casa, sem separador de milhar', () => {
+  assert.equal(formatarCampo(1000), '1000');
+  assert.equal(formatarCampo(42.5), '42,5');
+  assert.equal(formatarCampo(40), '40');
 });
 
 test('parseCarga arredonda a 1 casa e aceita zero', () => {

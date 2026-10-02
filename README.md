@@ -25,9 +25,10 @@ powershell -ExecutionPolicy Bypass -File tools/gerar-icones.ps1
 ## Publicar no GitHub Pages
 
 1. No site do GitHub, crie um repositório **público** (por exemplo `treino`), sem README nem outros arquivos iniciais.
-2. Nesta pasta, ligue o repositório e envie o código (troque `<usuario>` e `<repo>`):
+2. Nesta pasta, mescle a branch de trabalho na `main`, ligue o repositório e envie o código (troque `<usuario>` e `<repo>`):
 
    ```
+   git checkout main && git merge feat/app-treino
    git remote add origin https://github.com/<usuario>/<repo>.git
    git push -u origin main
    ```
@@ -37,12 +38,14 @@ powershell -ExecutionPolicy Bypass -File tools/gerar-icones.ps1
 
 ## Atualizar o app
 
-Altere os arquivos, **incremente `CACHE` em `sw.js`** (por exemplo `treino-v8`), faça commit e push. No celular, feche e abra o app duas vezes para carregar a versão nova.
+Altere os arquivos, **aumente `VERSAO_APP` (em `js/util.js`) e `CACHE` (em `sw.js`) juntos, com o mesmo número** (por exemplo `1.0.1` e `treino-1.0.1`), faça commit e push. No celular, feche e abra o app duas vezes para carregar a versão nova.
 
 ## Instalar no celular
 
 - **Android (Chrome):** menu ⋮ → "Instalar app".
 - **iPhone (Safari):** Compartilhar → "Adicionar à Tela de Início".
+
+> **Aviso para iPhone:** instale na tela de início ANTES do primeiro treino e use sempre pelo ícone: no iPhone, o app instalado guarda os dados separado do Safari, e o Safari apaga dados de sites não instalados após uns 7 dias sem uso. Se já usou pelo Safari, faça Exportar backup lá e Importar no app instalado.
 
 ## Dados
 

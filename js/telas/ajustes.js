@@ -1,11 +1,9 @@
 // Ajustes (#/ajustes): meus treinos, backup, restaurar padrão; e editor de treino (#/ajustes/treino/<id>).
-import { esc, parseReps } from '../util.js';
+import { esc, parseReps, VERSAO_APP } from '../util.js';
 import { GRUPOS } from '../dados.js';
 import { obterEstado, atualizar, substituirEstado } from '../estado.js';
 import { validarBackup, migrar, restaurarTreinosPadrao } from '../armazenamento.js';
 import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
-
-const VERSAO_APP = '1.0.0';
 
 // remove acento e caixa para a busca
 function normalizar(s) {

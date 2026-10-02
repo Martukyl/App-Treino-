@@ -12,7 +12,9 @@ test('gera SVG com um ponto por sessão e rótulos pt-BR', () => {
     { data: '2026-10-02T10:00:00Z', carga: 42.5 }
   ]);
   assert.match(svg, /^<svg[^>]*viewBox="0 0 320 180"/);
-  assert.equal((svg.match(/<circle/g) || []).length, 2);
+  // só os círculos visíveis (cada ponto também tem uma área de toque maior)
+  assert.equal((svg.match(/<circle class="ponto"/g) || []).length, 2);
+  assert.equal((svg.match(/<circle class="toque"/g) || []).length, 2);
   assert.match(svg, /42,5/);
   assert.match(svg, /<polyline/);
 });

@@ -1,6 +1,7 @@
 // Service worker: cache do app shell para funcionar offline.
 // Ao alterar QUALQUER arquivo do app, incremente CACHE.
-const CACHE = 'treino-v7';
+// Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
+const CACHE = 'treino-1.0.0';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
@@ -11,7 +12,7 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener('install', ev => {
-  ev.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  ev.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', ev => {

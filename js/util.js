@@ -1,6 +1,9 @@
 // Utilitários puros: formatação pt-BR, conversão de números e ids.
 // Não acessam DOM nem localStorage (testáveis no Node).
 
+// Versão do app: deve ser igual ao número de CACHE em sw.js (treino-<VERSAO_APP>).
+export const VERSAO_APP = '1.0.0';
+
 export function arredondar(n, passo = 0.5) {
   // o epsilon evita 42.49999 virar 42 por erro de ponto flutuante
   return Math.round(n / passo + 1e-9) * passo;
@@ -10,7 +13,8 @@ export function parseNumero(txt) {
   if (typeof txt === 'number') return Number.isFinite(txt) && txt >= 0 ? txt : null;
   if (txt == null) return null;
   const s = String(txt).trim().replace(',', '.');
-  if (!/^\d+(\.\d+)?$/.test(s)) return null;
+  // aceita estados intermediários da digitação: "42," e "42." → 42; ",5" e ".5" → 0.5
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(s)) return null;
   return Number(s);
 }
 
@@ -28,6 +32,13 @@ const fmtNumero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 
 export function formatarNumero(n) {
   return fmtNumero.format(n);
+}
+
+// Para o value= de inputs: sem separador de milhar (parseCarga leria "1.000" como 1)
+const fmtCampo = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, useGrouping: false });
+
+export function formatarCampo(n) {
+  return fmtCampo.format(n);
 }
 
 export function formatarKg(n) {

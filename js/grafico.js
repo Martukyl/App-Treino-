@@ -13,9 +13,13 @@ export function graficoLinha(pontos) {
   const x = i => M.esq + (i * (L - M.esq - M.dir)) / (pontos.length - 1);
   const y = c => M.topo + ((max - c) * (A - M.topo - M.base)) / (max - min);
   const coords = pontos.map((p, i) => `${x(i).toFixed(1)},${y(p.carga).toFixed(1)}`).join(' ');
-  const circulos = pontos.map((p, i) =>
-    `<circle cx="${x(i).toFixed(1)}" cy="${y(p.carga).toFixed(1)}" r="5" fill="var(--accent)" tabindex="0">` +
-    `<title>${esc(formatarData(p.data))}: ${formatarNumero(p.carga)} kg</title></circle>`).join('');
+  // círculo visível (r=5, sem foco) + área de toque transparente maior (r=14, focável)
+  const circulos = pontos.map((p, i) => {
+    const cx = x(i).toFixed(1), cy = y(p.carga).toFixed(1);
+    const titulo = `<title>${esc(formatarData(p.data))}: ${formatarNumero(p.carga)} kg</title>`;
+    return `<circle class="ponto" cx="${cx}" cy="${cy}" r="5" fill="var(--accent)">${titulo}</circle>` +
+      `<circle class="toque" cx="${cx}" cy="${cy}" r="14" fill="transparent" tabindex="0">${titulo}</circle>`;
+  }).join('');
   return `<svg viewBox="0 0 ${L} ${A}" role="img" aria-label="Evolução da carga">` +
     `<line x1="${M.esq}" y1="${y(max)}" x2="${L - M.dir}" y2="${y(max)}" stroke="var(--surface-2)"/>` +
     `<line x1="${M.esq}" y1="${y(min)}" x2="${L - M.dir}" y2="${y(min)}" stroke="var(--surface-2)"/>` +

@@ -6,6 +6,7 @@ import * as exercicios from './telas/exercicios.js';
 import * as historico from './telas/historico.js';
 import * as ajustes from './telas/ajustes.js';
 import { retomarDescanso } from './cronometro.js';
+import { fecharSheet } from './ui.js';
 
 // [padrão do hash, módulo da tela, aba ativa na nav]
 const ROTAS = [
@@ -26,9 +27,16 @@ function renderizarTela() {
   for (const [padrao, tela, aba] of ROTAS) {
     const m = hash.match(padrao);
     if (!m) continue;
-    const params = m[1] ? decodeURIComponent(m[1]) : undefined;
-    raiz.innerHTML = tela.render(params);
-    tela.montar?.(raiz, params);
+    try {
+      const params = m[1] ? decodeURIComponent(m[1]) : undefined;
+      raiz.innerHTML = tela.render(params);
+      tela.montar?.(raiz, params);
+    } catch (erro) {
+      console.error(erro);
+      raiz.innerHTML = `<div class="card"><p>Algo deu errado nesta tela.</p>
+        <p><a href="#/hoje">Voltar ao início</a></p>
+        <p><a href="#/ajustes">Ajustes (backup)</a></p></div>`;
+    }
     document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('ativa', a.dataset.aba === aba));
     return;
   }
@@ -36,7 +44,7 @@ function renderizarTela() {
 }
 
 definirRenderizador(renderizarTela);
-window.addEventListener('hashchange', () => { renderizarTela(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { fecharSheet(); renderizarTela(); window.scrollTo(0, 0); });
 renderizarTela();
 retomarDescanso();
 
