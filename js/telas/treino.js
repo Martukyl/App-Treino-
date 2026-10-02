@@ -43,8 +43,8 @@ function renderSerie(r, s) {
   return `
     <div class="serie${r.feita ? ' feita' : ''}" data-s="${s}">
       <span class="serie-n">${n}</span>
-      <input class="carga" inputmode="decimal" placeholder="kg" value="${r.carga == null ? '' : formatarNumero(r.carga)}" aria-label="Carga série ${n}">
-      <input class="reps" inputmode="numeric" placeholder="reps" value="${r.reps == null ? '' : r.reps}" aria-label="Repetições série ${n}">
+      <input class="carga" inputmode="decimal" placeholder="kg" value="${r.carga == null ? '' : formatarNumero(r.carga)}" aria-label="Carga série ${n}"${r.feita ? ' disabled' : ''}>
+      <input class="reps" inputmode="numeric" placeholder="reps" value="${r.reps == null ? '' : r.reps}" aria-label="Repetições série ${n}"${r.feita ? ' disabled' : ''}>
       <button type="button" class="btn btn-icone serie-ok" data-acao="feita" aria-pressed="${r.feita}" aria-label="Série ${n} feita">✓</button>
     </div>`;
 }
@@ -169,6 +169,8 @@ async function finalizar() {
 // Edição de um campo: grava sem re-renderizar (o teclado do celular não pode fechar).
 function aoDigitar(campo) {
   const linha = campo.closest('.serie');
+  // série feita é travada (desmarque o ✓ para editar); defesa extra além do disabled
+  if (linha.classList.contains('feita')) return;
   const i = Number(campo.closest('.exercicio').dataset.i);
   const s = Number(linha.dataset.s);
   const ehCarga = campo.classList.contains('carga');

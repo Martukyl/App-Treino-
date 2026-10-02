@@ -41,7 +41,10 @@ export function ajustarDescanso(deltaSeg) {
   const fim = obterEstado().sessaoAtual?.descansoAte;
   if (!fim) return;
   definirFim(Math.max(Date.now(), fim + deltaSeg * 1000));
-  tique();
+  // após o fim o intervalo já foi limpo e a classe 'fim' está ativa: religa tudo
+  const el = document.getElementById('cronometro');
+  if (intervalo === null || el.classList.contains('fim')) ligar();
+  else tique();
 }
 
 export function pararDescanso() {
