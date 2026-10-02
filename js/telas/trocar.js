@@ -89,7 +89,9 @@ export function abrirTrocar(indiceItem) {
       const sess = est.sessaoAtual;
       const it = sess && sess.itens[indiceItem];
       if (!it || it.exercicioId !== idAtual) return;
-      const trocadoDe = sempre ? null : (it.trocadoDe ?? it.exercicioId);
+      const original = it.trocadoDe ?? it.exercicioId;
+      // trocar de volta para o original não deixa "no lugar de" ele mesmo
+      const trocadoDe = (sempre || novoId === original) ? null : original;
       sess.itens[indiceItem] = criarItemSessao(est, {
         exercicioId: novoId, series: it.series, repMin: it.repMin, repMax: it.repMax, descanso: it.descanso
       }, trocadoDe);
@@ -158,11 +160,13 @@ export function abrirFormExercicio(exercicioId, aoSalvar) {
       const dica = campo('dica').value.trim();
       const msgs = [];
       campo('nome').classList.toggle('invalido', !nome || nome.length > 60);
-      campo('incremento').classList.toggle('invalido', !(inc > 0));
+      campo('incremento').classList.toggle('invalido', !(inc > 0) || (campo('incremento').value.trim().split(/[.,]/)[1] || '').length > 1);
       campo('dica').classList.toggle('invalido', dica.length > 400);
       if (!nome) msgs.push('Informe o nome.');
       else if (nome.length > 60) msgs.push('Nome com no máximo 60 caracteres.');
+      const casas = (campo('incremento').value.trim().split(/[.,]/)[1] || '').length;
       if (!(inc > 0)) msgs.push('Incremento deve ser maior que zero.');
+      else if (casas > 1) msgs.push('Use no máximo 1 casa decimal (ex.: 2,5).');
       if (dica.length > 400) msgs.push('Dica com no máximo 400 caracteres.');
       if (msgs.length) { erro.textContent = msgs.join(' '); erro.hidden = false; return; }
       const id = existente ? existente.id : gerarId('c_');
