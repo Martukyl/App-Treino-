@@ -52,4 +52,20 @@ if (avisoInicial() === 'corrompido') mostrarAviso('Os dados salvos estavam danif
 if (avisoInicial() === 'indisponivel') mostrarAviso('Não estou conseguindo salvar neste navegador — faça backups.');
 
 try { navigator.storage?.persist?.(); } catch { /* opcional */ }
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+if ('serviceWorker' in navigator) {
+  // Versão nova publicada: o SW novo assume o controle já na primeira abertura.
+  // Fora do treino recarrega sozinho; durante o treino só avisa, para não atrapalhar.
+  const jaTinhaVersao = !!navigator.serviceWorker.controller;
+  let recarregando = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!jaTinhaVersao || recarregando) return; // primeira instalação: nada a atualizar
+    const recarregar = () => { recarregando = true; location.reload(); };
+    if ((location.hash || '').startsWith('#/treino')) {
+      mostrarAviso('Nova versão disponível — toque aqui para atualizar.');
+      document.getElementById('aviso').onclick = recarregar;
+    } else {
+      recarregar();
+    }
+  });
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}

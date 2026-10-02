@@ -32,6 +32,10 @@ export function render() {
     <div class="tela-ajustes">
       <h1 class="titulo">Ajustes</h1>
       <section class="card">
+        <h2 class="sec-card">Seu nome</h2>
+        <input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Como quer ser chamada?" value="${esc(est.nome || '')}" aria-label="Seu nome">
+      </section>
+      <section class="card">
         <h2 class="sec-card">Meus treinos</h2>
         ${linhas || '<p class="muted">Nenhum treino.</p>'}
       </section>
@@ -83,6 +87,11 @@ export function montar(raiz) {
   const tela = raiz.querySelector('.tela-ajustes');
   if (!tela) return;
   const campo = tela.querySelector('[data-campo="arquivo"]');
+  // salva a cada tecla, sem re-renderizar (o teclado não fecha)
+  tela.querySelector('[data-campo="nome"]').oninput = ev => {
+    const nome = ev.target.value.trim().slice(0, 30);
+    atualizar(e => { e.nome = nome; }, { renderizar: false });
+  };
   tela.querySelector('[data-acao="exportar"]').onclick = exportar;
   tela.querySelector('[data-acao="importar"]').onclick = () => campo.click();
   campo.onchange = async () => {

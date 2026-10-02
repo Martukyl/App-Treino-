@@ -40,6 +40,12 @@ test('migrar adiciona exercício padrão faltante sem sobrescrever editado', () 
   assert.equal(m.exercicios.stiff.incremento, 5);
 });
 
+test('nome da usuária: vazio no início e preenchido pela migração em estados antigos', () => {
+  assert.equal(estadoInicial().nome, '');
+  assert.equal(migrar({ versao: 1, exercicios: {}, treinos: [], sessoes: [] }).nome, '');
+  assert.equal(migrar({ ...estadoInicial(), nome: 'Ana' }).nome, 'Ana');
+});
+
 test('migrar preenche campos ausentes', () => {
   const m = migrar({ versao: 1, exercicios: {}, treinos: [] });
   assert.deepEqual(m.sessoes, []);

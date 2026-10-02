@@ -3,11 +3,12 @@ import { esc, formatarData, gerarId } from '../util.js';
 import { proximoTreino, avaliar, historicoDoExercicio } from '../progressao.js';
 import { obterEstado, atualizar } from '../estado.js';
 
+// "Boa noite, Roberta!" — o nome vem de Ajustes e fica só no aparelho
 function saudacao() {
   const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
+  const parte = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const nome = (obterEstado().nome || '').trim();
+  return nome ? `${parte}, ${esc(nome)}` : parte;
 }
 
 // Data (dd/mm) do fim da sessão mais recente com aquele treino, ou null.

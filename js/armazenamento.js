@@ -14,7 +14,8 @@ export function estadoInicial() {
     treinos: copiar(treinosPadrao),
     sessoes: [],
     sessaoAtual: null,
-    ultimoTreinoId: null
+    ultimoTreinoId: null,
+    nome: ''
   };
 }
 
@@ -28,6 +29,7 @@ export function migrar(estado) {
   if (!Array.isArray(e.sessoes)) e.sessoes = [];
   if (e.sessaoAtual === undefined) e.sessaoAtual = null;
   if (e.ultimoTreinoId === undefined) e.ultimoTreinoId = null;
+  if (typeof e.nome !== 'string') e.nome = '';
   e.versao = VERSAO;
   return e;
 }
