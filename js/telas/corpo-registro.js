@@ -37,7 +37,7 @@ export function render(param) {
       <button type="button" class="foto-mini" data-acao="escolher" aria-label="Foto de ${esc(rotulo.toLowerCase())}"></button>
       <span class="foto-rotulo">${rotulo}</span>
       <button type="button" class="btn btn-sec foto-remover" data-acao="remover" hidden>Remover</button>
-      <input type="file" accept="image/*" capture="environment" hidden data-campo="arquivo-${pos}">
+      <input type="file" accept="image/*" hidden data-campo="arquivo-${pos}">
     </div>`).join('');
   return `
     <div class="tela-registro" data-id="${esc(medida ? medida.id : '')}">
