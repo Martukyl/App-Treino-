@@ -1,6 +1,6 @@
 # Aba "Corpo": perfil, peso, medidas e fotos — especificação
 
-Data: 2026-10-03 · Status: aguardando revisão · App: v1.0.2 → v1.1.0
+Data: 2026-10-03 · Status: aprovada pelo Tiago em 03/10 · App: v1.0.2 → v1.1.0
 Spec base do app: `2026-10-02-app-treino-design.md` (padrões, tokens de cor, restrições valem aqui).
 
 ## 1. Objetivo
@@ -151,11 +151,15 @@ Título (rótulo + unidade), valor atual, diferenças como no card, gráfico de 
   (`perfil.fotoId`). Na tela Hoje, avatar circular (56 px) ao lado da saudação; sem foto,
   círculo com a inicial do nome no gradiente do accent. Tocar no avatar → `#/corpo`.
   Entra no backup junto com as demais fotos.
-- **Imagem que remeta a academia:** faixa/ilustração no topo do card do treino sugerido
-  na tela Hoje. Decisão pendente com o Tiago: (a) ilustração SVG própria (halter/anilhas,
-  leve, funciona offline, combina com o visual translúcido) — recomendada; ou
-  (b) foto de academia com licença livre (ex.: Unsplash), comprimida e incluída no repo.
-  Sem CDN em runtime em nenhum dos casos.
+- **Imagem que remeta a academia (decidido em 03/10: foto livre, específica por treino):**
+  faixa no topo do card do treino sugerido na tela Hoje, uma foto por dia, combinando com
+  o foco: `img/treino-a.jpg` (A, barra no rack), `-b` (B, remada com halter), `-c`
+  (C, agachamento), `-d` (D, desenvolvimento com halteres), `-e` (E, levantamento terra).
+  800×400 JPEG ~60 KB, Licença Unsplash, créditos em `img/CREDITOS.md`. Mostrar a de
+  `treino-<id minúsculo>.jpg` só para ids A–E (treino com outro id = sem faixa). Altura
+  ~130 px, `object-fit: cover`, cantos arredondados no topo do card, `alt=""` (decorativa),
+  `loading="lazy"` não (está no topo). Também no card "Treino em andamento". Entram no
+  `ARQUIVOS` do sw.js (offline). Sem CDN em runtime.
 
 ## 7. Fotos (`js/fotos.js`)
 
