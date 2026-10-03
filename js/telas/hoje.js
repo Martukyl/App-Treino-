@@ -8,6 +8,7 @@ import { tempoMs } from '../cardio-ao-vivo.js';
 import { aoSairDaTela, toast } from '../ui.js';
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardSemana } from '../cards.js';
+import { renderCardRankingHoje, montarCardRankingHoje } from './ranking.js';
 
 // "Boa noite, Roberta!" — o nome vem de Ajustes e fica só no aparelho
 function saudacao() {
@@ -142,7 +143,7 @@ function renderSemana(est) {
 
 export function render() {
   const est = obterEstado();
-  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderSemana(est) + renderCardio(est);
+  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderSemana(est) + renderCardRankingHoje() + renderCardio(est);
 }
 
 export function montar(raiz) {
@@ -157,6 +158,7 @@ export function montar(raiz) {
     const timer = setInterval(tique, 1000);
     aoSairDaTela(() => clearInterval(timer));
   }
+  montarCardRankingHoje(raiz);
   const semana = raiz.querySelector('[data-acao="compartilhar-semana"]');
   if (semana) semana.onclick = () => compartilharCard('Minha semana', () => dadosCardSemana(obterEstado(), hojeISO()));
   raiz.querySelectorAll('[data-acao="comecar"]').forEach(el => {

@@ -4,6 +4,7 @@ import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
+import { sincronizarRanking } from '../ranking.js';
 import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarCronometro, itensHistorico } from '../cardio.js';
 
 const duracaoMs = s => new Date(s.fim).getTime() - new Date(s.inicio).getTime();
@@ -116,6 +117,7 @@ export function montarSessao(raiz, id) {
       }
       e.ultimoTreinoId = ultima ? ultima.treinoId : null;
     }, { renderizar: false });
+    sincronizarRanking();
     toast('Treino excluído');
     location.hash = '#/historico';
   };

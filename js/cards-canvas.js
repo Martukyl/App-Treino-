@@ -317,6 +317,44 @@ function desenharCorpo(ctx, d, fotos) {
   }
 }
 
+const MEDALHAS = ['🥇', '🥈', '🥉'];
+
+function desenharRanking(ctx, d) {
+  texto(ctx, d.titulo, PAD, 150, { tamanho: 84, peso: 800 });
+  texto(ctx, d.subtitulo, PAD, 214, { tamanho: 40, peso: 600, cor: COR.muted });
+  if (!d.podio.length) {
+    texto(ctx, 'Ainda sem pontos por aqui', LARGURA / 2, 640, { tamanho: 48, cor: COR.muted, alinhar: 'center' });
+    return;
+  }
+  // pódio: 2º, 1º, 3º (com menos de 3 pessoas, na ordem natural), alinhado pela base
+  const ordem = d.podio.length >= 3 ? [d.podio[1], d.podio[0], d.podio[2]] : d.podio;
+  const folga = 20, n = ordem.length;
+  const larg = Math.min(300, (LARGURA_UTIL - folga * (n - 1)) / n);
+  const total = larg * n + folga * (n - 1);
+  const x0 = PAD + (LARGURA_UTIL - total) / 2;
+  const base = 720, alturas = { 1: 360, 2: 330, 3: 310 };
+  ordem.forEach((p, i) => {
+    const h = alturas[p.posicao], x = x0 + i * (larg + folga), y = base - h;
+    caixa(ctx, x, y, larg, h, 36, p.posicao === 1 ? 'rgba(255, 92, 122, 0.20)' : COR.caixa);
+    const cx = x + larg / 2;
+    texto(ctx, MEDALHAS[p.posicao - 1], cx, y + 78, { tamanho: 64, alinhar: 'center' });
+    texto(ctx, p.emoji, cx, y + 190, { tamanho: 96, alinhar: 'center' });
+    texto(ctx, p.apelido, cx, y + h - 82, { tamanho: 38, peso: 700, alinhar: 'center', larguraMax: larg - 30 });
+    texto(ctx, p.valor, cx, y + h - 28, { tamanho: 44, peso: 800, cor: COR.accent2, alinhar: 'center', larguraMax: larg - 30 });
+  });
+  if (d.linhas.length) {
+    const alturaLinha = 68, y = base + 40;
+    caixa(ctx, PAD, y, LARGURA_UTIL, d.linhas.length * alturaLinha + 24, 36);
+    d.linhas.forEach((l, i) => {
+      const b = y + 12 + i * alturaLinha + 46;
+      texto(ctx, `${l.posicao}º`, PAD + 36, b, { tamanho: 38, peso: 700, cor: COR.muted, larguraMax: 80 });
+      texto(ctx, l.emoji, PAD + 150, b, { tamanho: 40, alinhar: 'center' });
+      texto(ctx, l.apelido, PAD + 200, b, { tamanho: 40, peso: 600, larguraMax: 460 });
+      texto(ctx, l.valor, PAD + LARGURA_UTIL - 36, b, { tamanho: 40, peso: 800, alinhar: 'right', larguraMax: 220 });
+    });
+  }
+}
+
 // ---------- Geração ----------
 
 function novoCanvas() {
@@ -354,6 +392,7 @@ export async function gerarCard(dados) {
   if (dados.tipo === 'treino') desenharTreino(ctx, dados, foto);
   else if (dados.tipo === 'cardio') desenharCardio(ctx, dados, rota);
   else if (dados.tipo === 'semana') desenharSemana(ctx, dados);
+  else if (dados.tipo === 'ranking') desenharRanking(ctx, dados);
   else desenharCorpo(ctx, dados, fotos);
   rodape(ctx);
   return paraPng(canvas);

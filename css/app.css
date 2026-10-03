@@ -562,3 +562,28 @@ body.boas-vindas #app { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 }
 .opcao-programa input { width: 24px; min-height: 24px; height: 24px; flex: 0 0 auto; margin-top: 2px; }
 .opcao-programa:has(input:checked) { border-color: var(--accent); background: rgba(255, 102, 133, 0.14); }
+
+/* Ranking e grupo */
+.podio, .lista-ranking, .lista-membros { list-style: none; margin: 0 0 8px; padding: 0; }
+.podio-item, .rank-linha, .membro-linha {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 10px; margin-bottom: 6px;
+  border-radius: 14px; background: rgba(255, 255, 255, 0.055);
+}
+.podio-item.eu, .rank-linha.eu { background: rgba(255, 102, 133, 0.16); outline: 1px solid var(--accent); }
+.podio-medalha, .rank-pos { flex: 0 0 auto; min-width: 32px; text-align: center; font-size: 20px; }
+.rank-pos { font-size: 16px; font-weight: 700; color: var(--muted); }
+.podio-emoji, .rank-emoji, .membro-emoji { flex: 0 0 auto; font-size: 24px; }
+.podio-nome, .rank-nome, .membro-nome { flex: 1 1 auto; min-width: 0; font-weight: 600; }
+.podio-valor, .rank-valor { flex: 0 0 auto; font-weight: 800; color: var(--accent-2); }
+.rank-linha .rank-pos:not(:empty) { min-width: 36px; }
+.grupo-nome { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+.grupo-codigo { font-size: 36px; font-weight: 800; letter-spacing: 0.18em; margin: 0 0 4px; color: var(--accent-2); }
+.grupo-eu { margin-top: 12px; }
+.emoji-grade { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 6px 0 4px; }
+.emoji-op {
+  min-height: 40px; padding: 0; font-size: 22px; line-height: 1; cursor: pointer; color: var(--text);
+  background: rgba(255, 255, 255, 0.065); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 12px;
+}
+.emoji-op.sel { border-color: var(--accent); background: rgba(255, 102, 133, 0.22); }
+.btn-mini { min-height: 36px; padding: 0 12px; font-size: 14px; flex: 0 0 auto; }
+.tela-ranking .chips { margin-bottom: 8px; }

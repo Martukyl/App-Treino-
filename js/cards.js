@@ -202,3 +202,26 @@ export function projetarTrajeto(segmentos, { largura, altura, margem = 0 } = {})
   const ultimo = proj[proj.length - 1];
   return { segmentos: proj, inicio: proj[0][0], fim: ultimo[ultimo.length - 1], escala };
 }
+
+// ---------- 5. Ranking do grupo ----------
+
+export const MAX_LISTA_RANKING = 10;
+
+// Só apelidos e emojis (nunca o nome real do perfil). `lista` já ordenada por pontos:
+// [{ apelido, emoji, pontos }]; podio = top 3, linhas = posições 4 a 10.
+export function dadosCardRanking({ grupo, periodo, lista, hoje, inicio, fim }) {
+  const curto = d => formatarDia(d).slice(0, 5);
+  const itens = lista.slice(0, MAX_LISTA_RANKING).map((x, i) => ({
+    posicao: i + 1, apelido: x.apelido, emoji: x.emoji, valor: `${formatarNumero(x.pontos)} pts`
+  }));
+  const titulo = periodo === 'mes' ? 'Ranking do mês' : 'Ranking da semana';
+  return {
+    tipo: 'ranking',
+    dia: hoje,
+    titulo,
+    subtitulo: `${grupo} · ${curto(inicio)} a ${curto(fim)}`,
+    podio: itens.slice(0, 3),
+    linhas: itens.slice(3),
+    texto: `${titulo} — ${grupo} 💪`
+  };
+}
