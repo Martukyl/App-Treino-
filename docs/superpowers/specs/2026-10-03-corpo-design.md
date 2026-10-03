@@ -145,6 +145,18 @@ Título (rótulo + unidade), valor atual, diferenças como no card, gráfico de 
   registro. Tocar numa imagem abre em tela cheia (sheet) — fechar volta.
 - Liberar `URL.revokeObjectURL` ao trocar de imagem/sair.
 
+### 6.5 Tela Hoje: foto de perfil e imagem de academia (pedido de 03/10)
+- **Foto de perfil:** campo no card Perfil (§6.1) para escolher/tirar foto (mesma
+  compressão do §7, mas recortada em quadrado e ≤ 400 px), guardada no IndexedDB
+  (`perfil.fotoId`). Na tela Hoje, avatar circular (56 px) ao lado da saudação; sem foto,
+  círculo com a inicial do nome no gradiente do accent. Tocar no avatar → `#/corpo`.
+  Entra no backup junto com as demais fotos.
+- **Imagem que remeta a academia:** faixa/ilustração no topo do card do treino sugerido
+  na tela Hoje. Decisão pendente com o Tiago: (a) ilustração SVG própria (halter/anilhas,
+  leve, funciona offline, combina com o visual translúcido) — recomendada; ou
+  (b) foto de academia com licença livre (ex.: Unsplash), comprimida e incluída no repo.
+  Sem CDN em runtime em nenhum dos casos.
+
 ## 7. Fotos (`js/fotos.js`)
 
 - `comprimirImagem(file)` → Blob JPEG: lado maior ≤ 1080 px, qualidade 0,75, orientação
