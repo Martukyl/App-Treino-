@@ -1,13 +1,16 @@
 // Service worker: cache do app shell para funcionar offline.
 // Ao alterar QUALQUER arquivo do app, incremente CACHE.
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
-const CACHE = 'treino-1.0.2';
+const CACHE = 'treino-1.1.0';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
   './js/progressao.js', './js/armazenamento.js', './js/cronometro.js', './js/grafico.js',
   './js/telas/hoje.js', './js/telas/treino.js', './js/telas/trocar.js',
   './js/telas/exercicios.js', './js/telas/historico.js', './js/telas/ajustes.js',
+  './js/corpo.js', './js/fotos.js', './js/telas/corpo.js', './js/telas/corpo-comum.js',
+  './js/telas/corpo-registro.js', './js/telas/corpo-fotos.js',
+  './img/treino-a.jpg', './img/treino-b.jpg', './img/treino-c.jpg', './img/treino-d.jpg', './img/treino-e.jpg',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 

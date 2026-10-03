@@ -5,14 +5,22 @@ import * as treino from './telas/treino.js';
 import * as exercicios from './telas/exercicios.js';
 import * as historico from './telas/historico.js';
 import * as ajustes from './telas/ajustes.js';
+import * as corpo from './telas/corpo.js';
+import * as corpoRegistro from './telas/corpo-registro.js';
+import * as corpoFotos from './telas/corpo-fotos.js';
+import { liberarUrls } from './fotos.js';
 import { retomarDescanso } from './cronometro.js';
-import { fecharSheet } from './ui.js';
+import { fecharSheet, executarSaidas } from './ui.js';
 
 // [padrão do hash, módulo da tela, aba ativa na nav]
 const ROTAS = [
   [/^#\/hoje$/, hoje, 'hoje'],
   [/^#\/treino$/, treino, 'hoje'],
   [/^#\/resumo\/([^/]+)$/, { render: p => treino.renderResumo(p), montar: (r, p) => treino.montarResumo?.(r, p) }, 'hoje'],
+  [/^#\/corpo$/, corpo, 'corpo'],
+  [/^#\/corpo\/registro\/([^/]+)$/, corpoRegistro, 'corpo'],
+  [/^#\/corpo\/medida\/([^/]+)$/, { render: p => corpo.renderMedida(p), montar: (r, p) => corpo.montarMedida?.(r, p) }, 'corpo'],
+  [/^#\/corpo\/fotos$/, corpoFotos, 'corpo'],
   [/^#\/exercicios$/, exercicios, 'exercicios'],
   [/^#\/exercicio\/([^/]+)$/, { render: p => exercicios.renderDetalhe(p), montar: (r, p) => exercicios.montarDetalhe?.(r, p) }, 'exercicios'],
   [/^#\/historico$/, historico, 'historico'],
@@ -24,6 +32,9 @@ const ROTAS = [
 function renderizarTela() {
   const hash = location.hash || '#/hoje';
   const raiz = document.getElementById('app');
+  // a tela anterior sai: limpa fotos não salvas e revoga object URLs
+  executarSaidas();
+  liberarUrls();
   for (const [padrao, tela, aba] of ROTAS) {
     const m = hash.match(padrao);
     if (!m) continue;

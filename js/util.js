@@ -2,7 +2,7 @@
 // Não acessam DOM nem localStorage (testáveis no Node).
 
 // Versão do app: deve ser igual ao número de CACHE em sw.js (treino-<VERSAO_APP>).
-export const VERSAO_APP = '1.0.2';
+export const VERSAO_APP = '1.1.0';
 
 export function arredondar(n, passo = 0.5) {
   // o epsilon evita 42.49999 virar 42 por erro de ponto flutuante
@@ -76,4 +76,16 @@ const MAPA_ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '
 export function esc(txt) {
   if (txt == null) return '';
   return String(txt).replace(/[&<>"']/g, c => MAPA_ESC[c]);
+}
+
+// 'AAAA-MM-DD' → 'DD/MM/AAAA' como texto puro (sem Date, logo sem efeito de fuso)
+export function formatarDia(dia) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dia || '');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
+}
+
+// Data de hoje no fuso local, 'AAAA-MM-DD' (toISOString daria o dia UTC)
+export function hojeISO(d = new Date()) {
+  const dois = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${dois(d.getMonth() + 1)}-${dois(d.getDate())}`;
 }
