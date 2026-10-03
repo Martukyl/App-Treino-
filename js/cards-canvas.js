@@ -228,9 +228,9 @@ function desenharCardio(ctx, d, rota) {
     const colunas = Math.min(d.metricas.length, 4) || 1;
     grade(ctx, d.metricas, PAD, y, LARGURA_UTIL, 170, colunas, 16, colunas > 3 ? 44 : 54);
   } else {
-    caixa(ctx, PAD, y, LARGURA_UTIL, 420, 40);
-    texto(ctx, d.icone, LARGURA / 2, y + 290, { tamanho: 260, alinhar: 'center' });
-    y += 420 + 40;
+    caixa(ctx, PAD, y, LARGURA_UTIL, 560, 40);
+    texto(ctx, d.icone, LARGURA / 2, y + 370, { tamanho: 300, alinhar: 'center' });
+    y += 560 + 40;
     const colunas = Math.min(d.metricas.length, 3) || 1;
     grade(ctx, d.metricas, PAD, y, LARGURA_UTIL, 220, colunas, 20, colunas > 2 ? 52 : 70);
   }
@@ -254,7 +254,7 @@ function desenharSemana(ctx, d) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
       ctx.stroke();
     }
-    texto(ctx, dia.letra, cx, cy + raio + 52, { tamanho: 36, peso: dia.hoje ? 800 : 600, cor: dia.hoje ? COR.texto : COR.muted, alinhar: 'center' });
+    texto(ctx, dia.letra, cx, cy + raio + 52, { tamanho: 36, peso: dia.hoje ? 700 : 600, cor: dia.hoje ? COR.texto : COR.muted, alinhar: 'center' });
   });
   grade(ctx, d.metricas, PAD, 560, LARGURA_UTIL, 230, 2, 24, 80);
   // faixa da sequência
@@ -292,9 +292,9 @@ function desenharCorpo(ctx, d, fotos) {
       texto(ctx, d.peso.valor, PAD + 40, y + 98, { tamanho: 84, peso: 800, larguraMax: 440 });
       if (d.peso.dif) texto(ctx, d.peso.dif, PAD + LARGURA_UTIL - 40, y + 90, { tamanho: 34, peso: 700, cor: corDirecao(d.peso.direcao), alinhar: 'right', larguraMax: 440 });
     } else {
-      texto(ctx, 'Peso', PAD + 40, y + 64, { tamanho: 34, peso: 600, cor: COR.muted });
-      texto(ctx, d.peso.valor, PAD + 40, y + 180, { tamanho: 130, peso: 800, larguraMax: LARGURA_UTIL - 80 });
-      if (d.peso.dif) texto(ctx, d.peso.dif, PAD + 40, y + 238, { tamanho: 40, peso: 700, cor: corDirecao(d.peso.direcao), larguraMax: LARGURA_UTIL - 80 });
+      texto(ctx, 'Peso', PAD + 40, y + 56, { tamanho: 34, peso: 600, cor: COR.muted });
+      texto(ctx, d.peso.valor, PAD + 40, y + 172, { tamanho: 120, peso: 800, larguraMax: LARGURA_UTIL - 80 });
+      if (d.peso.dif) texto(ctx, d.peso.dif, PAD + 40, y + 242, { tamanho: 40, peso: 700, cor: corDirecao(d.peso.direcao), larguraMax: LARGURA_UTIL - 80 });
     }
     y += alturaPeso + 24;
   }
