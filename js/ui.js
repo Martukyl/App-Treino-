@@ -59,3 +59,17 @@ export function toast(mensagem) {
   clearTimeout(temporizadorToast);
   temporizadorToast = setTimeout(() => { el.hidden = true; }, 2500);
 }
+
+// Callbacks de "saí da tela": rodam uma vez na próxima troca/redesenho de tela
+// (usado pelo registro de medidas para apagar fotos novas não salvas).
+let saidas = [];
+
+export function aoSairDaTela(fn) { saidas.push(fn); }
+
+export function executarSaidas() {
+  const lista = saidas;
+  saidas = [];
+  for (const fn of lista) {
+    try { fn(); } catch (erro) { console.error(erro); }
+  }
+}

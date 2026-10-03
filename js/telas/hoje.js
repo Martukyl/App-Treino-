@@ -2,6 +2,7 @@
 import { esc, formatarData, gerarId } from '../util.js';
 import { proximoTreino, avaliar, historicoDoExercicio } from '../progressao.js';
 import { obterEstado, atualizar } from '../estado.js';
+import { htmlAvatar, ligarAvatares } from './corpo-comum.js';
 
 // "Boa noite, Roberta!" — o nome vem de Ajustes e fica só no aparelho
 function saudacao() {
@@ -9,6 +10,21 @@ function saudacao() {
   const parte = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   const nome = (obterEstado().nome || '').trim();
   return nome ? `${parte}, ${esc(nome)}` : parte;
+}
+
+// avatar (foto de perfil ou inicial) ao lado da saudação; toque leva ao perfil na aba Corpo
+function cabecalho(est) {
+  return `
+    <header class="hoje-cab">
+      <a class="avatar-link" href="#/corpo" aria-label="Meu perfil">${htmlAvatar(est)}</a>
+      <h1 class="titulo">${saudacao()}!</h1>
+    </header>`;
+}
+
+// faixa com a foto do treino (só treinos A–E); decorativa
+function faixaFoto(id) {
+  return /^[A-E]$/.test(id)
+    ? `<div class="treino-foto"><img src="./img/treino-${id.toLowerCase()}.jpg" alt=""></div>` : '';
 }
 
 // Data (dd/mm) do fim da sessão mais recente com aquele treino, ou null.
@@ -31,8 +47,9 @@ function renderEmAndamento(est) {
     feitas += item.registros.filter(r => r.feita).length;
   }
   return `
-    <h1 class="titulo">${saudacao()}!</h1>
+    ${cabecalho(est)}
     <section class="card card-destaque">
+      ${faixaFoto(sa.treinoId)}
       <p class="muted">Treino em andamento</p>
       <h2 class="treino-nome">${esc(nome)}</h2>
       <p class="muted">${feitas} de ${total} séries feitas</p>
@@ -53,8 +70,9 @@ function renderSugerido(est) {
     `<button type="button" class="chip" data-acao="comecar" data-treino="${esc(o.id)}"><strong>${esc(o.id)}</strong> ${esc(o.foco)}</button>`
   ).join('');
   return `
-    <h1 class="titulo">${saudacao()}!</h1>
+    ${cabecalho(est)}
     <section class="card card-destaque">
+      ${faixaFoto(t.id)}
       <div class="treino-topo">
         <span class="treino-letra">${esc(t.id)}</span>
         <div>
@@ -75,6 +93,7 @@ export function render() {
 }
 
 export function montar(raiz) {
+  ligarAvatares(raiz, obterEstado());
   raiz.querySelectorAll('[data-acao="comecar"]').forEach(el => {
     el.addEventListener('click', () => iniciarSessao(el.dataset.treino));
   });

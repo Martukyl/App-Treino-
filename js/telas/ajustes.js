@@ -1,9 +1,10 @@
 // Ajustes (#/ajustes): meus treinos, backup, restaurar padrão; e editor de treino (#/ajustes/treino/<id>).
-import { esc, parseReps, VERSAO_APP } from '../util.js';
+import { esc, parseReps, hojeISO, VERSAO_APP } from '../util.js';
 import { GRUPOS } from '../dados.js';
 import { obterEstado, atualizar, substituirEstado } from '../estado.js';
 import { validarBackup, migrar, restaurarTreinosPadrao } from '../armazenamento.js';
 import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
+import { idsReferenciados, exportarFotos, importarFotos, listarIds, apagarFoto } from '../fotos.js';
 
 // remove acento e caixa para a busca
 function normalizar(s) {
@@ -11,13 +12,6 @@ function normalizar(s) {
 }
 
 const porNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR');
-
-// data local AAAA-MM-DD (não UTC)
-function dataLocal() {
-  const d = new Date();
-  const p = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
 
 // ---------- Tela principal ----------
 
@@ -32,16 +26,13 @@ export function render() {
     <div class="tela-ajustes">
       <h1 class="titulo">Ajustes</h1>
       <section class="card">
-        <h2 class="sec-card">Seu nome</h2>
-        <input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Como quer ser chamada?" value="${esc(est.nome || '')}" aria-label="Seu nome">
-      </section>
-      <section class="card">
         <h2 class="sec-card">Meus treinos</h2>
         ${linhas || '<p class="muted">Nenhum treino.</p>'}
       </section>
       <section class="card">
         <h2 class="sec-card">Backup</h2>
         <p class="muted">Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</p>
+        <p class="muted">Inclui suas fotos (o arquivo fica maior).</p>
         <button type="button" class="btn btn-sec btn-bloco" data-acao="exportar">Exportar backup</button>
         <button type="button" class="btn btn-sec btn-bloco" data-acao="importar">Importar backup</button>
         <input type="file" accept="application/json,.json" hidden data-campo="arquivo">
@@ -55,12 +46,19 @@ export function render() {
     </div>`;
 }
 
-function exportar() {
-  const blob = new Blob([JSON.stringify(obterEstado(), null, 2)], { type: 'application/json' });
+async function exportar() {
+  const est = obterEstado();
+  let fotos = {};
+  try {
+    fotos = await exportarFotos([...idsReferenciados(est)]);
+  } catch {
+    toast('Não consegui ler as fotos; o backup vai sem elas');
+  }
+  const blob = new Blob([JSON.stringify({ ...est, fotos }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `treino-backup-${dataLocal()}.json`;
+  a.download = `treino-backup-${hojeISO()}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -79,19 +77,23 @@ async function importar(arquivo) {
   const v = validarBackup(obj);
   if (!v.ok) { toast(v.erro); return; }
   if (!(await confirmar('Isso substitui todos os dados atuais pelos do backup. Continuar?', 'Substituir', true))) return;
+  // fotos primeiro (se falhar, o resto do backup ainda é restaurado), depois o estado
+  let fotosOk = true;
+  const mapa = obj.fotos && typeof obj.fotos === 'object' && !Array.isArray(obj.fotos) ? obj.fotos : {};
+  try { await importarFotos(mapa); } catch { fotosOk = false; }
   substituirEstado(migrar(obj));
-  toast('Backup restaurado');
+  // apaga do IndexedDB as fotos que o estado novo não usa
+  try {
+    const usadas = idsReferenciados(obterEstado());
+    for (const id of await listarIds()) if (!usadas.has(id)) await apagarFoto(id);
+  } catch { /* faxina é opcional */ }
+  toast(fotosOk ? 'Backup restaurado' : 'Backup restaurado, mas as fotos não puderam ser gravadas');
 }
 
 export function montar(raiz) {
   const tela = raiz.querySelector('.tela-ajustes');
   if (!tela) return;
   const campo = tela.querySelector('[data-campo="arquivo"]');
-  // salva a cada tecla, sem re-renderizar (o teclado não fecha)
-  tela.querySelector('[data-campo="nome"]').oninput = ev => {
-    const nome = ev.target.value.trim().slice(0, 30);
-    atualizar(e => { e.nome = nome; }, { renderizar: false });
-  };
   tela.querySelector('[data-acao="exportar"]').onclick = exportar;
   tela.querySelector('[data-acao="importar"]').onclick = () => campo.click();
   campo.onchange = async () => {
