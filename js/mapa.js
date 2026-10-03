@@ -1,7 +1,7 @@
 // Mapa (Leaflet 1.9.4, carregado sob demanda) para a gravação ao vivo e o detalhe do cardio.
 // Só L.map, L.tileLayer, L.polyline e L.circleMarker (as imagens de marcador não existem no app).
 
-const COR_TRAJETO = '#ff6685';
+const COR_TRAJETO = '#d54b32'; // accent do tema claro
 const URL_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 let carregando = null;

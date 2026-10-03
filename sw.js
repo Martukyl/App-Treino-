@@ -1,7 +1,7 @@
 // Service worker: cache do app shell para funcionar offline.
 // Ao alterar QUALQUER arquivo do app, incremente CACHE.
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
-const CACHE = 'treino-1.4.0';
+const CACHE = 'treino-1.4.1';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
