@@ -17,7 +17,7 @@ function storageFalso(inicial = {}) {
 
 test('estadoInicial tem catálogo, 5 treinos e nada em andamento', () => {
   const e = estadoInicial();
-  assert.equal(e.versao, 1);
+  assert.equal(e.versao, 2);
   assert.equal(Object.keys(e.exercicios).length, 25);
   assert.equal(e.treinos.length, 5);
   assert.deepEqual(e.sessoes, []);
@@ -108,4 +108,48 @@ test('restaurarTreinosPadrao mantém histórico e exercícios personalizados', (
   assert.ok(r.treinos[0].itens.length > 0);
   assert.equal(r.sessoes.length, 1);
   assert.ok(r.exercicios.c_meu);
+});
+
+test('estadoInicial v2 tem perfil vazio e medidas []', () => {
+  const e = estadoInicial();
+  assert.deepEqual(e.perfil, { altura: null, nascimento: null, metaPeso: null, fotoId: null });
+  assert.deepEqual(e.medidas, []);
+});
+
+test('migrar v1→v2 cria perfil/medidas e mantém nome na raiz', () => {
+  const m = migrar({ versao: 1, exercicios: {}, treinos: [], sessoes: [], nome: 'Ana' });
+  assert.equal(m.versao, 2);
+  assert.equal(m.nome, 'Ana');
+  assert.deepEqual(m.perfil, { altura: null, nascimento: null, metaPeso: null, fotoId: null });
+  assert.deepEqual(m.medidas, []);
+});
+
+test('migrar preserva perfil existente e completa campos ausentes', () => {
+  const m = migrar({ ...estadoInicial(), perfil: { altura: 165, metaPeso: 60 }, medidas: [{ id: 'm_1', data: '2026-10-02' }] });
+  assert.deepEqual(m.perfil, { altura: 165, nascimento: null, metaPeso: 60, fotoId: null });
+  assert.equal(m.medidas.length, 1);
+});
+
+test('migrar troca perfil/medidas inválidos e não deixa o campo fotos do backup', () => {
+  const m = migrar({ ...estadoInicial(), perfil: 'x', medidas: 'y', fotos: { f_1: 'data:image/jpeg;base64,AA' } });
+  assert.deepEqual(m.perfil, { altura: null, nascimento: null, metaPeso: null, fotoId: null });
+  assert.deepEqual(m.medidas, []);
+  assert.equal('fotos' in m, false);
+});
+
+test('validarBackup aceita v1 e v2 e rejeita medidas que não seja array', () => {
+  assert.equal(validarBackup({ versao: 1, exercicios: {}, treinos: [], sessoes: [] }).ok, true);
+  assert.equal(validarBackup({ versao: 2, exercicios: {}, treinos: [], sessoes: [], medidas: [] }).ok, true);
+  const r = validarBackup({ versao: 2, exercicios: {}, treinos: [], sessoes: [], medidas: {} });
+  assert.equal(r.ok, false);
+  assert.match(r.erro, /medidas/);
+});
+
+test('carregar estado v1 salvo → migrado para v2', () => {
+  const v1 = { versao: 1, exercicios: {}, treinos: [], sessoes: [], nome: 'Bia' };
+  const { estado, aviso } = carregar(storageFalso({ [CHAVE]: JSON.stringify(v1) }));
+  assert.equal(aviso, null);
+  assert.equal(estado.versao, 2);
+  assert.equal(estado.nome, 'Bia');
+  assert.deepEqual(estado.medidas, []);
 });
