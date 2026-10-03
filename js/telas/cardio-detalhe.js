@@ -8,6 +8,7 @@ import { criarMapaEstatico } from '../mapa.js';
 import { lerTrajeto, apagarTrajeto } from '../trajetos.js';
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardCardio } from '../cards.js';
+import { sincronizarRanking } from '../ranking.js';
 
 const hora = iso => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -85,6 +86,7 @@ export function montar(raiz, id) {
     if (!(await confirmar('Excluir este cardio? O trajeto dele também será apagado.', 'Excluir', true))) return;
     atualizar(e => { e.cardios = e.cardios.filter(x => x.id !== c.id); }, { renderizar: false });
     if (c.trajetoId) apagarTrajeto(c.trajetoId).catch(() => {});
+    sincronizarRanking();
     toast('Cardio excluído');
     location.hash = '#/historico';
   };

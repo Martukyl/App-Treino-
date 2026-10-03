@@ -4,6 +4,7 @@ import { ICONE_CARDIO, ROTULO_CARDIO, kcalAparelho, pesoAtual } from '../cardio.
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
 import { apagarTrajeto } from '../trajetos.js';
+import { sincronizarRanking } from '../ranking.js';
 
 const TIPOS = ['esteira', 'bicicleta', 'eliptico', 'escada', 'outro'];
 const OBS_MAX = 200;
@@ -126,6 +127,7 @@ export function montar(raiz, param) {
       const i = e.cardios.findIndex(x => x.id === registro.id);
       if (i >= 0) e.cardios[i] = registro; else e.cardios.push(registro);
     }, { renderizar: false });
+    sincronizarRanking();
     toast('Cardio salvo');
     location.hash = '#/historico';
   };
@@ -136,6 +138,7 @@ export function montar(raiz, param) {
       if (!(await confirmar('Excluir este cardio?', 'Excluir', true))) return;
       atualizar(e => { e.cardios = e.cardios.filter(x => x.id !== original.id); }, { renderizar: false });
       if (original.trajetoId) apagarTrajeto(original.trajetoId).catch(() => {});
+      sincronizarRanking();
       toast('Cardio excluído');
       location.hash = '#/historico';
     };

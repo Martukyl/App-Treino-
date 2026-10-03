@@ -221,7 +221,7 @@ expirou. Entre no grupo de novo com o código." e limpar `ranking.userId/refresh
 - **Ajustes → card "Grupo"**: sem grupo → **Criar grupo** (nome do grupo, apelido,
   emoji em grade de ~16 opções) e **Entrar com código** (código, apelido, emoji). Com
   grupo → nome e código grandes, **Convidar** (compartilha texto: "Entra no nosso grupo
-  do Treino 💪: abra <URL do app> e use o código FIT7K2" — URL vem de `location.origin +
+  do Treino 💪: abra <URL do app> e use o código FJT7K2" — URL vem de `location.origin +
   location.pathname`), editar apelido/emoji, **Sair do grupo** (confirmação), lista de
   membros com **Remover** só para a criadora.
 - **Hoje → card "Ranking da semana"** (só com grupo): pódio top 3 (emoji, apelido,

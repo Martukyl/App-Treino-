@@ -9,6 +9,7 @@ import { confirmar, toast, aoSairDaTela } from '../ui.js';
 import { observar, suportaGps } from '../gps.js';
 import { criarMapaAoVivo } from '../mapa.js';
 import { lerTrajeto } from '../trajetos.js';
+import { sincronizarRanking } from '../ranking.js';
 import {
   assinar, iniciarGravacao, pausarGravacao, retomarGravacao, finalizar, descartar,
   flushar, bufferPendente, instantaneo
@@ -300,6 +301,7 @@ function montarGravando(raiz) {
       if (!(await confirmar(`Finalizar ${rotulo}?`, 'Finalizar'))) return;
       const cardio = await finalizar();
       if (!cardio) return;
+      sincronizarRanking();
       toast(`${ROTULO_CARDIO[cardio.tipo]} salva`);
       location.hash = `#/cardio/${encodeURIComponent(cardio.id)}`;
     } finally {

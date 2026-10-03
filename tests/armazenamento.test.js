@@ -214,3 +214,23 @@ test('boasVindasPendente: estado novo = true; estado existente sem o campo = fal
   assert.equal(carregar(st).estado.boasVindasPendente, false);
   assert.equal(carregar(storageFalso()).estado.boasVindasPendente, true);
 });
+
+test('ranking: estado novo = null; migrar preserva o válido e normaliza o inválido', () => {
+  assert.equal(estadoInicial().ranking, null);
+  const antigo = estadoInicial();
+  delete antigo.ranking;
+  assert.equal(migrar(antigo).ranking, null);
+  const valido = { userId: 'u1', refreshToken: 'rt', grupo: { codigo: 'ABC234', nome: 'Meninas' }, apelido: 'Bia', emoji: '🔥', criador: true };
+  assert.deepEqual(migrar({ ...estadoInicial(), ranking: valido }).ranking, valido);
+  for (const ruim of ['x', 5, [], { grupo: 'abc' }]) {
+    const r = migrar({ ...estadoInicial(), ranking: ruim }).ranking;
+    assert.ok(r === null || (r.grupo === null && r.userId === null && r.criador === false));
+  }
+  // criador sem grupo não existe; emoji vazio volta ao padrão
+  const sem = migrar({ ...estadoInicial(), ranking: { userId: 'u', criador: true, emoji: '' } }).ranking;
+  assert.equal(sem.criador, false);
+  assert.equal(sem.emoji, '💪');
+  // faz parte do backup (viaja no estado)
+  const st = storageFalso({ [CHAVE]: JSON.stringify({ ...estadoInicial(), ranking: valido }) });
+  assert.deepEqual(carregar(st).estado.ranking, valido);
+});

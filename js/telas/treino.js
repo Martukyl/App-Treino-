@@ -10,6 +10,7 @@ import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
 import { prepararAudio, iniciarDescanso, pararDescanso } from '../cronometro.js';
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
+import { sincronizarRanking } from '../ranking.js';
 
 // Cards que a usuária expandiu/recolheu na mão (índice → true = aberto), por sessão.
 let aberturaManual = new Map();
@@ -165,6 +166,7 @@ async function finalizar() {
     e.sessaoAtual = null;
   }, { renderizar: false });
   pararDescanso();
+  sincronizarRanking(); // publica os totais no grupo (silencioso se offline ou sem grupo)
   location.hash = `#/resumo/${idDaSessao}`;
 }
 

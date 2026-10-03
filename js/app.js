@@ -12,6 +12,8 @@ import * as cardioGps from './telas/cardio-gps.js';
 import * as cardioAparelho from './telas/cardio-aparelho.js';
 import * as cardioDetalhe from './telas/cardio-detalhe.js';
 import * as boasVindas from './telas/boas-vindas.js';
+import * as ranking from './telas/ranking.js';
+import { sincronizarRanking } from './ranking.js';
 import { liberarUrls } from './fotos.js';
 import { sincronizar as sincronizarGravacao } from './gravacao.js';
 import { retomarDescanso } from './cronometro.js';
@@ -33,6 +35,7 @@ const ROTAS = [
   [/^#\/cardio\/gps$/, cardioGps, 'hoje'],
   [/^#\/cardio\/aparelho\/([^/]+)$/, cardioAparelho, 'hoje'],
   [/^#\/cardio\/([^/]+)$/, cardioDetalhe, 'historico'],
+  [/^#\/ranking$/, ranking, 'hoje'],
   [/^#\/ajustes$/, ajustes, 'ajustes'],
   [/^#\/boas-vindas$/, boasVindas, 'hoje'],
   // "novo" vem antes da rota genérica: cria o treino e troca a rota pelo editor dele
@@ -81,6 +84,9 @@ sincronizarGravacao();
 
 if (avisoInicial() === 'corrompido') mostrarAviso('Os dados salvos estavam danificados. Comecei do zero; uma cópia foi guardada.');
 if (avisoInicial() === 'indisponivel') mostrarAviso('Não estou conseguindo salvar neste navegador — faça backups.');
+
+// ranking: publica os totais pouco depois de abrir (sem grupo/sem rede não faz nada)
+setTimeout(() => sincronizarRanking({ imediato: true }), 2000);
 
 try { navigator.storage?.persist?.(); } catch { /* opcional */ }
 if ('serviceWorker' in navigator) {

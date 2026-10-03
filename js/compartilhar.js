@@ -115,3 +115,25 @@ export function compartilharCard(titulo, fazerDados, { interruptorFotos = false 
     interruptorFotos
   });
 }
+
+// Compartilha um texto (convite do grupo): menu do sistema; sem suporte, copia para a área de transferência.
+// Devolve 'compartilhado' | 'cancelado' | 'copiado' | 'falhou'.
+export async function compartilharTexto(texto) {
+  try {
+    if (navigator.share) {
+      await navigator.share({ text: texto });
+      return 'compartilhado';
+    }
+  } catch (erro) {
+    if (erro && erro.name === 'AbortError') return 'cancelado';
+    // qualquer outra falha do menu: tenta copiar
+  }
+  try {
+    await navigator.clipboard.writeText(texto);
+    toast('Convite copiado');
+    return 'copiado';
+  } catch {
+    toast('Não consegui copiar o convite');
+    return 'falhou';
+  }
+}

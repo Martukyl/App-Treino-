@@ -21,7 +21,26 @@ export function estadoInicial() {
     cardios: [],
     cardioAtual: null,
     // instalação nova: mostra as boas-vindas antes de tudo (estados antigos migram com false)
-    boasVindasPendente: true
+    boasVindasPendente: true,
+    // ranking entre amigas (Supabase): null = nunca usou; ver normalizarRanking
+    ranking: null
+  };
+}
+
+// Valida/normaliza o bloco `ranking` do estado: { userId, refreshToken, grupo, apelido, emoji, criador } ou null.
+export function normalizarRanking(r) {
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return null;
+  const texto = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const g = r.grupo;
+  const grupo = g && typeof g === 'object' && typeof g.codigo === 'string' && g.codigo
+    ? { codigo: g.codigo.slice(0, 12), nome: texto(g.nome, 40) } : null;
+  return {
+    userId: typeof r.userId === 'string' && r.userId ? r.userId : null,
+    refreshToken: typeof r.refreshToken === 'string' && r.refreshToken ? r.refreshToken : null,
+    grupo,
+    apelido: texto(r.apelido, 20),
+    emoji: texto(r.emoji, 8) || '💪',
+    criador: r.criador === true && !!grupo
   };
 }
 
@@ -46,6 +65,7 @@ export function migrar(estado) {
   if (e.cardioAtual === undefined) e.cardioAtual = null;
   // quem já usava o app (campo ausente) não vê as boas-vindas
   if (typeof e.boasVindasPendente !== 'boolean') e.boasVindasPendente = false;
+  e.ranking = normalizarRanking(e.ranking);
   delete e.trajetos; // os trajetos do backup vão para o IndexedDB, nunca para o estado
   delete e.fotos; // as fotos do backup vão para o IndexedDB, nunca para o estado
   e.versao = VERSAO;

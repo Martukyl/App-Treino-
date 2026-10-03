@@ -8,6 +8,8 @@ import { idsReferenciados, exportarFotos, importarFotos, listarIds, apagarFoto }
 import { idsTrajetos, exportarTrajetos, importarTrajetos, listarTrajetoIds, apagarTrajeto } from '../trajetos.js';
 import { flushar, sincronizar } from '../gravacao.js';
 import { proximaLetraLivre } from '../progressao.js';
+import { renderGrupo, montarGrupo } from './grupo.js';
+import { sincronizarRanking } from '../ranking.js';
 
 // remove acento e caixa para a busca
 function normalizar(s) {
@@ -33,6 +35,7 @@ export function render() {
         ${linhas || '<p class="muted">Nenhum treino.</p>'}
         <a class="btn btn-sec btn-bloco" data-acao="novo-treino" href="#/ajustes/treino/novo">+ Novo treino</a>
       </section>
+      ${renderGrupo()}
       <section class="card">
         <h2 class="sec-card">Backup</h2>
         <p class="muted">Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</p>
@@ -100,6 +103,7 @@ async function importar(arquivo) {
   // quem importa um backup já conhece o app: nunca mostra as boas-vindas
   substituirEstado({ ...migrar(obj), boasVindasPendente: false });
   sincronizar(); // liga/desliga o GPS conforme a gravação do backup (normalmente nenhuma)
+  sincronizarRanking(); // totais do backup importado vão para o grupo (se houver)
   // apaga do IndexedDB as fotos que o estado novo não usa
   try {
     const usadas = idsReferenciados(obterEstado());
@@ -116,6 +120,7 @@ async function importar(arquivo) {
 export function montar(raiz) {
   const tela = raiz.querySelector('.tela-ajustes');
   if (!tela) return;
+  montarGrupo(tela);
   const campo = tela.querySelector('[data-campo="arquivo"]');
   tela.querySelector('[data-acao="exportar"]').onclick = exportar;
   tela.querySelector('[data-acao="importar"]').onclick = () => campo.click();
