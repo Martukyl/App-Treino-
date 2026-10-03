@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   arredondar, parseNumero, parseCarga, parseReps, formatarNumero, formatarCampo, formatarKg,
-  formatarData, formatarDataCompleta, formatarDuracao, formatarDescanso, gerarId, esc
+  formatarData, formatarDataCompleta, formatarDuracao, formatarDescanso, gerarId, esc, formatarDia, hojeISO
 } from '../js/util.js';
 
 test('arredondar em passos de 0,5', () => {
@@ -81,4 +81,16 @@ test('gerarId gera ids distintos com prefixo', () => {
 test('esc escapa HTML', () => {
   assert.equal(esc('<b>"a" & \'b\'</b>'), '&lt;b&gt;&quot;a&quot; &amp; &#39;b&#39;&lt;/b&gt;');
   assert.equal(esc(null), '');
+});
+
+test('formatarDia converte AAAA-MM-DD sem voltar um dia', () => {
+  assert.equal(formatarDia('2026-10-02'), '02/10/2026');
+  assert.equal(formatarDia('2026-01-01'), '01/01/2026');
+  assert.equal(formatarDia(null), '');
+});
+
+test('hojeISO usa o dia local no formato AAAA-MM-DD', () => {
+  assert.equal(hojeISO(new Date(2026, 0, 5, 23, 59)), '2026-01-05');
+  assert.equal(hojeISO(new Date(2026, 9, 3, 0, 1)), '2026-10-03');
+  assert.match(hojeISO(), /^\d{4}-\d{2}-\d{2}$/);
 });
