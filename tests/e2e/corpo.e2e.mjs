@@ -3,7 +3,7 @@ import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
 const BASE = 'http://localhost:8080/';
-const IMG = 'C:/Claude/App Treino/img/';
+const IMG = 'C:/Claude/_pessoal/App Treino/img/';
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (nome, cond, extra = '') => { res.push([cond ? 'OK ' : 'FALHA', nome, extra]); };
