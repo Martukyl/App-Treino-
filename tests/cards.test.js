@@ -65,7 +65,7 @@ const sessaoB = () => ({
 
 test('dadosCardTreino: título, data, duração, séries, volume, exercícios e foto A–E', () => {
   const d = dadosCardTreino(estBase(), sessaoB());
-  assert.equal(d.titulo, 'Treino B — Superiores — Costas e ombro');
+  assert.equal(d.titulo, 'Treino B · Costas e ombro');
   assert.equal(d.saudacao, 'Mandou bem, Ana! 💪');
   assert.equal(d.data, '03/10/2026');
   assert.deepEqual(d.metricas.map(m => m.valor), ['1h 05min', '3', '800 kg', '2']);
@@ -79,6 +79,7 @@ test('dadosCardTreino: sem nome, treino criado (sem foto) e treino removido', ()
   assert.equal(d.saudacao, 'Treino concluído! 💪');
   assert.equal(d.foto, null);
   assert.equal(dadosCardTreino(est, { ...s, treinoId: 'Z' }).titulo, 'Treino');
+  assert.equal(dadosCardTreino(est, { ...s, treinoId: 'F' }).titulo, 'Treino F · Meu treino');
 });
 
 test('dadosCardCardio GPS: distância em destaque, tempo, ritmo, kcal e subida', () => {

@@ -31,7 +31,8 @@ export function formatarDif(d) {
 
 export function dadosCardTreino(est, sessao) {
   const treino = est.treinos.find(t => t.id === sessao.treinoId);
-  const titulo = treino ? `Treino ${treino.id} — ${treino.nome}` : 'Treino';
+  // "Treino B · Costas e ombro" (foco); sem foco, usa o nome do treino
+  const titulo = treino ? `Treino ${treino.id} · ${treino.foco || treino.nome}` : 'Treino';
   const nome = (est.nome || '').trim();
   const series = sessao.itens.reduce((n, it) => n + it.registros.length, 0);
   const volume = sessao.itens.reduce((v, it) => v + it.registros.reduce((a, r) => a + (r.carga || 0) * r.reps, 0), 0);
