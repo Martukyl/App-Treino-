@@ -3,6 +3,9 @@ import { esc, formatarData, gerarId } from '../util.js';
 import { proximoTreino, avaliar, historicoDoExercicio } from '../progressao.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { htmlAvatar, ligarAvatares } from './corpo-comum.js';
+import { ICONE_CARDIO, ROTULO_CARDIO, formatarCronometro } from '../cardio.js';
+import { tempoMs } from '../cardio-ao-vivo.js';
+import { aoSairDaTela } from '../ui.js';
 
 // "Boa noite, Roberta!" — o nome vem de Ajustes e fica só no aparelho
 function saudacao() {
@@ -87,13 +90,42 @@ function renderSugerido(est) {
     ${outros ? `<section class="card"><p class="muted">Outro treino</p><div class="chips">${outros}</div></section>` : ''}`;
 }
 
+// Card Cardio: atalhos para gravar com GPS ou registrar aparelho; "em andamento" se há gravação.
+function renderCardio(est) {
+  const a = est.cardioAtual;
+  if (a) {
+    const rotulo = ROTULO_CARDIO[a.tipo] || 'Cardio';
+    return `
+    <section class="card card-cardio" data-cardio="andamento">
+      <p class="muted">${ICONE_CARDIO[a.tipo] || ''} ${esc(rotulo)} ${a.pausado ? 'pausada' : 'em andamento'} · <span data-cardio-tempo>${formatarCronometro(tempoMs(a, Date.now()))}</span></p>
+      <a class="btn btn-principal btn-bloco" data-acao="continuar-cardio" href="#/cardio/gps">Continuar</a>
+    </section>`;
+  }
+  return `
+    <section class="card card-cardio" data-cardio="atalhos">
+      <h2 class="sec-card">Cardio</h2>
+      <a class="btn btn-principal btn-bloco" data-acao="cardio-gps" href="#/cardio/gps">🚶 Caminhada / Corrida</a>
+      <a class="btn btn-sec btn-bloco" data-acao="cardio-aparelho" href="#/cardio/aparelho/novo">Registrar aparelho</a>
+    </section>`;
+}
+
 export function render() {
   const est = obterEstado();
-  return est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est);
+  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderCardio(est);
 }
 
 export function montar(raiz) {
   ligarAvatares(raiz, obterEstado());
+  // tempo da gravação em andamento atualiza a cada segundo (relógio de parede)
+  const tempo = raiz.querySelector('[data-cardio-tempo]');
+  if (tempo) {
+    const tique = () => {
+      const a = obterEstado().cardioAtual;
+      if (a) tempo.textContent = formatarCronometro(tempoMs(a, Date.now()));
+    };
+    const timer = setInterval(tique, 1000);
+    aoSairDaTela(() => clearInterval(timer));
+  }
   raiz.querySelectorAll('[data-acao="comecar"]').forEach(el => {
     el.addEventListener('click', () => iniciarSessao(el.dataset.treino));
   });

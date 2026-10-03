@@ -8,7 +8,11 @@ import * as ajustes from './telas/ajustes.js';
 import * as corpo from './telas/corpo.js';
 import * as corpoRegistro from './telas/corpo-registro.js';
 import * as corpoFotos from './telas/corpo-fotos.js';
+import * as cardioGps from './telas/cardio-gps.js';
+import * as cardioAparelho from './telas/cardio-aparelho.js';
+import * as cardioDetalhe from './telas/cardio-detalhe.js';
 import { liberarUrls } from './fotos.js';
+import { sincronizar as sincronizarGravacao } from './gravacao.js';
 import { retomarDescanso } from './cronometro.js';
 import { fecharSheet, executarSaidas } from './ui.js';
 
@@ -25,6 +29,9 @@ const ROTAS = [
   [/^#\/exercicio\/([^/]+)$/, { render: p => exercicios.renderDetalhe(p), montar: (r, p) => exercicios.montarDetalhe?.(r, p) }, 'exercicios'],
   [/^#\/historico$/, historico, 'historico'],
   [/^#\/sessao\/([^/]+)$/, { render: p => historico.renderSessao(p), montar: (r, p) => historico.montarSessao?.(r, p) }, 'historico'],
+  [/^#\/cardio\/gps$/, cardioGps, 'hoje'],
+  [/^#\/cardio\/aparelho\/([^/]+)$/, cardioAparelho, 'hoje'],
+  [/^#\/cardio\/([^/]+)$/, cardioDetalhe, 'historico'],
   [/^#\/ajustes$/, ajustes, 'ajustes'],
   [/^#\/ajustes\/treino\/([^/]+)$/, { render: p => ajustes.renderEditarTreino(p), montar: (r, p) => ajustes.montarEditarTreino?.(r, p) }, 'ajustes']
 ];
@@ -58,6 +65,8 @@ definirRenderizador(renderizarTela);
 window.addEventListener('hashchange', () => { fecharSheet(); renderizarTela(); window.scrollTo(0, 0); });
 renderizarTela();
 retomarDescanso();
+// gravação de cardio em andamento (recarga/reabertura): religa o GPS em qualquer rota
+sincronizarGravacao();
 
 if (avisoInicial() === 'corrompido') mostrarAviso('Os dados salvos estavam danificados. Comecei do zero; uma cópia foi guardada.');
 if (avisoInicial() === 'indisponivel') mostrarAviso('Não estou conseguindo salvar neste navegador — faça backups.');

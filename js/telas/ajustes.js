@@ -5,6 +5,8 @@ import { obterEstado, atualizar, substituirEstado } from '../estado.js';
 import { validarBackup, migrar, restaurarTreinosPadrao } from '../armazenamento.js';
 import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
 import { idsReferenciados, exportarFotos, importarFotos, listarIds, apagarFoto } from '../fotos.js';
+import { idsTrajetos, exportarTrajetos, importarTrajetos, listarTrajetoIds, apagarTrajeto } from '../trajetos.js';
+import { flushar, sincronizar } from '../gravacao.js';
 
 // remove acento e caixa para a busca
 function normalizar(s) {
@@ -32,7 +34,7 @@ export function render() {
       <section class="card">
         <h2 class="sec-card">Backup</h2>
         <p class="muted">Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</p>
-        <p class="muted">Inclui suas fotos (o arquivo fica maior).</p>
+        <p class="muted">Inclui suas fotos e os trajetos do cardio (o arquivo fica maior).</p>
         <button type="button" class="btn btn-sec btn-bloco" data-acao="exportar">Exportar backup</button>
         <button type="button" class="btn btn-sec btn-bloco" data-acao="importar">Importar backup</button>
         <input type="file" accept="application/json,.json" hidden data-campo="arquivo">
@@ -54,7 +56,15 @@ async function exportar() {
   } catch {
     toast('Não consegui ler as fotos; o backup vai sem elas');
   }
-  const blob = new Blob([JSON.stringify({ ...est, fotos }, null, 2)], { type: 'application/json' });
+  // trajetos: grava antes o buffer da gravação em andamento, que também entra no backup
+  let trajetos = {};
+  try {
+    await flushar();
+    trajetos = await exportarTrajetos([...idsTrajetos(obterEstado())]);
+  } catch {
+    toast('Não consegui ler os trajetos; o backup vai sem eles');
+  }
+  const blob = new Blob([JSON.stringify({ ...obterEstado(), fotos, trajetos }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -81,13 +91,23 @@ async function importar(arquivo) {
   let fotosOk = true;
   const mapa = obj.fotos && typeof obj.fotos === 'object' && !Array.isArray(obj.fotos) ? obj.fotos : {};
   try { await importarFotos(mapa); } catch { fotosOk = false; }
+  // trajetos também antes do estado
+  let trajetosOk = true;
+  const mapaTrajetos = obj.trajetos && typeof obj.trajetos === 'object' && !Array.isArray(obj.trajetos) ? obj.trajetos : {};
+  try { await importarTrajetos(mapaTrajetos); } catch { trajetosOk = false; }
   substituirEstado(migrar(obj));
+  sincronizar(); // liga/desliga o GPS conforme a gravação do backup (normalmente nenhuma)
   // apaga do IndexedDB as fotos que o estado novo não usa
   try {
     const usadas = idsReferenciados(obterEstado());
     for (const id of await listarIds()) if (!usadas.has(id)) await apagarFoto(id);
   } catch { /* faxina é opcional */ }
-  toast(fotosOk ? 'Backup restaurado' : 'Backup restaurado, mas as fotos não puderam ser gravadas');
+  // e os trajetos órfãos (que nenhum cardio nem a gravação atual usa)
+  try {
+    const usados = idsTrajetos(obterEstado());
+    for (const id of await listarTrajetoIds()) if (!usados.has(id)) await apagarTrajeto(id);
+  } catch { /* faxina é opcional */ }
+  toast(fotosOk && trajetosOk ? 'Backup restaurado' : 'Backup restaurado, mas fotos ou trajetos não puderam ser gravados');
 }
 
 export function montar(raiz) {

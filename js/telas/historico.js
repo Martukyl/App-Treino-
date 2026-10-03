@@ -2,6 +2,7 @@
 import { esc, formatarDataCompleta, formatarDuracao, formatarKg, formatarNumero } from '../util.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
+import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarCronometro, itensHistorico } from '../cardio.js';
 
 const duracaoMs = s => new Date(s.fim).getTime() - new Date(s.inicio).getTime();
 const totalSeries = s => s.itens.reduce((n, it) => n + it.registros.length, 0);
@@ -18,14 +19,34 @@ function textoSerie(r) {
 
 // ---------- Lista ----------
 
+function linhaTreino(est, s) {
+  return `
+    <a class="linha-lista linha-sessao" data-tipo="treino" href="#/sessao/${encodeURIComponent(s.id)}">
+      <span class="linha-nome"><strong>${esc(formatarDataCompleta(s.fim))}</strong><br><span class="muted">🏋️ ${esc(tituloTreino(est, s))}</span></span>
+      <span class="linha-info muted">${esc(formatarDuracao(duracaoMs(s)))} · ${totalSeries(s)} séries</span>
+    </a>`;
+}
+
+// "🚶 Caminhada · 3,42 km · 41:20" (GPS) ou "🚴 Bicicleta · 30 min" (aparelho)
+function linhaCardio(c) {
+  const nome = `${ICONE_CARDIO[c.tipo] || '❤️'} ${ROTULO_CARDIO[c.tipo] || 'Cardio'}`;
+  const dist = c.distanciaM > 0 ? formatarKm(c.distanciaM) : null;
+  const info = c.modo === 'gps'
+    ? [dist, formatarCronometro(c.duracaoSeg * 1000)]
+    : [`${formatarNumero(Math.round(c.duracaoSeg / 60))} min`, dist];
+  return `
+    <a class="linha-lista linha-sessao" data-tipo="cardio" href="#/cardio/${encodeURIComponent(c.id)}">
+      <span class="linha-nome"><strong>${esc(formatarDataCompleta(c.fim))}</strong><br><span class="muted">${esc(nome)}</span></span>
+      <span class="linha-info muted">${esc(info.filter(Boolean).join(' · '))}</span>
+    </a>`;
+}
+
 export function render() {
   const est = obterEstado();
-  const ordenadas = [...est.sessoes].sort((a, b) => new Date(b.fim) - new Date(a.fim));
-  const linhas = ordenadas.map(s => `
-    <a class="linha-lista linha-sessao" href="#/sessao/${encodeURIComponent(s.id)}">
-      <span class="linha-nome"><strong>${esc(formatarDataCompleta(s.fim))}</strong><br><span class="muted">${esc(tituloTreino(est, s))}</span></span>
-      <span class="linha-info muted">${esc(formatarDuracao(duracaoMs(s)))} · ${totalSeries(s)} séries</span>
-    </a>`).join('');
+  // musculação e cardio juntos, por data (mais recente primeiro)
+  const linhas = itensHistorico(est.sessoes, est.cardios).map(item => (item.tipo === 'cardio'
+    ? linhaCardio(item.ref)
+    : linhaTreino(est, item.ref))).join('');
   return `
     <div class="tela-historico">
       <h1 class="titulo">Histórico</h1>
