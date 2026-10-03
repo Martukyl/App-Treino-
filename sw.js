@@ -1,7 +1,7 @@
 // Service worker: cache do app shell para funcionar offline.
 // Ao alterar QUALQUER arquivo do app, incremente CACHE.
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
-const CACHE = 'treino-1.2.0';
+const CACHE = 'treino-1.3.0';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
@@ -12,6 +12,7 @@ const ARQUIVOS = [
   './js/telas/corpo-registro.js', './js/telas/corpo-fotos.js',
   './js/geo.js', './js/cardio.js', './js/banco.js', './js/trajetos.js', './js/gps.js', './js/mapa.js',
   './js/cardio-ao-vivo.js', './js/gravacao.js',
+  './js/pontos.js', './js/cards.js', './js/cards-canvas.js', './js/compartilhar.js', './js/telas/boas-vindas.js',
   './js/telas/cardio-gps.js', './js/telas/cardio-aparelho.js', './js/telas/cardio-detalhe.js',
   './vendor/leaflet/leaflet.js', './vendor/leaflet/leaflet.css',
   './img/treino-a.jpg', './img/treino-b.jpg', './img/treino-c.jpg', './img/treino-d.jpg', './img/treino-e.jpg',
@@ -32,5 +33,7 @@ self.addEventListener('activate', ev => {
 
 self.addEventListener('fetch', ev => {
   if (ev.request.method !== 'GET') return;
+  // só a própria origem passa pelo cache; outras origens (mapa, futuramente o ranking) vão direto à rede
+  if (new URL(ev.request.url).origin !== self.location.origin) return;
   ev.respondWith(caches.match(ev.request, { ignoreSearch: true }).then(r => r || fetch(ev.request)));
 });

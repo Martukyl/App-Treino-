@@ -19,7 +19,9 @@ export function estadoInicial() {
     perfil: { altura: null, nascimento: null, metaPeso: null, fotoId: null },
     medidas: [],
     cardios: [],
-    cardioAtual: null
+    cardioAtual: null,
+    // instalação nova: mostra as boas-vindas antes de tudo (estados antigos migram com false)
+    boasVindasPendente: true
   };
 }
 
@@ -42,6 +44,8 @@ export function migrar(estado) {
   if (!Array.isArray(e.medidas)) e.medidas = [];
   if (!Array.isArray(e.cardios)) e.cardios = [];
   if (e.cardioAtual === undefined) e.cardioAtual = null;
+  // quem já usava o app (campo ausente) não vê as boas-vindas
+  if (typeof e.boasVindasPendente !== 'boolean') e.boasVindasPendente = false;
   delete e.trajetos; // os trajetos do backup vão para o IndexedDB, nunca para o estado
   delete e.fotos; // as fotos do backup vão para o IndexedDB, nunca para o estado
   e.versao = VERSAO;

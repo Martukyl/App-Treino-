@@ -7,6 +7,7 @@ import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
 import { idsReferenciados, exportarFotos, importarFotos, listarIds, apagarFoto } from '../fotos.js';
 import { idsTrajetos, exportarTrajetos, importarTrajetos, listarTrajetoIds, apagarTrajeto } from '../trajetos.js';
 import { flushar, sincronizar } from '../gravacao.js';
+import { proximaLetraLivre } from '../progressao.js';
 
 // remove acento e caixa para a busca
 function normalizar(s) {
@@ -30,6 +31,7 @@ export function render() {
       <section class="card">
         <h2 class="sec-card">Meus treinos</h2>
         ${linhas || '<p class="muted">Nenhum treino.</p>'}
+        <a class="btn btn-sec btn-bloco" data-acao="novo-treino" href="#/ajustes/treino/novo">+ Novo treino</a>
       </section>
       <section class="card">
         <h2 class="sec-card">Backup</h2>
@@ -95,7 +97,8 @@ async function importar(arquivo) {
   let trajetosOk = true;
   const mapaTrajetos = obj.trajetos && typeof obj.trajetos === 'object' && !Array.isArray(obj.trajetos) ? obj.trajetos : {};
   try { await importarTrajetos(mapaTrajetos); } catch { trajetosOk = false; }
-  substituirEstado(migrar(obj));
+  // quem importa um backup já conhece o app: nunca mostra as boas-vindas
+  substituirEstado({ ...migrar(obj), boasVindasPendente: false });
   sincronizar(); // liga/desliga o GPS conforme a gravação do backup (normalmente nenhuma)
   // apaga do IndexedDB as fotos que o estado novo não usa
   try {
@@ -130,6 +133,24 @@ export function montar(raiz) {
     substituirEstado(restaurarTreinosPadrao(obterEstado()));
     toast('Treinos restaurados');
   };
+}
+
+// ---------- Novo treino ----------
+
+// Rota #/ajustes/treino/novo: cria o treino (próxima letra livre) e troca a rota pelo editor dele.
+// location.replace evita deixar a rota "novo" no histórico (voltar não criaria outro treino).
+export function criarTreinoNovo() {
+  const est = obterEstado();
+  const letra = proximaLetraLivre(est.treinos, est.sessoes);
+  if (!letra) {
+    toast('Limite de 26 treinos atingido');
+    location.replace('#/ajustes');
+    return;
+  }
+  atualizar(e => {
+    e.treinos.push({ id: letra, nome: 'Novo treino', foco: '', itens: [] });
+  }, { renderizar: false });
+  location.replace(`#/ajustes/treino/${encodeURIComponent(letra)}`);
 }
 
 // ---------- Editor de treino ----------
@@ -178,6 +199,7 @@ export function renderEditarTreino(id) {
       ${itens || '<p class="muted">Nenhum exercício neste treino.</p>'}
       <button type="button" class="btn btn-principal btn-bloco" data-acao="adicionar">+ Adicionar exercício</button>
       <p class="muted">Rep máx precisa ser maior ou igual a rep mín.</p>
+      <button type="button" class="btn btn-perigo btn-bloco" data-acao="excluir-treino">Excluir treino</button>
     </div>`;
 }
 
@@ -280,4 +302,13 @@ export function montarEditarTreino(raiz, id) {
   });
 
   tela.querySelector('[data-acao="adicionar"]').onclick = () => abrirAdicionar(id);
+
+  tela.querySelector('[data-acao="excluir-treino"]').onclick = async () => {
+    const t = achar(obterEstado());
+    if (!t) return;
+    if (!(await confirmar(`Excluir o treino ${t.id} — ${t.nome}? Os treinos já feitos continuam no Histórico.`, 'Excluir', true))) return;
+    atualizar(e => { e.treinos = e.treinos.filter(x => x.id !== id); }, { renderizar: false });
+    toast('Treino excluído');
+    location.hash = '#/ajustes';
+  };
 }

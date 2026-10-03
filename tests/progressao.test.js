@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  historicoDoExercicio, cargaPredominante, avaliar, proximoTreino, melhorCargaPorSessao
+  historicoDoExercicio, cargaPredominante, avaliar, proximoTreino, melhorCargaPorSessao, proximaLetraLivre
 } from '../js/progressao.js';
 
 const barra = { id: 'x', incremento: 2.5 };
@@ -124,4 +124,16 @@ test('melhorCargaPorSessao em ordem cronológica', () => {
     { data: '2026-09-28', carga: 40 },
     { data: '2026-10-02', carga: 42.5 }
   ]);
+});
+
+test('proximaLetraLivre: primeira letra livre; evita letras do histórico; null com 26 treinos', () => {
+  assert.equal(proximaLetraLivre([]), 'A');
+  assert.equal(proximaLetraLivre([{ id: 'A' }, { id: 'B' }]), 'C');
+  assert.equal(proximaLetraLivre([{ id: 'A' }, { id: 'C' }]), 'B'); // preenche o buraco
+  // B foi excluído mas há sessões antigas de B: a letra nova não reaproveita B
+  assert.equal(proximaLetraLivre([{ id: 'A' }, { id: 'C' }], [{ treinoId: 'B' }]), 'D');
+  // sem letra "limpa", usa qualquer livre entre os treinos
+  const todas = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+  assert.equal(proximaLetraLivre(todas.slice(1).map(id => ({ id })), todas.map(l => ({ treinoId: l }))), 'A');
+  assert.equal(proximaLetraLivre(todas.map(id => ({ id }))), null);
 });

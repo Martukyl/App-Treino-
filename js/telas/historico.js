@@ -2,6 +2,8 @@
 import { esc, formatarDataCompleta, formatarDuracao, formatarKg, formatarNumero } from '../util.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
+import { compartilharCard } from '../compartilhar.js';
+import { dadosCardTreino } from '../cards.js';
 import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarCronometro, itensHistorico } from '../cardio.js';
 
 const duracaoMs = s => new Date(s.fim).getTime() - new Date(s.inicio).getTime();
@@ -90,6 +92,7 @@ export function renderSessao(id) {
         <p class="muted">${esc(formatarDuracao(duracaoMs(s)))} · ${totalSeries(s)} séries · ${formatarNumero(volume)} kg de volume</p>
       </section>
       ${blocos}
+      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar">Compartilhar</button>
       <button type="button" class="btn btn-perigo btn-bloco" data-acao="excluir">Excluir sessão</button>
     </div>`;
 }
@@ -98,6 +101,10 @@ export function montarSessao(raiz, id) {
   const tela = raiz.querySelector('.tela-sessao');
   const botao = tela && tela.querySelector('[data-acao="excluir"]');
   if (!botao) return;
+  tela.querySelector('[data-acao="compartilhar"]').onclick = () => {
+    const s = obterEstado().sessoes.find(x => x.id === id);
+    if (s) compartilharCard('Treino concluído', () => dadosCardTreino(obterEstado(), s));
+  };
   botao.onclick = async () => {
     if (!(await confirmar('Excluir este treino do histórico?', 'Excluir', true))) return;
     atualizar(e => {
