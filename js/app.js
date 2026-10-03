@@ -86,7 +86,7 @@ if (avisoInicial() === 'corrompido') mostrarAviso('Os dados salvos estavam danif
 if (avisoInicial() === 'indisponivel') mostrarAviso('Não estou conseguindo salvar neste navegador — faça backups.');
 
 // ranking: publica os totais pouco depois de abrir (sem grupo/sem rede não faz nada)
-setTimeout(() => sincronizarRanking(), 2000);
+setTimeout(() => sincronizarRanking({ imediato: true }), 2000);
 
 try { navigator.storage?.persist?.(); } catch { /* opcional */ }
 if ('serviceWorker' in navigator) {

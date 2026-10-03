@@ -5,7 +5,7 @@ import { obterEstado, atualizar } from './estado.js';
 import { hojeISO } from './util.js';
 import { toast } from './ui.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config-ranking.js';
-import { criarCliente } from './supabase.js';
+import { criarCliente, ErroRanking, MSG_OFFLINE } from './supabase.js';
 import {
   agregarUltimosDias, calcularRanking, inicioBusca, ordenarRanking, DIAS_SINCRONIZADOS
 } from './ranking-calculo.js';
@@ -33,6 +33,9 @@ export const temSessao = () => !!(obterEstado().ranking?.userId && obterEstado()
 export const sessaoExpirada = () => !!grupoAtual() && !temSessao();
 
 const online = () => globalThis.navigator?.onLine !== false;
+
+// ações do usuário sem rede: erro amigável sem nem tentar (evita barulho de rede falhando)
+const exigirOnline = () => { if (!online()) throw new ErroRanking(MSG_OFFLINE, { offline: true }); };
 
 // ---------- Sincronização (publicar os totais dos últimos 35 dias) ----------
 
@@ -136,7 +139,13 @@ export async function carregarRanking(periodo, { metrica = 'pontos', forcar = fa
   let dados;
   let offline = false;
   try {
-    dados = await buscarDados(forcar);
+    if (!online()) {
+      // sem rede: não tenta; usa o último ranking em memória, se houver
+      if (cache && cache.chave === chaveCache()) { dados = cache; offline = true; }
+      else return { ok: false, motivo: 'offline' };
+    } else {
+      dados = await buscarDados(forcar);
+    }
   } catch (erro) {
     if (erro && erro.sessaoInvalida) return { ok: false, motivo: 'sessao-expirada', mensagem: erro.mensagem };
     if (cache && cache.chave === chaveCache()) { dados = cache; offline = !!(erro && erro.offline); }
@@ -158,7 +167,8 @@ export function rankingEmCache(periodo, metrica = 'pontos') {
 // Membros do grupo para a tela Ajustes → { ok, membros: [{ userId, apelido, emoji, eu }], criadoPor }
 export async function listarMembros() {
   try {
-    const dados = await buscarDados(false);
+    const dados = online() ? await buscarDados(false) : cache && cache.chave === chaveCache() ? cache : null;
+    if (!dados) return { ok: false, motivo: 'offline' };
     if (dados.removida) return { ok: false, motivo: 'removida' };
     const eu = obterEstado().ranking.userId;
     return {
@@ -173,6 +183,7 @@ export async function listarMembros() {
 // ---------- Ações do grupo (lançam ErroRanking: mostrar erro.message no toast) ----------
 
 async function garantirSessao() {
+  exigirOnline();
   if (!temSessao()) await cliente.entrarAnonimo();
 }
 
@@ -199,6 +210,7 @@ export async function entrarGrupo({ codigo, apelido, emoji }) {
 }
 
 export async function sairGrupo() {
+  exigirOnline();
   await cliente.rpc('sair_grupo');
   cache = null;
   mudarRanking(r => (r ? { ...r, grupo: null, criador: false } : r));
@@ -211,11 +223,13 @@ export function esquecerGrupo() {
 }
 
 export async function removerMembro(userId) {
+  exigirOnline();
   await cliente.rpc('remover_membro', { p_user: userId });
   cache = null;
 }
 
 export async function editarPerfil({ apelido, emoji }) {
+  exigirOnline();
   const r = obterEstado().ranking;
   if (r?.userId) {
     await cliente.alterar('membros', `user_id=eq.${encodeURIComponent(r.userId)}`, { apelido, emoji });
