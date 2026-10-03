@@ -1,7 +1,7 @@
 // Service worker: cache do app shell para funcionar offline.
 // Ao alterar QUALQUER arquivo do app, incremente CACHE.
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
-const CACHE = 'treino-1.1.0';
+const CACHE = 'treino-1.2.0';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
@@ -10,6 +10,10 @@ const ARQUIVOS = [
   './js/telas/exercicios.js', './js/telas/historico.js', './js/telas/ajustes.js',
   './js/corpo.js', './js/fotos.js', './js/telas/corpo.js', './js/telas/corpo-comum.js',
   './js/telas/corpo-registro.js', './js/telas/corpo-fotos.js',
+  './js/geo.js', './js/cardio.js', './js/banco.js', './js/trajetos.js', './js/gps.js', './js/mapa.js',
+  './js/cardio-ao-vivo.js', './js/gravacao.js',
+  './js/telas/cardio-gps.js', './js/telas/cardio-aparelho.js', './js/telas/cardio-detalhe.js',
+  './vendor/leaflet/leaflet.js', './vendor/leaflet/leaflet.css',
   './img/treino-a.jpg', './img/treino-b.jpg', './img/treino-c.jpg', './img/treino-d.jpg', './img/treino-e.jpg',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];

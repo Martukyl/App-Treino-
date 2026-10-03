@@ -466,3 +466,62 @@ input.invalido, textarea.invalido { outline: 2px solid var(--danger); }
 .comp-foto figcaption { margin-top: 6px; font-size: 13px; color: var(--muted); text-align: center; }
 .foto-cheia-fundo { display: block; width: 100%; padding: 0; border: 0; background: none; }
 .foto-cheia { display: block; max-width: 100%; max-height: 68vh; margin: 0 auto; object-fit: contain; border-radius: 12px; }
+
+/* ---- Cardio (v1.2) ---- */
+
+.card-cardio .btn-bloco:first-of-type { margin-top: 4px; }
+
+/* Cronômetro grande da gravação */
+.cardio-tipo { margin: 4px 0 0; text-align: center; }
+.cron-grande {
+  font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em;
+  text-align: center; margin: 4px 0;
+  text-shadow: 0 4px 24px rgba(255, 255, 255, 0.08);
+}
+
+/* Sinal do GPS */
+.sinal {
+  display: block; margin: 0 0 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.card .sinal { text-align: left; margin-top: 12px; }
+.sinal-ok { color: var(--ok); }
+.sinal-fraco { color: var(--warn); }
+
+/* Mapa: isolation contém os z-index internos do Leaflet (não cobrem nav, sheet nem toast) */
+.mapa-caixa {
+  position: relative; isolation: isolate; overflow: hidden;
+  border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.11);
+  background: var(--surface);
+}
+.mapa { width: 100%; background: rgba(26, 28, 40, 0.9); }
+.mapa-ao-vivo { height: clamp(200px, 34vh, 340px); }
+.mapa-detalhe { height: 280px; }
+/* o leaflet.css carrega depois e define #ddd: o seletor duplo vence */
+.mapa.leaflet-container { background: #1a1c28; font: inherit; }
+.leaflet-container .leaflet-control-attribution { background: rgba(9, 11, 18, 0.7); color: var(--muted); }
+.leaflet-container .leaflet-control-attribution a { color: var(--muted); }
+.btn-centralizar {
+  position: absolute; right: 10px; bottom: 28px; z-index: 500;
+  min-height: 44px; padding: 0 14px; font-size: 14px;
+  background: rgba(31, 32, 45, 0.9);
+}
+.mapa-aviso { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 500; margin: 0; font-size: 13px; }
+
+/* Grade de números (2 colunas) */
+.grade-metricas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.card .grade-metricas { margin: 0; }
+.metrica {
+  display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; min-width: 0;
+  background: rgba(255, 255, 255, 0.055); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+}
+.metrica-valor { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.metrica-rotulo { font-size: 12px; color: var(--muted); }
+
+.aviso-tela { text-align: center; font-size: 13px; }
+.cardio-botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.tela-cardio-gps[data-modo="gravando"] .cardio-botoes .btn { min-height: 56px; }
+
+@media (max-width: 380px) {
+  .cron-grande { font-size: 48px; }
+  .metrica-valor { font-size: 19px; }
+}

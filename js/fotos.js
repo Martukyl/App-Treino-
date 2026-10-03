@@ -2,8 +2,8 @@
 // As funções puras (calcularDimensoes, idsReferenciados) rodam no Node; o resto precisa do navegador.
 // Qualquer falha de IndexedDB/canvas rejeita a Promise: quem chama avisa com toast e segue sem a foto.
 import { gerarId } from './util.js';
+import { transacao as transacaoBanco } from './banco.js';
 
-const BANCO = 'appTreino-fotos';
 const STORE = 'fotos';
 const QUALIDADE = 0.75;
 const LADO_MAX_PERFIL = 400;
@@ -78,39 +78,8 @@ export async function comprimirImagem(file, { lado = 1080, quadrado = false } = 
 
 // ---------- IndexedDB ----------
 
-let abertura = null;
-
-function abrirBanco() {
-  if (abertura) return abertura;
-  abertura = new Promise((resolve, reject) => {
-    if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB indisponível')); return; }
-    let req;
-    try { req = indexedDB.open(BANCO, 1); } catch (e) { reject(e); return; }
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => {
-      const db = req.result;
-      db.onversionchange = () => { db.close(); abertura = null; };
-      resolve(db);
-    };
-    req.onerror = () => reject(req.error);
-    req.onblocked = () => reject(new Error('banco de fotos bloqueado'));
-  });
-  abertura.catch(() => { abertura = null; }); // permite tentar de novo depois
-  return abertura;
-}
-
-// Executa fn(store) numa transação e resolve com o resultado da requisição devolvida.
-async function transacao(modo, fn) {
-  const db = await abrirBanco();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, modo);
-    let resultado;
-    try { resultado = fn(tx.objectStore(STORE)); } catch (e) { reject(e); return; }
-    tx.oncomplete = () => resolve(resultado && 'result' in resultado ? resultado.result : undefined);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error || new Error('transação cancelada'));
-  });
-}
+// Transação na store de fotos (abertura do banco compartilhada em banco.js).
+const transacao = (modo, fn) => transacaoBanco(STORE, modo, fn);
 
 export async function salvarFoto(blob) {
   const id = gerarId('f_');
