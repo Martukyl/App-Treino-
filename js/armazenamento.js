@@ -3,7 +3,7 @@
 import { exerciciosPadrao, treinosPadrao } from './dados.js';
 
 export const CHAVE = 'appTreino.v1';
-export const VERSAO = 2;
+export const VERSAO = 3;
 
 const copiar = obj => JSON.parse(JSON.stringify(obj));
 
@@ -17,7 +17,9 @@ export function estadoInicial() {
     ultimoTreinoId: null,
     nome: '',
     perfil: { altura: null, nascimento: null, metaPeso: null, fotoId: null },
-    medidas: []
+    medidas: [],
+    cardios: [],
+    cardioAtual: null
   };
 }
 
@@ -38,6 +40,9 @@ export function migrar(estado) {
     metaPeso: p.metaPeso ?? null, fotoId: p.fotoId ?? null
   };
   if (!Array.isArray(e.medidas)) e.medidas = [];
+  if (!Array.isArray(e.cardios)) e.cardios = [];
+  if (e.cardioAtual === undefined) e.cardioAtual = null;
+  delete e.trajetos; // os trajetos do backup vão para o IndexedDB, nunca para o estado
   delete e.fotos; // as fotos do backup vão para o IndexedDB, nunca para o estado
   e.versao = VERSAO;
   return e;
@@ -53,6 +58,9 @@ export function validarBackup(obj) {
   if (!Array.isArray(obj.sessoes)) return { ok: false, erro: 'Campo sessoes ausente ou inválido.' };
   if (obj.medidas !== undefined && !Array.isArray(obj.medidas)) {
     return { ok: false, erro: 'Campo medidas ausente ou inválido.' };
+  }
+  if (obj.cardios !== undefined && !Array.isArray(obj.cardios)) {
+    return { ok: false, erro: 'Campo cardios ausente ou inválido.' };
   }
   return { ok: true };
 }

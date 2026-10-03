@@ -17,7 +17,7 @@ function storageFalso(inicial = {}) {
 
 test('estadoInicial tem catálogo, 5 treinos e nada em andamento', () => {
   const e = estadoInicial();
-  assert.equal(e.versao, 2);
+  assert.equal(e.versao, 3);
   assert.equal(Object.keys(e.exercicios).length, 25);
   assert.equal(e.treinos.length, 5);
   assert.deepEqual(e.sessoes, []);
@@ -116,9 +116,9 @@ test('estadoInicial v2 tem perfil vazio e medidas []', () => {
   assert.deepEqual(e.medidas, []);
 });
 
-test('migrar v1→v2 cria perfil/medidas e mantém nome na raiz', () => {
+test('migrar v1→v3 cria perfil/medidas e mantém nome na raiz', () => {
   const m = migrar({ versao: 1, exercicios: {}, treinos: [], sessoes: [], nome: 'Ana' });
-  assert.equal(m.versao, 2);
+  assert.equal(m.versao, 3);
   assert.equal(m.nome, 'Ana');
   assert.deepEqual(m.perfil, { altura: null, nascimento: null, metaPeso: null, fotoId: null });
   assert.deepEqual(m.medidas, []);
@@ -145,11 +145,58 @@ test('validarBackup aceita v1 e v2 e rejeita medidas que não seja array', () =>
   assert.match(r.erro, /medidas/);
 });
 
-test('carregar estado v1 salvo → migrado para v2', () => {
+test('carregar estado v1 salvo → migrado para v3', () => {
   const v1 = { versao: 1, exercicios: {}, treinos: [], sessoes: [], nome: 'Bia' };
   const { estado, aviso } = carregar(storageFalso({ [CHAVE]: JSON.stringify(v1) }));
   assert.equal(aviso, null);
-  assert.equal(estado.versao, 2);
+  assert.equal(estado.versao, 3);
   assert.equal(estado.nome, 'Bia');
   assert.deepEqual(estado.medidas, []);
+});
+
+test('estadoInicial tem cardios vazio e nenhuma gravação em andamento', () => {
+  const e = estadoInicial();
+  assert.deepEqual(e.cardios, []);
+  assert.equal(e.cardioAtual, null);
+});
+
+test('migrar v2→v3 cria cardios/cardioAtual e preserva o resto', () => {
+  const v2 = { ...estadoInicial(), versao: 2, nome: 'Ana', medidas: [{ id: 'm_1', data: '2026-10-02', peso: 60 }] };
+  delete v2.cardios; delete v2.cardioAtual;
+  const m = migrar(v2);
+  assert.equal(m.versao, 3);
+  assert.deepEqual(m.cardios, []);
+  assert.equal(m.cardioAtual, null);
+  assert.equal(m.nome, 'Ana');
+  assert.equal(m.medidas.length, 1);
+});
+
+test('migrar preserva cardios e cardioAtual existentes', () => {
+  const atual = { id: 'c_2', tipo: 'caminhada', pausado: false };
+  const m = migrar({ ...estadoInicial(), cardios: [{ id: 'c_1' }], cardioAtual: atual });
+  assert.deepEqual(m.cardios, [{ id: 'c_1' }]);
+  assert.deepEqual(m.cardioAtual, atual);
+});
+
+test('migrar troca cardios inválido e remove o campo trajetos do backup', () => {
+  const m = migrar({ ...estadoInicial(), cardios: 'x', trajetos: { t_1: { segmentos: [] } } });
+  assert.deepEqual(m.cardios, []);
+  assert.equal('trajetos' in m, false);
+});
+
+test('validarBackup aceita v3 e rejeita cardios que não seja array', () => {
+  assert.equal(validarBackup({ versao: 3, exercicios: {}, treinos: [], sessoes: [], cardios: [] }).ok, true);
+  assert.equal(validarBackup({ versao: 2, exercicios: {}, treinos: [], sessoes: [] }).ok, true);
+  const r = validarBackup({ versao: 3, exercicios: {}, treinos: [], sessoes: [], cardios: {} });
+  assert.equal(r.ok, false);
+  assert.match(r.erro, /cardios/);
+});
+
+test('carregar estado v2 salvo → migrado para v3', () => {
+  const v2 = { versao: 2, exercicios: {}, treinos: [], sessoes: [], medidas: [] };
+  const { estado, aviso } = carregar(storageFalso({ [CHAVE]: JSON.stringify(v2) }));
+  assert.equal(aviso, null);
+  assert.equal(estado.versao, 3);
+  assert.deepEqual(estado.cardios, []);
+  assert.equal(estado.cardioAtual, null);
 });
