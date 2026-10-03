@@ -25,7 +25,7 @@ export function render() {
       </div>`;
   }
   const opcoes = sel => registros.map(m =>
-    `<option value="${esc(m.id)}"${m.id === sel ? ' selected' : ''}>${esc(rotuloRegistro(m))}</option>`).join('');
+    `<option value="${esc(m.id)}"${m.id === sel ? ' selected' : ''}>${esc(formatarDia(m.data))}</option>`).join('');
   return `
     <div class="tela-fotos">
       <a class="voltar" href="#/corpo">← Corpo</a>
