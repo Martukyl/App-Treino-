@@ -91,7 +91,7 @@ export function formatarValor(metrica, valor) {
 // "atualizado há 3 min" a partir de milissegundos decorridos
 export function textoIdade(ms) {
   const min = Math.floor(ms / 60000);
-  if (min < 1) return 'atualizado agora há pouco';
+  if (min < 1) return 'atualizado agora';
   if (min < 60) return `atualizado há ${min} min`;
   return `atualizado há ${Math.floor(min / 60)} h`;
 }

@@ -124,7 +124,7 @@ test('formatarValor, textoIdade e normalização de campos', () => {
   assert.equal(formatarValor('sequencia', 1), '1 dia');
   assert.equal(formatarValor('sequencia', 4), '4 dias');
   assert.equal(formatarValor('treinos', 3), '3');
-  assert.equal(textoIdade(20_000), 'atualizado agora há pouco');
+  assert.equal(textoIdade(20_000), 'atualizado agora');
   assert.equal(textoIdade(3 * 60_000), 'atualizado há 3 min');
   assert.equal(textoIdade(120 * 60_000), 'atualizado há 2 h');
   assert.equal(normalizarCodigo(' fit 7k2\n'), 'FIT7K2');
