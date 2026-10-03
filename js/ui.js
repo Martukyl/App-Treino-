@@ -15,6 +15,9 @@ export function abrirSheet(html, aoAbrir) {
   return sheet;
 }
 
+// Registra um callback para quando o sheet atual for fechado (por qualquer caminho).
+export function aoFecharSheetAtual(fn) { aoFecharSheet = fn; }
+
 export function fecharSheet() {
   const sheet = document.getElementById('sheet');
   const fundo = document.getElementById('sheet-fundo');

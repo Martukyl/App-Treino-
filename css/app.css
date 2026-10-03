@@ -525,3 +525,40 @@ input.invalido, textarea.invalido { outline: 2px solid var(--danger); }
   .cron-grande { font-size: 48px; }
   .metrica-valor { font-size: 19px; }
 }
+
+/* ---- Compartilhar, boas-vindas e novo treino (v1.3) ---- */
+
+/* Prévia do card no sheet */
+.previa { text-align: center; margin-bottom: 12px; min-height: 80px; }
+.previa img {
+  display: block; width: auto; height: auto; max-width: 100%; max-height: 52vh;
+  margin: 0 auto; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Card "Minha semana" na tela Hoje */
+.semana-dias { display: flex; justify-content: space-between; gap: 4px; margin: 8px 0 12px; }
+.semana-dia {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex: 1 1 0; min-width: 0; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.semana-dia.hoje { color: var(--text); }
+.semana-bolinha {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.25); font-size: 18px; font-weight: 800; color: #261018;
+}
+.semana-dia.ativo .semana-bolinha { border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.semana-dia.hoje .semana-bolinha { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18); }
+
+/* Boas-vindas: sem barra de abas */
+body.boas-vindas .nav { display: none; }
+body.boas-vindas #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+.tela-boas-vindas .titulo { margin-top: 24px; }
+.escolha-programa { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+.opcao-programa {
+  display: flex; align-items: flex-start; gap: 12px; margin: 0; padding: 14px;
+  color: var(--text); font-size: 16px; line-height: 1.35;
+  background: rgba(255, 255, 255, 0.065); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 16px; cursor: pointer;
+}
+.opcao-programa input { width: 24px; min-height: 24px; height: 24px; flex: 0 0 auto; margin-top: 2px; }
+.opcao-programa:has(input:checked) { border-color: var(--accent); background: rgba(255, 102, 133, 0.14); }

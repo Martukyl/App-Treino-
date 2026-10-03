@@ -8,6 +8,8 @@ import { avaliar, historicoDoExercicio } from '../progressao.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
 import { prepararAudio, iniciarDescanso, pararDescanso } from '../cronometro.js';
+import { compartilharCard } from '../compartilhar.js';
+import { dadosCardTreino } from '../cards.js';
 
 // Cards que a usuária expandiu/recolheu na mão (índice → true = aberto), por sessão.
 let aberturaManual = new Map();
@@ -352,8 +354,17 @@ export function renderResumo(sessaoId) {
           ? `<h2>Na próxima, pode aumentar:</h2><ul class="lista-ex">${subir.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
           : '<p>Continue firme — mesma carga na próxima.</p>'}
       </section>
+      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar">Compartilhar</button>
       <a class="btn btn-principal btn-bloco" href="#/hoje">Voltar ao início</a>
     </div>`;
 }
 
-export function montarResumo() {}
+export function montarResumo(raiz, sessaoId) {
+  const botao = raiz.querySelector('.tela-resumo [data-acao="compartilhar"]');
+  if (!botao) return;
+  botao.onclick = () => {
+    const est = obterEstado();
+    const s = est.sessoes.find(x => x.id === sessaoId);
+    if (s) compartilharCard('Treino concluído', () => dadosCardTreino(obterEstado(), s));
+  };
+}

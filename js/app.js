@@ -1,5 +1,5 @@
 // Inicialização, roteador por hash e service worker.
-import { definirRenderizador, avisoInicial, mostrarAviso } from './estado.js';
+import { definirRenderizador, avisoInicial, mostrarAviso, obterEstado } from './estado.js';
 import * as hoje from './telas/hoje.js';
 import * as treino from './telas/treino.js';
 import * as exercicios from './telas/exercicios.js';
@@ -11,6 +11,7 @@ import * as corpoFotos from './telas/corpo-fotos.js';
 import * as cardioGps from './telas/cardio-gps.js';
 import * as cardioAparelho from './telas/cardio-aparelho.js';
 import * as cardioDetalhe from './telas/cardio-detalhe.js';
+import * as boasVindas from './telas/boas-vindas.js';
 import { liberarUrls } from './fotos.js';
 import { sincronizar as sincronizarGravacao } from './gravacao.js';
 import { retomarDescanso } from './cronometro.js';
@@ -33,11 +34,21 @@ const ROTAS = [
   [/^#\/cardio\/aparelho\/([^/]+)$/, cardioAparelho, 'hoje'],
   [/^#\/cardio\/([^/]+)$/, cardioDetalhe, 'historico'],
   [/^#\/ajustes$/, ajustes, 'ajustes'],
+  [/^#\/boas-vindas$/, boasVindas, 'hoje'],
+  // "novo" vem antes da rota genérica: cria o treino e troca a rota pelo editor dele
+  [/^#\/ajustes\/treino\/novo$/, { render: () => '', montar: () => ajustes.criarTreinoNovo() }, 'ajustes'],
   [/^#\/ajustes\/treino\/([^/]+)$/, { render: p => ajustes.renderEditarTreino(p), montar: (r, p) => ajustes.montarEditarTreino?.(r, p) }, 'ajustes']
 ];
 
 function renderizarTela() {
   const hash = location.hash || '#/hoje';
+  // primeira abertura: qualquer rota vira as boas-vindas (sem barra de abas); depois, ela não volta
+  const pendente = !!obterEstado().boasVindasPendente;
+  document.body.classList.toggle('boas-vindas', pendente);
+  if (pendente !== (hash === '#/boas-vindas')) {
+    location.replace(pendente ? '#/boas-vindas' : '#/hoje'); // dispara hashchange e redesenha
+    return;
+  }
   const raiz = document.getElementById('app');
   // a tela anterior sai: limpa fotos não salvas e revoga object URLs
   executarSaidas();

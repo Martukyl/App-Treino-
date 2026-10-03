@@ -200,3 +200,17 @@ test('carregar estado v2 salvo → migrado para v3', () => {
   assert.deepEqual(estado.cardios, []);
   assert.equal(estado.cardioAtual, null);
 });
+
+test('boasVindasPendente: estado novo = true; estado existente sem o campo = false', () => {
+  assert.equal(estadoInicial().boasVindasPendente, true);
+  // quem já usava o app (salvo antes da v1.3, sem o campo) não vê as boas-vindas
+  const antigo = estadoInicial();
+  delete antigo.boasVindasPendente;
+  assert.equal(migrar(antigo).boasVindasPendente, false);
+  assert.equal(migrar({ versao: 1, exercicios: {}, treinos: [], sessoes: [] }).boasVindasPendente, false);
+  // um estado novo ainda não concluído continua pendente após migrar
+  assert.equal(migrar(estadoInicial()).boasVindasPendente, true);
+  const st = storageFalso({ [CHAVE]: JSON.stringify(antigo) });
+  assert.equal(carregar(st).estado.boasVindasPendente, false);
+  assert.equal(carregar(storageFalso()).estado.boasVindasPendente, true);
+});

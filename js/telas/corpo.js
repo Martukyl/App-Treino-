@@ -8,6 +8,8 @@ import { obterEstado, atualizar } from '../estado.js';
 import { comprimirImagem, salvarFoto, apagarFoto } from '../fotos.js';
 import { confirmar, toast } from '../ui.js';
 import { spanDif, ctxPeso, htmlAvatar, ligarAvatares } from './corpo-comum.js';
+import { compartilharCard } from '../compartilhar.js';
+import { dadosCardCorpo } from '../cards.js';
 
 const MSG_GRAFICO = '<p class="muted">O gráfico aparece a partir do 2º registro.</p>';
 
@@ -119,6 +121,12 @@ function htmlRegistros(est) {
   return `<section class="card"><h2 class="sec-card">Registros</h2>${linhas}</section>`;
 }
 
+// o card da evolução só faz sentido com peso ou alguma medida registrados
+function temDadosParaCard(est) {
+  const d = dadosCardCorpo(est);
+  return !!(d.peso || d.medidas.length);
+}
+
 function temFoto(m) { return Object.values(m.fotos || {}).some(Boolean); }
 
 export function render() {
@@ -133,6 +141,7 @@ export function render() {
       ${vazio ? '<section class="card"><p>Registre seu peso e suas medidas de tempos em tempos (e, se quiser, fotos). Aqui você vê a evolução, quanto falta para a meta e compara as fotos antes e depois.</p></section>' : ''}
       ${htmlPeso(est)}
       ${htmlMedidas(est)}
+      ${temDadosParaCard(est) ? '<button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar-corpo">Compartilhar evolução</button>' : ''}
       ${comFoto >= 2 ? '<section class="card"><h2 class="sec-card">Fotos</h2><p class="muted">Compare suas fotos de duas datas.</p><a class="btn btn-sec btn-bloco" href="#/corpo/fotos">Comparar fotos</a></section>' : ''}
       ${vazio ? '' : htmlRegistros(est)}
     </div>`;
@@ -150,6 +159,15 @@ export function montar(raiz) {
     const peso = tela.querySelector('[data-sec="peso"]');
     if (peso) peso.outerHTML = htmlPeso(est);
   };
+
+  const botaoCompartilhar = tela.querySelector('[data-acao="compartilhar-corpo"]');
+  if (botaoCompartilhar) {
+    botaoCompartilhar.onclick = () => compartilharCard(
+      'Minha evolução',
+      opcoes => dadosCardCorpo(obterEstado(), opcoes),
+      { interruptorFotos: !!dadosCardCorpo(obterEstado(), { incluirFotos: true }).fotos }
+    );
+  }
 
   // nome salva a cada tecla, sem re-renderizar (o teclado não fecha)
   tela.querySelector('[data-campo="nome"]').oninput = ev => {

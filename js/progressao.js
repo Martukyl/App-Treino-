@@ -68,6 +68,18 @@ export function proximoTreino(treinos, ultimoTreinoId) {
   return i < 0 ? treinos[0] : treinos[(i + 1) % treinos.length];
 }
 
+// Próxima letra livre (A–Z) para um treino novo. Prefere uma letra que nem treino atual nem
+// sessão do histórico usam (para não confundir treinos antigos com o novo); sem isso, qualquer
+// letra livre entre os treinos. null se as 26 estão em uso.
+export function proximaLetraLivre(treinos, sessoes = []) {
+  const letras = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+  const emTreinos = new Set(treinos.map(t => t.id));
+  const noHistorico = new Set(sessoes.map(s => s.treinoId));
+  return letras.find(l => !emTreinos.has(l) && !noHistorico.has(l))
+    ?? letras.find(l => !emTreinos.has(l))
+    ?? null;
+}
+
 // Maior carga feita em cada sessão, em ordem cronológica (para o gráfico).
 export function melhorCargaPorSessao(historico) {
   return historico

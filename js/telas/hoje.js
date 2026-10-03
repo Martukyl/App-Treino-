@@ -1,11 +1,13 @@
 // Tela Hoje: treino sugerido, treino em andamento e início de sessão.
-import { esc, formatarData, gerarId } from '../util.js';
+import { esc, formatarData, gerarId, hojeISO } from '../util.js';
 import { proximoTreino, avaliar, historicoDoExercicio } from '../progressao.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { htmlAvatar, ligarAvatares } from './corpo-comum.js';
 import { ICONE_CARDIO, ROTULO_CARDIO, formatarCronometro } from '../cardio.js';
 import { tempoMs } from '../cardio-ao-vivo.js';
-import { aoSairDaTela } from '../ui.js';
+import { aoSairDaTela, toast } from '../ui.js';
+import { compartilharCard } from '../compartilhar.js';
+import { dadosCardSemana } from '../cards.js';
 
 // "Boa noite, Roberta!" — o nome vem de Ajustes e fica só no aparelho
 function saudacao() {
@@ -62,12 +64,21 @@ function renderEmAndamento(est) {
 
 function renderSugerido(est) {
   const t = proximoTreino(est.treinos, est.ultimoTreinoId);
-  if (!t) return '<p class="muted">Nenhum treino cadastrado. Restaure os treinos padrão em Ajustes.</p>';
+  if (!t) {
+    return `
+    ${cabecalho(est)}
+    <section class="card card-destaque" data-sec="sem-treinos">
+      <h2 class="treino-nome">Você ainda não tem treinos</h2>
+      <p class="muted">Crie o seu primeiro treino e escolha os exercícios.</p>
+      <a class="btn btn-principal btn-bloco" data-acao="criar-treino" href="#/ajustes/treino/novo">Criar treino</a>
+    </section>`;
+  }
   const itens = t.itens.map(it => {
     const ex = est.exercicios[it.exercicioId];
     const nome = ex ? ex.nome : it.exercicioId;
     return `<li><span>${esc(nome)}</span><span class="muted">${it.series} × ${it.repMin}–${it.repMax}</span></li>`;
   }).join('');
+  const vazio = t.itens.length === 0;
   const ultima = ultimaVez(est, t.id);
   const outros = est.treinos.filter(o => o.id !== t.id).map(o =>
     `<button type="button" class="chip" data-acao="comecar" data-treino="${esc(o.id)}"><strong>${esc(o.id)}</strong> ${esc(o.foco)}</button>`
@@ -85,7 +96,10 @@ function renderSugerido(est) {
       </div>
       <ul class="lista-ex">${itens}</ul>
       <p class="muted">Último: ${ultima ? formatarData(ultima) : 'Ainda não feito'}</p>
-      <button type="button" class="btn btn-principal btn-bloco" data-acao="comecar" data-treino="${esc(t.id)}">Começar</button>
+      ${vazio
+        ? `<p class="muted">Este treino ainda não tem exercícios.</p>
+      <a class="btn btn-principal btn-bloco" data-acao="adicionar-exercicios" href="#/ajustes/treino/${encodeURIComponent(t.id)}">Adicionar exercícios</a>`
+        : `<button type="button" class="btn btn-principal btn-bloco" data-acao="comecar" data-treino="${esc(t.id)}">Começar</button>`}
     </section>
     ${outros ? `<section class="card"><p class="muted">Outro treino</p><div class="chips">${outros}</div></section>` : ''}`;
 }
@@ -109,9 +123,26 @@ function renderCardio(est) {
     </section>`;
 }
 
+// Card "Minha semana": 7 bolinhas seg–dom (ativo = preenchida) e botão de compartilhar.
+function renderSemana(est) {
+  const d = dadosCardSemana(est, hojeISO());
+  const bolinhas = d.dias.map(x =>
+    `<span class="semana-dia${x.ativo ? ' ativo' : ''}${x.hoje ? ' hoje' : ''}" data-dia="${x.dia}"><span class="semana-bolinha" aria-label="${x.ativo ? 'treinou' : 'sem atividade'}">${x.ativo ? '✓' : ''}</span>${x.letra}</span>`
+  ).join('');
+  const [treinos, cardio, , pontos] = d.metricas.map(m => m.valor);
+  return `
+    <section class="card card-semana" data-sec="semana">
+      <h2 class="sec-card">Minha semana</h2>
+      <div class="semana-dias">${bolinhas}</div>
+      <p class="muted">${treinos} ${treinos === '1' ? 'treino' : 'treinos'} · ${esc(cardio)} de cardio · ${pontos} pts</p>
+      <p class="muted">${esc(d.textoSequencia)}</p>
+      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar-semana">Compartilhar</button>
+    </section>`;
+}
+
 export function render() {
   const est = obterEstado();
-  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderCardio(est);
+  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderSemana(est) + renderCardio(est);
 }
 
 export function montar(raiz) {
@@ -126,6 +157,8 @@ export function montar(raiz) {
     const timer = setInterval(tique, 1000);
     aoSairDaTela(() => clearInterval(timer));
   }
+  const semana = raiz.querySelector('[data-acao="compartilhar-semana"]');
+  if (semana) semana.onclick = () => compartilharCard('Minha semana', () => dadosCardSemana(obterEstado(), hojeISO()));
   raiz.querySelectorAll('[data-acao="comecar"]').forEach(el => {
     el.addEventListener('click', () => iniciarSessao(el.dataset.treino));
   });
@@ -135,6 +168,11 @@ export function iniciarSessao(treinoId) {
   const est = obterEstado();
   const treino = est.treinos.find(t => t.id === treinoId);
   if (!treino) return;
+  if (!treino.itens.length) { // treino sem exercícios: manda para o editor em vez de abrir uma sessão vazia
+    toast('Este treino ainda não tem exercícios');
+    location.hash = `#/ajustes/treino/${encodeURIComponent(treino.id)}`;
+    return;
+  }
   atualizar(e => {
     e.sessaoAtual = {
       id: gerarId('s_'), treinoId, inicio: new Date().toISOString(), fim: null, descansoAte: null,

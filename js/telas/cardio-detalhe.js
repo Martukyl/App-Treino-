@@ -6,6 +6,8 @@ import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast, aoSairDaTela } from '../ui.js';
 import { criarMapaEstatico } from '../mapa.js';
 import { lerTrajeto, apagarTrajeto } from '../trajetos.js';
+import { compartilharCard } from '../compartilhar.js';
+import { dadosCardCardio } from '../cards.js';
 
 const hora = iso => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -63,6 +65,7 @@ export function render(id) {
       <section class="card"><div class="grade-metricas">${numeros.join('')}</div></section>
       ${parciais}
       ${obs}
+      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar">Compartilhar</button>
       ${editar}
       <button type="button" class="btn btn-perigo btn-bloco" data-acao="excluir">Excluir</button>
     </div>`;
@@ -72,6 +75,11 @@ export function montar(raiz, id) {
   const tela = raiz.querySelector('.tela-cardio-detalhe');
   const c = obterEstado().cardios.find(x => x.id === id);
   if (!tela || !c) return;
+
+  tela.querySelector('[data-acao="compartilhar"]').onclick = () => {
+    const atual = obterEstado().cardios.find(x => x.id === id);
+    if (atual) compartilharCard(`${ROTULO_CARDIO[atual.tipo] || 'Cardio'} concluída`, () => dadosCardCardio(atual));
+  };
 
   tela.querySelector('[data-acao="excluir"]').onclick = async () => {
     if (!(await confirmar('Excluir este cardio? O trajeto dele também será apagado.', 'Excluir', true))) return;
