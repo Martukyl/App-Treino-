@@ -147,3 +147,22 @@ test('dadosCardRanking: pódio top 3, lista até 10, só apelidos', () => {
   assert.ok(!JSON.stringify(d).includes('userId'));
   assert.equal(dadosCardRanking({ grupo: 'G', periodo: 'mes', lista: [], hoje: HOJE, inicio: '2026-10-01', fim: HOJE }).titulo, 'Ranking do mês');
 });
+
+test('calcularRanking: contar_desde ignora dias anteriores no total e na sequência', () => {
+  const membros = [{ user_id: 'u1', apelido: 'Ana', emoji: '💪' }];
+  const dias = [
+    { user_id: 'u1', data: '2026-09-29', treinos: 1, cardio_min: 0, km: 0, pontos: 10 },
+    { user_id: 'u1', data: '2026-10-01', treinos: 1, cardio_min: 0, km: 0, pontos: 10 },
+    { user_id: 'u1', data: '2026-10-02', treinos: 1, cardio_min: 0, km: 0, pontos: 10 },
+    { user_id: 'u1', data: '2026-10-03', treinos: 1, cardio_min: 0, km: 0, pontos: 10 }
+  ];
+  const [sem] = calcularRanking(membros, dias, HOJE, 'semana');
+  assert.equal(sem.pontos, 40);
+  const [r] = calcularRanking(membros, dias, HOJE, 'semana', '2026-10-02');
+  assert.equal(r.pontos, 20);
+  assert.equal(r.treinos, 2);
+  assert.equal(r.sequencia, 2);
+  const [mes] = calcularRanking(membros, dias, HOJE, 'mes', '2026-10-04');
+  assert.equal(mes.pontos, 0);
+  assert.equal(mes.sequencia, 0);
+});

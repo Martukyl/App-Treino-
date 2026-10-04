@@ -49,10 +49,12 @@ const arred2 = n => Math.round(n * 100) / 100;
 
 // Linhas de `dias` do servidor + membros → um item por membro com os totais do período e a sequência.
 // membros: [{ user_id, apelido, emoji }]; dias: [{ user_id, data, treinos, cardio_min, km, pontos }]
-export function calcularRanking(membros, dias, hoje, periodo) {
+// desde: 'AAAA-MM-DD' opcional (grupos.contar_desde) — dias anteriores são ignorados, inclusive na sequência
+export function calcularRanking(membros, dias, hoje, periodo, desde = null) {
   const { inicio, fim } = limitesPeriodo(periodo, hoje);
   const porUsuario = new Map();
   for (const d of dias) {
+    if (desde && d.data < desde) continue;
     if (!porUsuario.has(d.user_id)) porUsuario.set(d.user_id, []);
     porUsuario.get(d.user_id).push(d);
   }

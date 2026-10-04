@@ -18,6 +18,10 @@ create table if not exists public.grupos (
   criado_em timestamptz not null default now()
 );
 
+-- Zerar a competição: o ranking ignora os dias anteriores a contar_desde (o histórico fica no banco).
+-- Hoje só pelo SQL Editor: update public.grupos set contar_desde = 'AAAA-MM-DD' where codigo = 'XXXXXX';
+alter table public.grupos add column if not exists contar_desde date;
+
 create table if not exists public.membros (
   user_id uuid primary key references auth.users on delete cascade, -- 1 grupo por pessoa
   grupo text not null references public.grupos on delete cascade,

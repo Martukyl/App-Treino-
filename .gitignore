@@ -1,3 +1,6 @@
 node_modules/
 *.log
 CLAUDE.local.md
+
+# Telas de comparação do brainstorming (superpowers)
+.superpowers/

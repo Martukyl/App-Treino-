@@ -2,7 +2,7 @@
 // Não acessam DOM nem localStorage (testáveis no Node).
 
 // Versão do app: deve ser igual ao número de CACHE em sw.js (treino-<VERSAO_APP>).
-export const VERSAO_APP = '1.4.2';
+export const VERSAO_APP = '1.4.3';
 
 export function arredondar(n, passo = 0.5) {
   // o epsilon evita 42.49999 virar 42 por erro de ponto flutuante

@@ -91,11 +91,12 @@ async function buscarDados(forcar) {
     const inicio = inicioBusca(hoje);
     const [membros, grupos, dias] = await Promise.all([
       cliente.selecionar('membros', 'select=user_id,apelido,emoji&order=entrou_em.asc,user_id.asc'),
-      cliente.selecionar('grupos', 'select=codigo,nome,criado_por'),
+      // select=* (e não a lista de colunas): continua funcionando se contar_desde ainda não existir no banco
+      cliente.selecionar('grupos', 'select=*'),
       cliente.selecionarTudo('dias', `select=user_id,data,treinos,cardio_min,km,pontos&data=gte.${inicio}&order=user_id.asc,data.asc`)
     ]);
     const r = obterEstado().ranking;
-    const dados = { chave, em: Date.now(), hoje, inicio, membros, dias, criadoPor: null, removida: false };
+    const dados = { chave, em: Date.now(), hoje, inicio, membros, dias, criadoPor: null, desde: null, removida: false };
     if (!membros.some(m => m.user_id === r.userId)) {
       // a criadora me removeu (ou o grupo acabou): volta ao estado "sem grupo"
       dados.removida = true;
@@ -106,6 +107,7 @@ async function buscarDados(forcar) {
     const g = grupos.find(x => x.codigo === r.grupo.codigo);
     if (g) {
       dados.criadoPor = g.criado_por;
+      dados.desde = g.contar_desde || null; // competição zerada: ignora dias anteriores
       const criador = g.criado_por === r.userId;
       if (criador !== r.criador || g.nome !== r.grupo.nome) {
         mudarRanking(x => (x ? { ...x, criador, grupo: { ...x.grupo, nome: g.nome } } : x));
@@ -153,14 +155,14 @@ export async function carregarRanking(periodo, { metrica = 'pontos', forcar = fa
     else return { ok: false, motivo: 'erro', mensagem: erro && erro.message };
   }
   if (dados.removida) return { ok: false, motivo: 'removida' };
-  const lista = ordenarRanking(calcularRanking(dados.membros, diasComLocais(dados), dados.hoje, periodo), metrica);
+  const lista = ordenarRanking(calcularRanking(dados.membros, diasComLocais(dados), dados.hoje, periodo, dados.desde), metrica);
   return { ok: true, lista, atualizadoEm: dados.em, offline, hoje: dados.hoje };
 }
 
 // Último ranking em memória, sem rede (a tela Hoje desenha isso antes da busca terminar)
 export function rankingEmCache(periodo, metrica = 'pontos') {
   if (!cache || cache.chave !== chaveCache() || cache.removida) return null;
-  const lista = ordenarRanking(calcularRanking(cache.membros, diasComLocais(cache), cache.hoje, periodo), metrica);
+  const lista = ordenarRanking(calcularRanking(cache.membros, diasComLocais(cache), cache.hoje, periodo, cache.desde), metrica);
   return { ok: true, lista, atualizadoEm: cache.em, offline: false, hoje: cache.hoje };
 }
 
