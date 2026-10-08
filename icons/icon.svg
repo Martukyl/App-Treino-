@@ -1,6 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-  <rect width="20" height="20" rx="4" fill="#0e0e13"/>
-  <g fill="#ff5c7a">
+  <defs>
+    <linearGradient id="aco" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#8d939b"/>
+      <stop offset="0.42" stop-color="#5d636b"/>
+      <stop offset="1" stop-color="#2d3136"/>
+    </linearGradient>
+    <linearGradient id="cobre" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="20" y2="0">
+      <stop offset="0" stop-color="#93491f"/>
+      <stop offset="0.24" stop-color="#bf6a37"/>
+      <stop offset="0.5" stop-color="#eaa274"/>
+      <stop offset="0.76" stop-color="#bf6a37"/>
+      <stop offset="1" stop-color="#93491f"/>
+    </linearGradient>
+  </defs>
+  <rect width="20" height="20" rx="4" fill="url(#aco)"/>
+  <g fill="url(#cobre)">
     <rect x="6" y="9.25" width="8" height="1.5" rx="0.5"/>
     <rect x="4.5" y="7" width="1.5" height="6" rx="0.5"/>
     <rect x="14" y="7" width="1.5" height="6" rx="0.5"/>

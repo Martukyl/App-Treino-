@@ -10,6 +10,8 @@ Preparar (uma vez, numa pasta fora do repo): `npm i playwright-core`, e rodar os
 2. Rodar, com `OUT=<pasta das capturas>`:
    - `corpo.e2e.mjs` — aba Corpo, fotos, backup e regressão do treino.
    - `cardio.e2e.mjs` — caminhada com GPS falso + relógio simulado, aparelho, backup.
+   - `visual.e2e.mjs` — visual cinza + cobre (v1.5): faixa `.topo` em todas as telas, fonte Outfit,
+     caixas em cobre, semana no topo da Hoje, barra do treino; capturas 390×844 em `OUT`.
    - `ranking.e2e.mjs` — 2 navegadores contra o Supabase REAL (cria e apaga um grupo de teste;
      deixa 2 usuários anônimos em Authentication → Users, filtro "Anonymous").
    - `seguranca-supabase.mjs` — regras do banco com 3 usuários anônimos via REST.

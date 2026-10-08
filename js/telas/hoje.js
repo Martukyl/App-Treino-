@@ -18,12 +18,35 @@ function saudacao() {
   return nome ? `${parte}, ${esc(nome)}` : parte;
 }
 
-// avatar (foto de perfil ou inicial) ao lado da saudação; toque leva ao perfil na aba Corpo
+// "Quarta, 7 de outubro"
+function dataDeHoje() {
+  const txt = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).replace('-feira', '');
+  return txt.charAt(0).toUpperCase() + txt.slice(1);
+}
+
+// Cabeçalho (vai para o topo em degradê): data, avatar (toque leva ao perfil na aba Corpo),
+// saudação e a semana — 7 dias seg–dom (ativo = treinou), sequência e botão de compartilhar.
 function cabecalho(est) {
+  const d = dadosCardSemana(est, hojeISO());
+  const bolinhas = d.dias.map(x =>
+    `<span class="semana-dia${x.ativo ? ' ativo' : ''}${x.hoje ? ' hoje' : ''}" data-dia="${x.dia}"><span class="semana-bolinha" aria-label="${x.ativo ? 'treinou' : 'sem atividade'}">${x.ativo ? '✓' : ''}</span>${x.letra}</span>`
+  ).join('');
+  const [treinos, cardio, , pontos] = d.metricas.map(m => m.valor);
   return `
     <header class="hoje-cab">
-      <a class="avatar-link" href="#/corpo" aria-label="Meu perfil">${htmlAvatar(est)}</a>
+      <div class="hoje-linha">
+        <span class="hoje-data">${esc(dataDeHoje())}</span>
+        <a class="avatar-link" href="#/corpo" aria-label="Meu perfil">${htmlAvatar(est)}</a>
+      </div>
       <h1 class="titulo">${saudacao()}!</h1>
+      <div data-sec="semana" role="group" aria-label="Minha semana">
+        <p class="hoje-resumo">${treinos} ${treinos === '1' ? 'treino' : 'treinos'} · ${esc(cardio)} de cardio · ${pontos} pts na semana</p>
+        <div class="semana-dias">${bolinhas}</div>
+        <div class="hoje-rodape">
+          <p>${esc(d.textoSequencia)}</p>
+          <button type="button" class="btn-vidro" data-acao="compartilhar-semana">Compartilhar</button>
+        </div>
+      </div>
     </header>`;
 }
 
@@ -124,26 +147,9 @@ function renderCardio(est) {
     </section>`;
 }
 
-// Card "Minha semana": 7 bolinhas seg–dom (ativo = preenchida) e botão de compartilhar.
-function renderSemana(est) {
-  const d = dadosCardSemana(est, hojeISO());
-  const bolinhas = d.dias.map(x =>
-    `<span class="semana-dia${x.ativo ? ' ativo' : ''}${x.hoje ? ' hoje' : ''}" data-dia="${x.dia}"><span class="semana-bolinha" aria-label="${x.ativo ? 'treinou' : 'sem atividade'}">${x.ativo ? '✓' : ''}</span>${x.letra}</span>`
-  ).join('');
-  const [treinos, cardio, , pontos] = d.metricas.map(m => m.valor);
-  return `
-    <section class="card card-semana" data-sec="semana">
-      <h2 class="sec-card">Minha semana</h2>
-      <div class="semana-dias">${bolinhas}</div>
-      <p class="muted">${treinos} ${treinos === '1' ? 'treino' : 'treinos'} · ${esc(cardio)} de cardio · ${pontos} pts</p>
-      <p class="muted">${esc(d.textoSequencia)}</p>
-      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar-semana">Compartilhar</button>
-    </section>`;
-}
-
 export function render() {
   const est = obterEstado();
-  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderSemana(est) + renderCardRankingHoje() + renderCardio(est);
+  return (est.sessaoAtual ? renderEmAndamento(est) : renderSugerido(est)) + renderCardRankingHoje() + renderCardio(est);
 }
 
 export function montar(raiz) {
