@@ -5,13 +5,13 @@ import { LARGURA, ALTURA, RODAPE, projetarTrajeto } from './cards.js';
 import { lerFoto } from './fotos.js';
 import { lerTrajeto } from './trajetos.js';
 
-const FONTE = 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Segoe UI Emoji", sans-serif';
+const FONTE = 'Outfit, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Segoe UI Emoji", sans-serif';
 // tokens do css/app.css (constantes equivalentes: o canvas não lê var() direto)
 const COR = {
-  bg: '#f2f0e9', texto: '#20241f', muted: '#71766e', accent: '#d54b32', accent2: '#eea34a',
+  bg: '#efeff0', texto: '#1f2023', muted: '#6b6d72', accent: '#bf6a37', accent2: '#eaa274',
   ok: '#31765a', warn: '#a96313', danger: '#bd352d',
-  caixa: '#fffefa', borda: '#e4e0d6',
-  suave: '#f8e8e2', apagado: '#e9e6dd' // destaque claro (item ativo) e fundo neutro (mapa)
+  caixa: '#ffffff', borda: '#e3e4e6',
+  suave: '#f6e6db', apagado: '#e4e5e7' // destaque claro (item ativo) e fundo neutro (mapa)
 };
 const PAD = 72;
 const LARGURA_UTIL = LARGURA - 2 * PAD;
@@ -36,7 +36,7 @@ function caixa(ctx, x, y, w, h, r = 36, preenchimento = COR.caixa) {
   ctx.fillStyle = preenchimento;
   // sombra leve, como os cards do tema claro
   ctx.save();
-  ctx.shadowColor = 'rgba(43, 38, 27, 0.07)';
+  ctx.shadowColor = 'rgba(20, 22, 26, 0.07)';
   ctx.shadowBlur = 40;
   ctx.shadowOffsetY = 14;
   ctx.fill();
@@ -56,8 +56,8 @@ function fundo(ctx) {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, LARGURA, ALTURA);
   };
-  brilho(1000, 0, 900, 'rgba(213, 75, 50, 0.10)');
-  brilho(0, 800, 860, 'rgba(238, 163, 74, 0.10)');
+  brilho(1000, 0, 900, 'rgba(191, 106, 55, 0.12)');
+  brilho(0, 800, 860, 'rgba(93, 99, 107, 0.10)');
 }
 
 function rodape(ctx) {
@@ -196,7 +196,7 @@ function desenharCardio(ctx, d, rota) {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = COR.accent;
-      ctx.shadowColor = 'rgba(213, 75, 50, 0.30)';
+      ctx.shadowColor = 'rgba(191, 106, 55, 0.30)';
       ctx.shadowBlur = 24;
       for (const seg of proj.segmentos) {
         ctx.beginPath();
@@ -250,7 +250,7 @@ function desenharSemana(ctx, d) {
       texto(ctx, '✓', cx, cy + 18, { tamanho: 50, peso: 800, cor: '#fff', alinhar: 'center' });
     } else {
       ctx.lineWidth = 5;
-      ctx.strokeStyle = '#d8d4ca';
+      ctx.strokeStyle = '#d4d5d8';
       ctx.stroke();
     }
     texto(ctx, dia.letra, cx, cy + raio + 52, { tamanho: 36, peso: dia.hoje ? 700 : 600, cor: dia.hoje ? COR.texto : COR.muted, alinhar: 'center' });
