@@ -43,6 +43,28 @@ const ROTAS = [
   [/^#\/ajustes\/treino\/([^/]+)$/, { render: p => ajustes.renderEditarTreino(p), montar: (r, p) => ajustes.montarEditarTreino?.(r, p) }, 'ajustes']
 ];
 
+// Visual: os elementos de cabeçalho do começo da tela (voltar, título, cabeçalhos da Hoje e do
+// treino) vão para um div.topo, no mesmo lugar (dentro do div.tela-* se houver), para ficarem
+// sobre a faixa em degradê. Nada sai do pai: delegação de eventos e seletores continuam valendo.
+const CABECALHO = '.voltar, .titulo, .hoje-cab, .treino-cab';
+function marcarTopo(raiz) {
+  const primeiro = raiz.firstElementChild;
+  const pai = primeiro && primeiro.tagName === 'DIV' && [...primeiro.classList].some(c => c.startsWith('tela-'))
+    ? primeiro : raiz;
+  const itens = [];
+  for (let n = pai.firstChild; n; n = n.nextSibling) {
+    if (n.nodeType === Node.TEXT_NODE && !n.textContent.trim()) continue;
+    if (n.nodeType === Node.ELEMENT_NODE && n.matches(CABECALHO)) { itens.push(n); continue; }
+    break;
+  }
+  raiz.classList.toggle('sem-topo', itens.length === 0);
+  if (!itens.length) return;
+  const topo = document.createElement('div');
+  topo.className = 'topo';
+  pai.insertBefore(topo, itens[0]);
+  topo.append(...itens);
+}
+
 function renderizarTela() {
   const hash = location.hash || '#/hoje';
   // primeira abertura: qualquer rota vira as boas-vindas (sem barra de abas); depois, ela não volta
@@ -62,12 +84,14 @@ function renderizarTela() {
     try {
       const params = m[1] ? decodeURIComponent(m[1]) : undefined;
       raiz.innerHTML = tela.render(params);
+      marcarTopo(raiz);
       tela.montar?.(raiz, params);
     } catch (erro) {
       console.error(erro);
-      raiz.innerHTML = `<div class="card"><p>Algo deu errado nesta tela.</p>
+      raiz.innerHTML = `<h1 class="titulo">Algo deu errado</h1><div class="card"><p>Algo deu errado nesta tela.</p>
         <p><a href="#/hoje">Voltar ao início</a></p>
         <p><a href="#/ajustes">Ajustes (backup)</a></p></div>`;
+      marcarTopo(raiz);
     }
     document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('ativa', a.dataset.aba === aba));
     return;
