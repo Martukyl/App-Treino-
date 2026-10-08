@@ -39,7 +39,7 @@ function cabecalho(est) {
         <a class="avatar-link" href="#/corpo" aria-label="Meu perfil">${htmlAvatar(est)}</a>
       </div>
       <h1 class="titulo">${saudacao()}!</h1>
-      <div data-sec="semana">
+      <div data-sec="semana" role="group" aria-label="Minha semana">
         <p class="hoje-resumo">${treinos} ${treinos === '1' ? 'treino' : 'treinos'} · ${esc(cardio)} de cardio · ${pontos} pts na semana</p>
         <div class="semana-dias">${bolinhas}</div>
         <div class="hoje-rodape">

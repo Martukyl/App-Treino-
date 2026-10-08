@@ -51,4 +51,4 @@ Commit ao fim de cada tarefa. Executor: sessão principal (Opus); revisão final
 ## Tarefa 7 — Revisão e entrega
 
 - Revisão do branch inteiro por subagente Opus (diff real). Corrigir o que for confirmado.
-- Atualizar `CLAUDE.local.md`. Mostrar capturas ao Tiago; push na main só com ok.
+- Atualizar `CLAUDE.local.md`. Mostrar as capturas; push na main só com ok do dono do app.

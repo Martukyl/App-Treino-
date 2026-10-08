@@ -88,7 +88,7 @@ function renderizarTela() {
       tela.montar?.(raiz, params);
     } catch (erro) {
       console.error(erro);
-      raiz.innerHTML = `<h1 class="titulo">Algo deu errado</h1><div class="card"><p>Algo deu errado nesta tela.</p>
+      raiz.innerHTML = `<h1 class="titulo">Algo deu errado nesta tela</h1><div class="card">
         <p><a href="#/hoje">Voltar ao início</a></p>
         <p><a href="#/ajustes">Ajustes (backup)</a></p></div>`;
       marcarTopo(raiz);

@@ -5,7 +5,7 @@
       <stop offset="0.42" stop-color="#5d636b"/>
       <stop offset="1" stop-color="#2d3136"/>
     </linearGradient>
-    <linearGradient id="cobre" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="cobre" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="20" y2="0">
       <stop offset="0" stop-color="#93491f"/>
       <stop offset="0.24" stop-color="#bf6a37"/>
       <stop offset="0.5" stop-color="#eaa274"/>

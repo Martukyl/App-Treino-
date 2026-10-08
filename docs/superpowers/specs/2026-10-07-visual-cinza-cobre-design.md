@@ -26,16 +26,16 @@ texto de negócio muda.
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--faixa` | `radial-gradient(220px 170px at 94% 6%, rgba(214,128,78,.32), transparent 70%)`, `radial-gradient(300px 260px at 0% 100%, rgba(0,0,0,.45), transparent 70%)`, `linear-gradient(165deg, #8d939b 0%, #5d636b 42%, #2d3136 100%)` + textura escovada (`repeating-linear-gradient(90deg, …)`) | topo de toda tela |
+| `--faixa` | `radial-gradient(220px 170px at 94% 6%, rgba(214,128,78,.32), transparent 70%)`, `radial-gradient(300px 260px at 0% 100%, rgba(0,0,0,.45), transparent 70%)`, `linear-gradient(165deg, #7d838b 0%, #575d65 42%, #2d3136 100%)` + textura escovada (`repeating-linear-gradient(90deg, …)`) | topo de toda tela |
 | `--bg` (folha) | `#efeff0` | fundo abaixo da faixa |
 | `--surface` | `#ffffff` | cards, sheet, toast |
 | `--surface-2` | `#e7e8ea` | botão secundário, fundos neutros |
 | `--text` | `#1f2023` | texto |
 | `--muted` | `#6b6d72` | texto secundário |
-| `--accent` | `#a6542a` | texto/ícone em cobre (contraste ≥ 4,5 no branco) |
+| `--accent` | `#96491f` | texto/ícone em cobre (contraste ≥ 4,5 no branco) |
 | `--cobre` | `#bf6a37` | preenchimentos sólidos |
-| `--metal` | `linear-gradient(180deg, rgba(255,255,255,.28), transparent 48%, rgba(0,0,0,.07) 52%, transparent), linear-gradient(100deg, #93491f, #bf6a37 24%, #eaa274 50%, #bf6a37 76%, #93491f)` | preenchimento metálico (dias, check, avatar, barra) |
-| `--metal-botao` | igual a `--metal`, porém com centro mais escuro (`#c27141`) | botão principal (texto branco legível) |
+| `--metal` | `linear-gradient(180deg, rgba(255,255,255,.28), transparent 48%, rgba(0,0,0,.07) 52%, transparent), linear-gradient(100deg, #93491f, #bf6a37 24%, #eaa274 50%, #bf6a37 76%, #93491f)` | metal decorativo sem texto (barra de progresso) |
+| `--metal-botao` | `#6f3412 → #8a461f → #9e5227 → …` com brilho de 12% | tudo que tem texto/ícone branco: botão principal, letra do treino, avatar, check, dias treinados (contraste ≥ 4,4) |
 | `--caixa` | `linear-gradient(180deg, #f8e1cf 0%, #efc3a2 47%, #e2a77f 53%, #f3cfb2 100%)` | caixas de digitar (cobre acetinado) |
 | `--caixa-texto` | `#3d1d0a` | texto dentro das caixas |
 | `--suave` | `#f6e6db` | destaque claro (selo, item "eu", menu ativo) |
@@ -119,7 +119,7 @@ em cobre metálico quando marcado.
 - **Mapa**: trajeto em `#bf6a37`; fundo do mapa cinza claro.
 - **Cards de compartilhar (canvas)**: mesma paleta (fundo `#efeff0`, cobre no lugar do coral,
   Outfit se carregada).
-- **Barra de status / manifest**: `theme-color` e `background_color` = `#80868e` / `#efeff0`.
+- **Barra de status / manifest**: `theme-color` e `background_color` = `#7d838b` / `#efeff0`.
 - **Ícone do app**: fundo cinza aço com o haltere em cobre (SVG + PNGs regerados).
 
 ## Fora do escopo
@@ -138,4 +138,4 @@ Menu e rotas novas, modo escuro, qualquer mudança de lógica, textos de tela (e
   telas para conferência visual.
 - Foco visível no teclado; `prefers-reduced-motion` respeitado (regra atual mantida).
 - `VERSAO_APP` (js/util.js) e `CACHE` (sw.js) = `1.5.0`; fonte nova incluída no cache do SW.
-- Publicação (push na main) só com ok do Tiago.
+- Publicação (push na main) só com ok do dono do app.

@@ -603,7 +603,7 @@ body.boas-vindas #app { padding-bottom: calc(24px + env(safe-area-inset-bottom))
   --surface-2: #e7e8ea;
   --text: #1f2023;
   --muted: #6b6d72;
-  --accent: #a6542a;
+  --accent: #96491f;
   --accent-2: #eaa274;
   --cobre: #bf6a37;
   --ok: #31765a;
@@ -615,14 +615,14 @@ body.boas-vindas #app { padding-bottom: calc(24px + env(safe-area-inset-bottom))
   --faixa:
     radial-gradient(220px 170px at 94% 6%, rgba(214, 128, 78, 0.32), transparent 70%),
     radial-gradient(300px 260px at 0% 100%, rgba(0, 0, 0, 0.45), transparent 70%),
-    linear-gradient(165deg, #8d939b 0%, #5d636b 42%, #2d3136 100%);
+    linear-gradient(165deg, #7d838b 0%, #575d65 42%, #2d3136 100%);
   --metal:
     linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.07) 52%, rgba(0, 0, 0, 0) 100%),
     linear-gradient(100deg, #93491f 0%, #bf6a37 24%, #eaa274 50%, #bf6a37 76%, #93491f 100%);
-  /* centro mais escuro: texto branco legível no botão */
+  /* centro mais escuro: texto/ícone branco com contraste ≥ 4,5 (botão, letra, avatar, check) */
   --metal-botao:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.08) 52%, rgba(0, 0, 0, 0) 100%),
-    linear-gradient(100deg, #8a441c 0%, #ad5c2e 28%, #c27141 50%, #ad5c2e 72%, #8a441c 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.08) 52%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(100deg, #6f3412 0%, #8a461f 28%, #9e5227 50%, #8a461f 72%, #6f3412 100%);
   --caixa: linear-gradient(180deg, #f8e1cf 0%, #efc3a2 47%, #e2a77f 53%, #f3cfb2 100%);
   --caixa-texto: #3d1d0a;
   color-scheme: light;
@@ -681,7 +681,7 @@ a { color: var(--accent); }
   margin: 4px 0 0;
 }
 .topo .muted { color: rgba(255, 255, 255, 0.8); }
-.topo .voltar { color: rgba(255, 255, 255, 0.88); min-height: 40px; font-weight: 500; }
+.topo .voltar { color: rgba(255, 255, 255, 0.92); min-height: 44px; font-weight: 500; }
 .topo a:focus-visible, .topo button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .titulo {
@@ -696,7 +696,7 @@ a { color: var(--accent); }
 /* Hoje: data, saudação, resumo da semana e os 7 dias no topo */
 .hoje-cab { display: block; margin: 0; }
 .hoje-linha { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hoje-data { font-size: 14px; color: rgba(255, 255, 255, 0.82); }
+.hoje-data { font-size: 14px; font-weight: 500; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
 .hoje-cab .titulo { margin: 6px 0 4px; }
 .hoje-resumo { margin: 0; font-size: 14px; font-weight: 300; color: rgba(255, 255, 255, 0.88); }
 .topo .semana-dias { gap: 6px; margin: 14px 0 10px; }
@@ -713,7 +713,7 @@ a { color: var(--accent); }
   box-shadow: none;
 }
 .topo .semana-dia.ativo .semana-bolinha {
-  background: var(--metal);
+  background: var(--metal-botao);
   border-color: rgba(255, 255, 255, 0.35);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   text-shadow: 0 1px 1px rgba(90, 40, 10, 0.4);
@@ -735,7 +735,7 @@ a { color: var(--accent); }
 /* Avatar */
 .avatar { width: 46px; height: 46px; border: 2px solid rgba(255, 255, 255, 0.8); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); }
 .avatar-grande { width: 72px; height: 72px; }
-.avatar-letra { font-size: 22px; font-weight: 500; color: #fff; background: var(--metal); text-shadow: 0 1px 2px rgba(90, 40, 10, 0.35); }
+.avatar-letra { font-size: 22px; font-weight: 500; color: #fff; background: var(--metal-botao); text-shadow: 0 1px 2px rgba(90, 40, 10, 0.35); }
 .avatar-grande.avatar-letra { font-size: 30px; }
 
 /* Treino em andamento: cabeçalho no topo e barra de progresso */
@@ -788,7 +788,7 @@ a { color: var(--accent); }
 .treino-letra {
   width: 56px; height: 56px; border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 16px;
   font-size: 30px; font-weight: 600; color: #fff;
-  background: var(--metal);
+  background: var(--metal-botao);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 3px 10px rgba(147, 73, 31, 0.25);
   text-shadow: 0 1px 2px rgba(90, 40, 10, 0.4);
 }
@@ -815,22 +815,24 @@ a { color: var(--accent); }
 .btn:focus-visible, .chip:focus-visible, .btn-selo:focus-visible { outline: 2px solid var(--cobre); outline-offset: 2px; }
 
 /* Caixas de digitar em cobre acetinado */
-input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]), select, textarea {
+/* :where() zera a especificidade das exclusões: .serie input.invalido e afins continuam vencendo */
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"])), select, textarea {
   color: var(--caixa-texto);
   border: 1px solid rgba(140, 70, 30, 0.28);
   border-radius: 14px;
   background: var(--caixa);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -1px 0 rgba(120, 55, 20, 0.18);
 }
-input::placeholder, textarea::placeholder { color: #8a5a3c; opacity: 0.85; }
+input::placeholder, textarea::placeholder { color: #6e3f22; opacity: 1; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--cobre); outline-offset: 1px; }
+input.invalido:focus, textarea.invalido:focus { outline-color: var(--danger); }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--cobre); }
 .serie input { font-weight: 500; }
 .serie .btn-icone { border-radius: 14px; }
 .serie .serie-ok[aria-pressed="true"] {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
-  background: var(--metal);
+  background: var(--metal-botao);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 6px rgba(147, 73, 31, 0.3);
   text-shadow: 0 1px 1px rgba(80, 35, 10, 0.4);
 }
@@ -872,6 +874,7 @@ label, .sec-troca { color: var(--muted); }
   filter: none;
 }
 .nav a.ativa span { background-color: var(--accent); filter: none; }
+.grafico circle:focus-visible { outline-color: var(--cobre); }
 .nav a[data-aba="hoje"] span {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5.5 9v11h13V9M9.5 20v-6h5v6'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5.5 9v11h13V9M9.5 20v-6h5v6'/%3E%3C/svg%3E");

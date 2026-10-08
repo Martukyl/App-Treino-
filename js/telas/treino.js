@@ -125,7 +125,7 @@ export function render() {
           <p class="muted"><span class="tempo">${formatarDuracao(Date.now() - new Date(sa.inicio).getTime())}</span> · <span class="progresso">${feitas}/${total} séries</span></p>
         </div>
         <button type="button" class="btn btn-sec btn-icone" data-acao="menu" aria-label="Mais opções">⋯</button>
-        <div class="barra-progresso" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${feitas}"><b style="width:${total ? Math.round(feitas / total * 100) : 0}%"></b></div>
+        <div class="barra-progresso" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${feitas}" aria-valuetext="${feitas} de ${total} séries"><b style="width:${total ? Math.round(feitas / total * 100) : 0}%"></b></div>
       </header>
       ${cards}
       <button type="button" class="btn btn-principal btn-bloco" data-acao="finalizar">Finalizar treino</button>
