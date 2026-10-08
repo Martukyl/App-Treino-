@@ -73,7 +73,10 @@ ok('4 fotos no banco (perfil + 3)', await nFotos() === 4, String(await nFotos())
 
 // ---------- Tela Corpo ----------
 const txt = await page.locator('.tela-corpo').innerText();
-ok('Idade + IMC', /35 anos · IMC 22,2 \(Normal\)/.test(txt), (txt.match(/\d+ anos.*/) || [''])[0]);
+// idade esperada para nascimento em 04/10/1990 (calculada: o teste não envelhece)
+const agora = new Date();
+const idade = agora.getFullYear() - 1990 - (agora.getMonth() < 9 || (agora.getMonth() === 9 && agora.getDate() < 4) ? 1 : 0);
+ok('Idade + IMC', new RegExp(`${idade} anos · IMC 22,2 \\(Normal\\)`).test(txt), (txt.match(/\d+ anos.*/) || [''])[0]);
 ok('Faltam 1,5 kg', txt.includes('faltam 1,5 kg para a meta'));
 ok('Desde o início +2,1', txt.includes('+2,1'));
 const cor = async rot => page.locator('.linha-medida', { hasText: rot }).locator('.dif').first().getAttribute('class');
