@@ -938,3 +938,6 @@ label, .sec-troca { color: var(--muted); }
   .treino-foto { height: 160px; margin: -18px -18px 16px; }
   .topo .titulo { font-size: 27px; }
 }
+/* série feita: só as caixas esmaecem; o check em cobre fica inteiro */
+.serie.feita { opacity: 1; }
+.serie.feita input, .serie.feita .serie-n { opacity: 0.6; }
