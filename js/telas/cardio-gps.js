@@ -3,13 +3,14 @@
 // e, ao sair, desmonta apenas o mapa e o intervalo do cronômetro visual.
 import { esc, parseCarga, formatarNumero, hojeISO, gerarId } from '../util.js';
 import { CAMPOS_CORPO } from '../corpo.js';
-import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro, pesoAtual } from '../cardio.js';
+import { ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro, pesoAtual } from '../cardio.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast, aoSairDaTela } from '../ui.js';
 import { observar, suportaGps } from '../gps.js';
 import { criarMapaAoVivo } from '../mapa.js';
 import { lerTrajeto } from '../trajetos.js';
 import { sincronizarRanking } from '../ranking.js';
+import { ic } from '../icones.js';
 import {
   assinar, iniciarGravacao, pausarGravacao, retomarGravacao, finalizar, descartar,
   flushar, bufferPendente, instantaneo
@@ -42,28 +43,29 @@ function renderPreparar() {
   const est = obterEstado();
   const tipo = ultimoTipo(est);
   const chips = TIPOS.map(t => `
-    <button type="button" class="chip${t === tipo ? ' chip-ativo' : ''}" data-acao="tipo" data-tipo="${t}" aria-pressed="${t === tipo}">
-      ${ICONE_CARDIO[t]} ${ROTULO_CARDIO[t]}</button>`).join('');
+    <button type="button" class="seletor-op${t === tipo ? ' on' : ''}" data-acao="tipo" data-tipo="${t}" aria-pressed="${t === tipo}">
+      ${ROTULO_CARDIO[t]}</button>`).join('');
   const campoPeso = pesoAtual(est) == null ? `
-      <label>Seu peso (kg)<input type="text" inputmode="decimal" data-campo="peso" placeholder="Ex.: 62,5"></label>
-      <p class="muted">Usado para estimar as calorias. Fica registrado na aba Corpo.</p>` : '';
+      <label class="campo-bloco">Seu peso (kg)<input type="text" inputmode="decimal" data-campo="peso" placeholder="Ex.: 62,5"></label>
+      <p class="rotulo">Usado para estimar as calorias. Fica registrado na aba Corpo.</p>` : '';
   return `
     <div class="tela-cardio-gps" data-modo="preparar">
-      <a class="voltar" href="#/hoje">← Hoje</a>
-      <h1 class="titulo">Caminhada / Corrida</h1>
-      <section class="card">
-        <div class="chips">${chips}</div>
+      <header class="cab-tela a"><a class="redondo tocavel" href="#/hoje" aria-label="Voltar para Hoje">${ic('volta')}</a><h1 class="titulo-tela">Caminhada ou corrida</h1></header>
+      <div class="bloco bloco-white pilha a">
+        <div class="seletor">${chips}</div>
         <p class="sinal" data-sinal>Procurando GPS…</p>
         ${campoPeso}
-      </section>
-      <section class="card" data-negado hidden>
-        <h2 class="sec-card">Localização bloqueada</h2>
-        <p class="muted" data-negado-msg></p>
-        <a class="btn btn-sec btn-bloco" href="#/cardio/aparelho/novo" data-acao="ir-aparelho">Registrar como aparelho / manual</a>
-      </section>
+      </div>
+      <div class="bloco bloco-clay pilha a" data-negado hidden>
+        <strong>Localização bloqueada</strong>
+        <p class="rotulo" data-negado-msg></p>
+        <a class="pilula" href="#/cardio/aparelho/novo" data-acao="ir-aparelho">Registrar como aparelho ou manual</a>
+      </div>
       <p class="form-erro" data-erro hidden></p>
-      <button type="button" class="btn btn-principal btn-bloco" data-acao="iniciar" disabled>Iniciar</button>
-      <button type="button" class="btn btn-sec btn-bloco" data-acao="iniciar-mesmo" hidden>Iniciar mesmo assim</button>
+      <div class="pilha a cardio-iniciar">
+        <button type="button" class="btn-grande" data-acao="iniciar" disabled>${ic('play')}Iniciar</button>
+        <button type="button" class="btn-grande claro" data-acao="iniciar-mesmo" hidden>Iniciar mesmo assim</button>
+      </div>
     </div>`;
 }
 
@@ -116,7 +118,7 @@ function montarPreparar(raiz) {
     b.onclick = () => {
       tipo = b.dataset.tipo;
       tela.querySelectorAll('[data-acao="tipo"]').forEach(x => {
-        x.classList.toggle('chip-ativo', x === b);
+        x.classList.toggle('on', x === b);
         x.setAttribute('aria-pressed', String(x === b));
       });
     };
@@ -169,23 +171,24 @@ function renderGravando() {
   const metricas = [
     ['distancia', 'Distância'], ['velocidade', 'Velocidade'], ['ritmo', 'Ritmo'],
     ['calorias', 'Calorias'], ['altitude', 'Altitude'], ['subida', 'Subida']
-  ].map(([k, r]) => `
-      <div class="metrica"><span class="metrica-valor" data-met="${k}">—</span><span class="metrica-rotulo">${r}</span></div>`).join('');
+  ].map(([k, r], i) => `
+      <div class="bloco metrica bloco-${['sky', 'sand', 'sage', 'clay', 'white', 'white'][i]}"><span class="rotulo">${r}</span><span class="metrica-valor num" data-met="${k}">—</span></div>`).join('');
   return `
     <div class="tela-cardio-gps" data-modo="gravando" data-id="${esc(a.id)}">
-      <p class="cardio-tipo muted" data-tipo>${ICONE_CARDIO[a.tipo] || ''} ${esc(ROTULO_CARDIO[a.tipo] || '')}</p>
-      <div class="cron-grande" data-cron>00:00</div>
-      <p class="sinal" data-sinal>Procurando GPS…</p>
-      <div class="mapa-caixa">
+      <header class="cab-tela a"><a class="redondo tocavel" href="#/hoje" aria-label="Voltar para Hoje (a gravação continua)">${ic('volta')}</a>
+        <h1 class="titulo-tela cardio-tipo" data-tipo>${esc(ROTULO_CARDIO[a.tipo] || 'Cardio')}</h1></header>
+      <div class="bloco mapa-caixa a">
         <div class="mapa mapa-ao-vivo" data-mapa></div>
-        <button type="button" class="btn btn-sec btn-centralizar" data-acao="centralizar" hidden>📍 centralizar</button>
-        <p class="mapa-aviso muted" data-mapa-aviso hidden>Mapa indisponível. A gravação continua normalmente.</p>
+        <p class="sinal selo-gps vidro" data-sinal>Procurando GPS…</p>
+        <button type="button" class="pilula pilula-mini vidro btn-centralizar" data-acao="centralizar" hidden>${ic('mapa')}Centralizar</button>
+        <p class="mapa-aviso rotulo" data-mapa-aviso hidden>Mapa indisponível. A gravação continua normalmente.</p>
       </div>
-      <div class="grade-metricas">${metricas}</div>
-      <p class="muted aviso-tela" data-aviso-tela hidden>Mantenha a tela ligada para o GPS continuar gravando.</p>
-      <div class="cardio-botoes">
-        <button type="button" class="btn btn-sec" data-acao="pausar">Pausar</button>
-        <button type="button" class="btn btn-principal" data-acao="finalizar">Finalizar</button>
+      <div class="bloco bloco-white cron-bloco a"><span class="rotulo">Tempo</span><div class="cron-grande num" data-cron>00:00</div></div>
+      <div class="grade grade-metricas a">${metricas}</div>
+      <p class="rotulo aviso-tela" data-aviso-tela hidden>Mantenha a tela ligada para o GPS continuar gravando.</p>
+      <div class="cardio-botoes a">
+        <button type="button" class="bloco-botao bloco-ink tocavel" data-acao="pausar">${ic('pausa')}<span>Pausar</span></button>
+        <button type="button" class="bloco-botao bloco-clay tocavel" data-acao="finalizar">${ic('bandeira')}<span>Finalizar</span></button>
       </div>
     </div>`;
 }
@@ -215,13 +218,20 @@ function montarGravando(raiz) {
     met('altitude').textContent = a.altAtual == null ? '—' : `${numero(a.altAtual)} m`;
     met('subida').textContent = `${numero(a.subidaM)} m`;
     const sinal = q('[data-sinal]');
-    if (a.pausado) { sinal.textContent = 'Pausado'; sinal.className = 'sinal'; }
-    else if (s.erro === 'negado') { sinal.textContent = 'Sem permissão de localização'; sinal.className = 'sinal sinal-fraco'; }
-    else if (s.sinalFraco) { sinal.textContent = 'Sinal de GPS fraco'; sinal.className = 'sinal sinal-fraco'; }
-    else if (s.precisao != null) { sinal.textContent = `GPS ok (±${Math.round(s.precisao)} m)`; sinal.className = 'sinal sinal-ok'; }
-    else { sinal.textContent = 'Procurando GPS…'; sinal.className = 'sinal'; }
-    q('[data-acao="pausar"]').textContent = a.pausado ? 'Retomar' : 'Pausar';
-    q('[data-tipo]').textContent = `${ICONE_CARDIO[a.tipo] || ''} ${ROTULO_CARDIO[a.tipo] || ''}${a.pausado ? ' · pausada' : ''}`;
+    const base = 'sinal selo-gps vidro';
+    if (a.pausado) { sinal.textContent = 'Pausado'; sinal.className = base; }
+    else if (s.erro === 'negado') { sinal.textContent = 'Sem permissão de localização'; sinal.className = `${base} sinal-fraco`; }
+    else if (s.sinalFraco) { sinal.textContent = 'Sinal de GPS fraco'; sinal.className = `${base} sinal-fraco`; }
+    else if (s.precisao != null) { sinal.textContent = `GPS ok (±${Math.round(s.precisao)} m)`; sinal.className = `${base} sinal-ok`; }
+    else { sinal.textContent = 'Procurando GPS…'; sinal.className = base; }
+    const pausar = q('[data-acao="pausar"]');
+    const rotuloPausa = a.pausado ? 'Retomar' : 'Pausar';
+    if (pausar.textContent.trim() !== rotuloPausa) {
+      pausar.innerHTML = `${ic(a.pausado ? 'play' : 'pausa')}<span>${rotuloPausa}</span>`;
+      pausar.classList.toggle('bloco-ink', !a.pausado);
+      pausar.classList.toggle('bloco-sage', a.pausado);
+    }
+    q('[data-tipo]').textContent = `${ROTULO_CARDIO[a.tipo] || 'Cardio'}${a.pausado ? ' · pausada' : ''}`;
     q('[data-aviso-tela]').hidden = s.telaLigada;
   };
 

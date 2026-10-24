@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CHAVE, estadoInicial, migrar, validarBackup, carregar, salvar, restaurarTreinosPadrao
 } from '../js/armazenamento.js';
-import { exerciciosPadrao } from '../js/dados.js';
+import { exerciciosPadrao, DICAS_ANTIGAS } from '../js/dados.js';
 
 // storage falso no formato do localStorage
 function storageFalso(inicial = {}) {
@@ -233,4 +233,35 @@ test('ranking: estado novo = null; migrar preserva o válido e normaliza o invá
   // faz parte do backup (viaja no estado)
   const st = storageFalso({ [CHAVE]: JSON.stringify({ ...estadoInicial(), ranking: valido }) });
   assert.deepEqual(carregar(st).estado.ranking, valido);
+});
+
+// ---------- textos neutros: dicas antigas do catálogo (v2.0) ----------
+
+function estadoComDica(id, dica, personalizado = false) {
+  const e = estadoInicial();
+  e.exercicios[id] = { ...e.exercicios[id], dica, personalizado };
+  return e;
+}
+
+test('migrar troca dica antiga do catálogo pela neutra', () => {
+  for (const id of Object.keys(DICAS_ANTIGAS)) {
+    const e = migrar(estadoComDica(id, DICAS_ANTIGAS[id]));
+    assert.equal(e.exercicios[id].dica, exerciciosPadrao[id].dica, id);
+  }
+});
+
+test('migrar mantém dica editada pela pessoa', () => {
+  const e = migrar(estadoComDica('glute_bridge', 'Minha dica: deitada, pés juntos.'));
+  assert.equal(e.exercicios.glute_bridge.dica, 'Minha dica: deitada, pés juntos.');
+});
+
+test('migrar não mexe em exercício personalizado', () => {
+  const e = migrar(estadoComDica('mesa_flexora', DICAS_ANTIGAS.mesa_flexora, true));
+  assert.equal(e.exercicios.mesa_flexora.dica, DICAS_ANTIGAS.mesa_flexora);
+});
+
+test('backup antigo passa por migrar e sai corrigido', () => {
+  const backup = JSON.parse(JSON.stringify(estadoComDica('triceps_frances', DICAS_ANTIGAS.triceps_frances)));
+  assert.equal(validarBackup(backup).ok, true);
+  assert.equal(migrar(backup).exercicios.triceps_frances.dica, exerciciosPadrao.triceps_frances.dica);
 });

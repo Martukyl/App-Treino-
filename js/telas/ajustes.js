@@ -1,6 +1,7 @@
 // Ajustes (#/ajustes): meus treinos, backup, restaurar padrão; e editor de treino (#/ajustes/treino/<id>).
 import { esc, parseReps, hojeISO, VERSAO_APP } from '../util.js';
-import { GRUPOS } from '../dados.js';
+import { GRUPOS, fotoDoTreino, corDoTreino } from '../dados.js';
+import { ic } from '../icones.js';
 import { obterEstado, atualizar, substituirEstado } from '../estado.js';
 import { validarBackup, migrar, restaurarTreinosPadrao } from '../armazenamento.js';
 import { abrirSheet, fecharSheet, confirmar, toast } from '../ui.js';
@@ -22,34 +23,42 @@ const porNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR');
 
 export function render() {
   const est = obterEstado();
-  const linhas = est.treinos.map(t => `
-    <a class="linha-lista" href="#/ajustes/treino/${encodeURIComponent(t.id)}">
-      <span class="linha-nome"><strong>${esc(t.id)}</strong> · ${esc(t.nome)}</span>
-      <span class="linha-info muted">${t.itens.length} exercícios</span>
-    </a>`).join('');
+  const linhas = est.treinos.map(t => {
+    const foto = fotoDoTreino(t.id);
+    return `
+    <a class="linha-lista linha-treino tocavel" href="#/ajustes/treino/${encodeURIComponent(t.id)}">
+      <span class="mini-treino ${foto ? '' : 'fundo-' + corDoTreino(t.id)}">${foto ? `<img src="${foto}" alt="">` : ''}<span>${esc(t.id)}</span></span>
+      <span class="linha-nome"><b>${esc(t.nome)}</b><span class="sub">${t.itens.length} ${t.itens.length === 1 ? 'exercício' : 'exercícios'}</span></span>
+      ${ic('dir')}
+    </a>`;
+  }).join('');
   return `
     <div class="tela-ajustes">
-      <h1 class="titulo">Ajustes</h1>
-      <section class="card">
-        <h2 class="sec-card">Meus treinos</h2>
-        ${linhas || '<p class="muted">Nenhum treino.</p>'}
-        <a class="btn btn-sec btn-bloco" data-acao="novo-treino" href="#/ajustes/treino/novo">+ Novo treino</a>
-      </section>
-      ${renderGrupo()}
-      <section class="card">
-        <h2 class="sec-card">Backup</h2>
-        <p class="muted">Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</p>
-        <p class="muted">Inclui suas fotos e os trajetos do cardio (o arquivo fica maior).</p>
-        <button type="button" class="btn btn-sec btn-bloco" data-acao="exportar">Exportar backup</button>
-        <button type="button" class="btn btn-sec btn-bloco" data-acao="importar">Importar backup</button>
+      <header class="cab-tela a"><h1 class="titulo-tela">Ajustes</h1></header>
+      <div class="bloco bloco-white a">
+        <label class="campo-bloco">Seu nome (aparece na saudação)<input type="text" data-campo="nome-ajustes" maxlength="30" autocomplete="given-name" placeholder="Opcional" value="${esc(est.nome || '')}"></label>
+      </div>
+      <div class="secao a">Meus treinos</div>
+      <div class="a">
+        ${linhas || '<p class="rotulo">Nenhum treino.</p>'}
+        <a class="pilula novo-treino tocavel" data-acao="novo-treino" href="#/ajustes/treino/novo">${ic('mais')}Novo treino</a>
+      </div>
+      <div class="a">${renderGrupo()}</div>
+      <div class="bloco bloco-sand pilha a">
+        <b>Backup</b>
+        <p class="rotulo">Os dados ficam só neste aparelho. Exporte um backup de vez em quando. Ele inclui suas fotos e os trajetos do cardio (o arquivo fica maior).</p>
+        <div class="grade">
+          <button type="button" class="pilula tocavel" data-acao="exportar">Exportar</button>
+          <button type="button" class="pilula tocavel" data-acao="importar">Importar</button>
+        </div>
         <input type="file" accept="application/json,.json" hidden data-campo="arquivo">
-      </section>
-      <section class="card">
-        <h2 class="sec-card">Treinos padrão</h2>
-        <p class="muted">Volta os treinos A–E ao original. Mantém histórico e exercícios criados.</p>
-        <button type="button" class="btn btn-sec btn-bloco" data-acao="restaurar">Restaurar treinos padrão</button>
-      </section>
-      <p class="muted">Versão ${VERSAO_APP}</p>
+      </div>
+      <div class="bloco bloco-white pilha a">
+        <b>Treinos padrão</b>
+        <p class="rotulo">Volta os treinos A–E ao original. Mantém histórico e exercícios criados.</p>
+        <button type="button" class="pilula restaurar tocavel" data-acao="restaurar">Restaurar treinos padrão</button>
+      </div>
+      <p class="rotulo rodape-app">Treino ${VERSAO_APP} · fotos: Unsplash</p>
     </div>`;
 }
 
@@ -121,6 +130,11 @@ export function montar(raiz) {
   const tela = raiz.querySelector('.tela-ajustes');
   if (!tela) return;
   montarGrupo(tela);
+  // nome salva a cada tecla, sem re-renderizar (o teclado não fecha)
+  tela.querySelector('[data-campo="nome-ajustes"]').oninput = ev => {
+    const nome = ev.target.value.trim().slice(0, 30);
+    atualizar(e => { e.nome = nome; }, { renderizar: false });
+  };
   const campo = tela.querySelector('[data-campo="arquivo"]');
   tela.querySelector('[data-acao="exportar"]').onclick = exportar;
   tela.querySelector('[data-acao="importar"]').onclick = () => campo.click();
@@ -189,7 +203,7 @@ export function renderEditarTreino(id) {
         <div class="card-botoes">
           <button type="button" class="btn btn-sec" data-acao="subir" aria-label="Subir"${i === 0 ? ' disabled' : ''}>↑</button>
           <button type="button" class="btn btn-sec" data-acao="descer" aria-label="Descer"${i === ultimo ? ' disabled' : ''}>↓</button>
-          <button type="button" class="btn btn-perigo" data-acao="remover" aria-label="Remover">✕</button>
+          <button type="button" class="btn btn-perigo" data-acao="remover" aria-label="Remover">${ic('fechar')}</button>
         </div>
       </section>`;
   }).join('');

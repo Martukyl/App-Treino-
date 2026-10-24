@@ -2,8 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   projetarTrajeto, dadosCardTreino, dadosCardCardio, dadosCardSemana, dadosCardCorpo,
-  fotosAntesDepois, nomeArquivoCard, formatarDif, MAX_MEDIDAS_CARD
-} from '../js/cards.js';
+  fotosAntesDepois, nomeArquivoCard, formatarDif, MAX_MEDIDAS_CARD, RODAPE } from '../js/cards.js';
 
 const local = (a, m, d, h = 10, min = 0) => new Date(a, m - 1, d, h, min).toISOString();
 
@@ -66,7 +65,7 @@ const sessaoB = () => ({
 test('dadosCardTreino: título, data, duração, séries, volume, exercícios e foto A–E', () => {
   const d = dadosCardTreino(estBase(), sessaoB());
   assert.equal(d.titulo, 'Treino B · Costas e ombro');
-  assert.equal(d.saudacao, 'Mandou bem, Ana! 💪');
+  assert.equal(d.saudacao, 'Mandou bem, Ana!');
   assert.equal(d.data, '03/10/2026');
   assert.deepEqual(d.metricas.map(m => m.valor), ['1h 05min', '3', '800 kg', '2']);
   assert.equal(d.foto, './img/treino-b.jpg');
@@ -76,7 +75,7 @@ test('dadosCardTreino: sem nome, treino criado (sem foto) e treino removido', ()
   const est = { ...estBase(), nome: '  ' };
   const s = { ...sessaoB(), treinoId: 'F' };
   const d = dadosCardTreino(est, s);
-  assert.equal(d.saudacao, 'Treino concluído! 💪');
+  assert.equal(d.saudacao, 'Treino concluído!');
   assert.equal(d.foto, null);
   assert.equal(dadosCardTreino(est, { ...s, treinoId: 'Z' }).titulo, 'Treino');
   assert.equal(dadosCardTreino(est, { ...s, treinoId: 'F' }).titulo, 'Treino F · Meu treino');
@@ -85,7 +84,7 @@ test('dadosCardTreino: sem nome, treino criado (sem foto) e treino removido', ()
 test('dadosCardCardio GPS: distância em destaque, tempo, ritmo, kcal e subida', () => {
   const c = { modo: 'gps', tipo: 'caminhada', fim: local(2026, 10, 3, 8), duracaoSeg: 2480, distanciaM: 3420, kcal: 180, subidaM: 25, trajetoId: 't_1' };
   const d = dadosCardCardio(c);
-  assert.equal(d.titulo, '🚶 Caminhada');
+  assert.equal(d.titulo, 'Caminhada');
   assert.equal(d.destaque.valor, '3,42 km');
   assert.deepEqual(d.metricas.map(m => m.valor), ['41:20', '12:05 /km', '180 kcal', '25 m']);
   assert.equal(d.trajetoId, 't_1');
@@ -113,7 +112,7 @@ test('dadosCardSemana: 7 dias, totais da semana e sequência', () => {
   assert.equal(d.dias[5].hoje, true);
   assert.deepEqual(d.metricas.map(m => m.valor), ['1', '30 min', '3 km', '16']);
   assert.equal(d.sequencia, 2);
-  assert.equal(d.textoSequencia, '🔥 2 dias seguidos');
+  assert.equal(d.textoSequencia, '2 dias seguidos');
   assert.match(dadosCardSemana(estBase(), '2026-10-03').textoSequencia, /Comece/);
 });
 
@@ -170,4 +169,10 @@ test('nomeArquivoCard e formatarDif', () => {
   assert.equal(formatarDif(1.2), '+1,2');
   assert.equal(formatarDif(0), '0');
   assert.equal(formatarDif(null), '—');
+});
+
+test('cards sem emoji decorativo (rodapé e textos)', () => {
+  const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
+  assert.doesNotMatch(RODAPE, emoji);
+  assert.doesNotMatch(dadosCardSemana(estBase(), '2026-10-03').texto, emoji);
 });

@@ -5,14 +5,17 @@ import { LARGURA, ALTURA, RODAPE, projetarTrajeto } from './cards.js';
 import { lerFoto } from './fotos.js';
 import { lerTrajeto } from './trajetos.js';
 
-const FONTE = 'Outfit, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Segoe UI Emoji", sans-serif';
-// tokens do css/app.css (constantes equivalentes: o canvas não lê var() direto)
+const FONTE = 'Figtree, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Segoe UI Emoji", sans-serif';
+const FONTE_DISP = 'Unbounded, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Segoe UI Emoji", sans-serif';
+// tokens do css/base.css (visual Blocos; o canvas não lê var() direto)
 const COR = {
-  bg: '#efeff0', texto: '#1f2023', muted: '#6b6d72', accent: '#bf6a37', accent2: '#eaa274',
-  ok: '#31765a', warn: '#a96313', danger: '#bd352d',
-  caixa: '#ffffff', borda: '#e3e4e6',
-  suave: '#f6e6db', apagado: '#e4e5e7' // destaque claro (item ativo) e fundo neutro (mapa)
+  bg: '#f3f2ee', texto: '#1c1f23', muted: '#646a71', accent: '#1c1f23', accent2: '#efe3cc',
+  ok: '#3f7a4a', warn: '#8a5a12', danger: '#a8432f',
+  caixa: '#ffffff', borda: '#e3e1da',
+  suave: '#d9e3cf', apagado: '#e9ece4', ceu: '#d3e2ee', areia: '#efe3cc' // destaque (item ativo) e fundo neutro (mapa)
 };
+// pesos 800+ viram a fonte de títulos (Unbounded 600), como na tela
+const fonte = (peso, t) => (peso >= 800 ? `600 ${t}px ${FONTE_DISP}` : `${peso} ${t}px ${FONTE}`);
 const PAD = 72;
 const LARGURA_UTIL = LARGURA - 2 * PAD;
 
@@ -31,19 +34,19 @@ function caminhoArredondado(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// bloco do visual Blocos: cor chapada, cantos arredondados, sem sombra nem borda
 function caixa(ctx, x, y, w, h, r = 36, preenchimento = COR.caixa) {
   caminhoArredondado(ctx, x, y, w, h, r);
   ctx.fillStyle = preenchimento;
-  // sombra leve, como os cards do tema claro
-  ctx.save();
-  ctx.shadowColor = 'rgba(20, 22, 26, 0.07)';
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 14;
   ctx.fill();
-  ctx.restore();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = COR.borda;
-  ctx.stroke();
+}
+
+// logo de 4 blocos (grafite, sálvia, areia, céu) centrado em (cx, cy)
+function logoBlocos(ctx, cx, cy, tam) {
+  const lado = tam * 0.46, folga = tam * 0.08;
+  [[COR.texto, 0, 0], [COR.suave, 1, 0], [COR.areia, 0, 1], [COR.ceu, 1, 1]].forEach(([cor, i, j]) => {
+    caixa(ctx, cx - tam / 2 + i * (lado + folga), cy - tam / 2 + j * (lado + folga), lado, lado, lado * 0.28, cor);
+  });
 }
 
 function fundo(ctx) {
@@ -52,12 +55,12 @@ function fundo(ctx) {
   const brilho = (cx, cy, raio, cor) => {
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, raio);
     g.addColorStop(0, cor);
-    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.addColorStop(1, cor.replace(/[\d.]+\)$/, '0)')); // mesma cor, transparente (evita cinza no meio)
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, LARGURA, ALTURA);
   };
-  brilho(1000, 0, 900, 'rgba(191, 106, 55, 0.12)');
-  brilho(0, 800, 860, 'rgba(93, 99, 107, 0.10)');
+  brilho(1000, 0, 900, 'rgba(217, 227, 207, 0.55)');
+  brilho(0, 900, 860, 'rgba(211, 226, 238, 0.5)');
 }
 
 function rodape(ctx) {
@@ -71,10 +74,10 @@ function rodape(ctx) {
 // escreve texto reduzindo a fonte até caber em larguraMax; devolve o tamanho usado
 function texto(ctx, str, x, y, { tamanho = 40, peso = 700, cor = COR.texto, alinhar = 'left', larguraMax = LARGURA_UTIL, minimo = 22 } = {}) {
   let t = tamanho;
-  ctx.font = `${peso} ${t}px ${FONTE}`;
+  ctx.font = fonte(peso, t);
   while (t > minimo && ctx.measureText(str).width > larguraMax) {
     t -= 2;
-    ctx.font = `${peso} ${t}px ${FONTE}`;
+    ctx.font = fonte(peso, t);
   }
   ctx.fillStyle = cor;
   ctx.textAlign = alinhar;
@@ -164,7 +167,7 @@ async function imagemDaFoto(id) {
 
 function desenharTreino(ctx, d, foto) {
   texto(ctx, d.saudacao, PAD, 150, { tamanho: 64, peso: 800 });
-  ctx.font = `800 58px ${FONTE}`;
+  ctx.font = fonte(800, 58);
   const linhas = quebrar(ctx, d.titulo, LARGURA_UTIL, 2);
   linhas.forEach((l, i) => texto(ctx, l, PAD, 244 + i * 70, { tamanho: 58, peso: 800, cor: COR.accent }));
   let y = 244 + linhas.length * 70 - 8;
@@ -174,7 +177,7 @@ function desenharTreino(ctx, d, foto) {
     imagemCover(ctx, foto, PAD, y, LARGURA_UTIL, 360, 40);
     y += 360 + 36;
   } else {
-    texto(ctx, '🏋️', LARGURA / 2, y + 170, { tamanho: 190, alinhar: 'center' });
+    logoBlocos(ctx, LARGURA / 2, y + 110, 190);
     y += 250;
   }
   const altura = Math.min(220, (ALTURA - 120 - y - 24) / 2);
@@ -196,7 +199,7 @@ function desenharCardio(ctx, d, rota) {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = COR.accent;
-      ctx.shadowColor = 'rgba(191, 106, 55, 0.30)';
+      ctx.shadowColor = 'rgba(28, 31, 35, 0.25)';
       ctx.shadowBlur = 24;
       for (const seg of proj.segmentos) {
         ctx.beginPath();
@@ -228,7 +231,7 @@ function desenharCardio(ctx, d, rota) {
     grade(ctx, d.metricas, PAD, y, LARGURA_UTIL, 170, colunas, 16, colunas > 3 ? 44 : 54);
   } else {
     caixa(ctx, PAD, y, LARGURA_UTIL, 560, 40);
-    texto(ctx, d.icone, LARGURA / 2, y + 370, { tamanho: 300, alinhar: 'center' });
+    logoBlocos(ctx, LARGURA / 2, y + 280, 280);
     y += 560 + 40;
     const colunas = Math.min(d.metricas.length, 3) || 1;
     grade(ctx, d.metricas, PAD, y, LARGURA_UTIL, 220, colunas, 20, colunas > 2 ? 52 : 70);
@@ -316,7 +319,6 @@ function desenharCorpo(ctx, d, fotos) {
   }
 }
 
-const MEDALHAS = ['🥇', '🥈', '🥉'];
 
 function desenharRanking(ctx, d) {
   texto(ctx, d.titulo, PAD, 150, { tamanho: 84, peso: 800 });
@@ -336,7 +338,7 @@ function desenharRanking(ctx, d) {
     const h = alturas[p.posicao], x = x0 + i * (larg + folga), y = base - h;
     caixa(ctx, x, y, larg, h, 36, p.posicao === 1 ? COR.suave : COR.caixa);
     const cx = x + larg / 2;
-    texto(ctx, MEDALHAS[p.posicao - 1], cx, y + 78, { tamanho: 64, alinhar: 'center' });
+    texto(ctx, `${p.posicao}º`, cx, y + 78, { tamanho: 56, peso: 800, alinhar: 'center' });
     texto(ctx, p.emoji, cx, y + 190, { tamanho: 96, alinhar: 'center' });
     texto(ctx, p.apelido, cx, y + h - 82, { tamanho: 38, peso: 700, alinhar: 'center', larguraMax: larg - 30 });
     texto(ctx, p.valor, cx, y + h - 28, { tamanho: 44, peso: 800, cor: COR.accent, alinhar: 'center', larguraMax: larg - 30 });
@@ -372,6 +374,8 @@ function paraPng(canvas) {
 // dados (de cards.js) → Blob PNG 1080 × 1350. Carrega as imagens necessárias antes de desenhar.
 export async function gerarCard(dados) {
   let foto = null, rota = null, fotos = null;
+  // fontes locais do app: carrega antes de desenhar (sem isso o canvas usaria a fonte do sistema)
+  try { await Promise.all([document.fonts.load('600 64px Unbounded'), document.fonts.load('600 40px Figtree'), document.fonts.load('700 40px Figtree')]); } catch { /* segue com a do sistema */ }
   if (dados.tipo === 'treino' && dados.foto) foto = await carregarImagem(dados.foto);
   if (dados.tipo === 'cardio' && dados.trajetoId) {
     try {

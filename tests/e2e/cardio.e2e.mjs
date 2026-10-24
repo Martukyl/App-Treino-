@@ -2,7 +2,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
-const BASE = 'http://localhost:8080/';
+const BASE = process.env.BASE_URL || 'http://localhost:8080/';
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (nome, cond, extra = '') => res.push([cond ? 'OK ' : 'FALHA', nome, extra]);
@@ -26,7 +26,10 @@ const FAKE = `
     window.__watchers = () => w.length;
   })();`;
 
-const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
+// navegador: CDP_URL (Chrome já aberto com --remote-debugging-port) ou BROWSER_PATH (padrão: Edge no Windows)
+const browser = process.env.CDP_URL
+  ? await chromium.connectOverCDP(process.env.CDP_URL)
+  : await chromium.launch({ executablePath: process.env.BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, serviceWorkers: 'block' });
 await ctx.addInitScript(FAKE);
 await ctx.route(/tile\.openstreetmap\.org/, r => r.abort());
@@ -34,6 +37,8 @@ const page = await ctx.newPage();
 const erros = [];
 page.on('console', m => { if (m.type() === 'error' && !/tile\.openstreetmap|ERR_FAILED|net::/.test(m.text())) erros.push(m.text()); });
 page.on('pageerror', e => erros.push(String(e)));
+// relógio simulado congela as animações (WAAPI): roda com movimento reduzido
+await page.emulateMedia({ reducedMotion: 'reduce' });
 await page.clock.install({ time: new Date('2026-10-03T07:00:00-03:00') });
 
 const estado = () => page.evaluate(() => JSON.parse(localStorage.getItem('appTreino.v1')));
@@ -161,6 +166,8 @@ e = await estado();
 const ap = e.cardios.find(x => x.modo === 'aparelho');
 ok('Esteira salva c/ kcal estimada', ap && ap.kcalEstimada && ap.kcal > 0 && ap.distanciaM === 3200, ap && `${ap.kcal} ${ap.distanciaM}`);
 await ir('#/historico');
+// o redesenho do hashchange pode chegar depois do relógio simulado: espera a lista
+await page.locator('.linha-sessao').nth(1).waitFor();
 const tipos = await page.locator('.linha-sessao').evaluateAll(a => a.map(x => x.dataset.tipo));
 ok('Histórico com 2 cardios', tipos.filter(t => t === 'cardio').length === 2, tipos.join(','));
 await page.screenshot({ path: `${OUT}/c3-historico.png`, fullPage: true });

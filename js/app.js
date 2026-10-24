@@ -18,6 +18,8 @@ import { liberarUrls } from './fotos.js';
 import { sincronizar as sincronizarGravacao } from './gravacao.js';
 import { retomarDescanso } from './cronometro.js';
 import { fecharSheet, executarSaidas } from './ui.js';
+import { mostraMenu, direcaoTransicao } from './navegacao.js';
+import { entrar, trocarTela } from './movimento.js';
 
 // [padrão do hash, módulo da tela, aba ativa na nav]
 const ROTAS = [
@@ -43,27 +45,14 @@ const ROTAS = [
   [/^#\/ajustes\/treino\/([^/]+)$/, { render: p => ajustes.renderEditarTreino(p), montar: (r, p) => ajustes.montarEditarTreino?.(r, p) }, 'ajustes']
 ];
 
-// Visual: os elementos de cabeçalho do começo da tela (voltar, título, cabeçalhos da Hoje e do
-// treino) vão para um div.topo, no mesmo lugar (dentro do div.tela-* se houver), para ficarem
-// sobre a faixa em degradê. Nada sai do pai: delegação de eventos e seletores continuam valendo.
-const CABECALHO = '.voltar, .titulo, .hoje-cab, .treino-cab';
-function marcarTopo(raiz) {
-  const primeiro = raiz.firstElementChild;
-  const pai = primeiro && primeiro.tagName === 'DIV' && [...primeiro.classList].some(c => c.startsWith('tela-'))
-    ? primeiro : raiz;
-  const itens = [];
-  for (let n = pai.firstChild; n; n = n.nextSibling) {
-    if (n.nodeType === Node.TEXT_NODE && !n.textContent.trim()) continue;
-    if (n.nodeType === Node.ELEMENT_NODE && n.matches(CABECALHO)) { itens.push(n); continue; }
-    break;
-  }
-  raiz.classList.toggle('sem-topo', itens.length === 0);
-  if (!itens.length) return;
-  const topo = document.createElement('div');
-  topo.className = 'topo';
-  pai.insertBefore(topo, itens[0]);
-  topo.append(...itens);
+let hashAnterior = null;
+
+// Faixa de vidro no topo: aparece ao rolar (em telas que abrem com foto, só depois da foto).
+function atualizarTopoVidro() {
+  const capa = document.querySelector('#app > .tela:not(.saindo) > .capa:first-child, #app > .tela:not(.saindo) > div > .capa:first-child');
+  document.getElementById('topo-vidro').classList.toggle('on', window.scrollY > (capa ? 170 : 8));
 }
+window.addEventListener('scroll', atualizarTopoVidro, { passive: true });
 
 function renderizarTela() {
   const hash = location.hash || '#/hoje';
@@ -74,26 +63,35 @@ function renderizarTela() {
     location.replace(pendente ? '#/boas-vindas' : '#/hoje'); // dispara hashchange e redesenha
     return;
   }
-  const raiz = document.getElementById('app');
+  const app = document.getElementById('app');
   // a tela anterior sai: limpa fotos não salvas e revoga object URLs
   executarSaidas();
   liberarUrls();
   for (const [padrao, tela, aba] of ROTAS) {
     const m = hash.match(padrao);
     if (!m) continue;
+    // rota nova: contêiner novo que entra deslizando; mesma rota (re-render): troca só o conteúdo
+    const atual = app.querySelector(':scope > .tela:not(.saindo)');
+    const novaRota = hash !== hashAnterior || !atual;
+    const raiz = novaRota ? document.createElement('div') : atual;
+    if (novaRota) { raiz.className = 'tela'; app.appendChild(raiz); }
     try {
       const params = m[1] ? decodeURIComponent(m[1]) : undefined;
       raiz.innerHTML = tela.render(params);
-      marcarTopo(raiz);
       tela.montar?.(raiz, params);
     } catch (erro) {
       console.error(erro);
-      raiz.innerHTML = `<h1 class="titulo">Algo deu errado nesta tela</h1><div class="card">
-        <p><a href="#/hoje">Voltar ao início</a></p>
-        <p><a href="#/ajustes">Ajustes (backup)</a></p></div>`;
-      marcarTopo(raiz);
+      raiz.innerHTML = `<div class="cab-tela"><h1 class="titulo-tela">Algo deu errado nesta tela</h1></div>
+        <div class="linhas"><a href="#/hoje">Voltar ao início</a><a href="#/ajustes">Ajustes (backup)</a></div>`;
     }
-    document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('ativa', a.dataset.aba === aba));
+    if (novaRota) {
+      if (atual) { atual.classList.add('saindo'); trocarTela(atual, raiz, direcaoTransicao(hashAnterior, hash)); }
+      entrar(raiz);
+    }
+    hashAnterior = hash;
+    document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('ativa', a.dataset.aba === aba && mostraMenu(hash)));
+    document.body.classList.toggle('sem-menu', !mostraMenu(hash));
+    atualizarTopoVidro();
     return;
   }
   location.hash = '#/hoje';

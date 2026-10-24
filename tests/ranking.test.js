@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   agregarUltimosDias, limitesPeriodo, inicioBusca, ordenarRanking, calcularRanking,
-  formatarValor, textoIdade, normalizarCodigo, normalizarApelido, CODIGO_VALIDO
+  formatarValor, textoIdade, normalizarCodigo, normalizarApelido, CODIGO_VALIDO, avatarMembro, seloZera
 } from '../js/ranking-calculo.js';
 import { dadosCardRanking } from '../js/cards.js';
 
@@ -165,4 +165,17 @@ test('calcularRanking: contar_desde ignora dias anteriores no total e na sequên
   const [mes] = calcularRanking(membros, dias, HOJE, 'mes', '2026-10-04');
   assert.equal(mes.pontos, 0);
   assert.equal(mes.sequencia, 0);
+});
+
+test('avatarMembro usa o emoji escolhido e, sem ele, as iniciais', () => {
+  assert.deepEqual(avatarMembro({ apelido: 'Rafa', emoji: '💪' }), { tipo: 'emoji', texto: '💪' });
+  assert.deepEqual(avatarMembro({ apelido: 'Rafa', emoji: '' }), { tipo: 'iniciais', texto: 'RA' });
+  assert.deepEqual(avatarMembro({ apelido: 'L', emoji: null }), { tipo: 'iniciais', texto: 'L' });
+  assert.deepEqual(avatarMembro({ apelido: '', emoji: '' }), { tipo: 'iniciais', texto: '?' });
+  assert.deepEqual(avatarMembro({ apelido: '  léo  ' }), { tipo: 'iniciais', texto: 'LÉ' });
+});
+
+test('seloZera diz quando o período recomeça', () => {
+  assert.equal(seloZera('semana'), 'zera na segunda');
+  assert.equal(seloZera('mes'), 'zera no dia 1º');
 });

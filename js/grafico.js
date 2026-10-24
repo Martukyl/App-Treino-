@@ -9,7 +9,7 @@ function rotuloDia(data) {
   return m ? `${m[2]}/${m[1]}` : formatarData(data);
 }
 
-export function graficoLinha(pontos, { unidade = 'kg', meta = null } = {}) {
+export function graficoLinha(pontos, { unidade = 'kg', meta = null, desenhar = false } = {}) {
   if (pontos.length < 2) {
     return '<p class="muted">O gráfico aparece depois de 2 treinos com este exercício.</p>';
   }
@@ -43,6 +43,28 @@ export function graficoLinha(pontos, { unidade = 'kg', meta = null } = {}) {
     `<text x="${M.esq}" y="${A - 8}" fill="var(--muted)" font-size="11">${esc(rotuloDia(pontos[0].data))}</text>` +
     `<text x="${L - M.dir}" y="${A - 8}" text-anchor="end" fill="var(--muted)" font-size="11">${esc(rotuloDia(pontos.at(-1).data))}</text>` +
     linhaMeta +
-    `<polyline points="${coords}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` +
+    `<polyline points="${coords}"${desenhar ? ' data-desenhar' : ''} fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` +
     circulos + '</svg>';
 }
+
+// Mini-gráfico (tendência) para listas e blocos pequenos; o traço se desenha ao entrar na tela.
+export function miniGrafico(valores, { largura = 46, altura = 20 } = {}) {
+  if (!Array.isArray(valores) || valores.length < 2) return '';
+  const min = Math.min(...valores), max = Math.max(...valores);
+  const pad = 2;
+  const x = i => pad + (i * (largura - 2 * pad)) / (valores.length - 1);
+  const y = v => (max === min ? altura / 2 : pad + ((max - v) * (altura - 2 * pad)) / (max - min));
+  const d = valores.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="mini-grafico" viewBox="0 0 ${largura} ${altura}" aria-hidden="true"><path data-desenhar d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// Colunas (até as 8 últimas), altura proporcional à maior; a mais recente em destaque.
+export function graficoColunas(valores, rotulos) {
+  const v = (valores || []).slice(-8), r = (rotulos || []).slice(-8);
+  if (!v.length) return '';
+  const max = Math.max(...v) || 1;
+  const cols = v.map((x, i) => `
+    <div class="coluna${i === v.length - 1 ? ' atual' : ''}"><small class="num">${formatarNumero(x)}</small><i data-crescer style="height:${Math.max(6, Math.round((x / max) * 100))}%"></i><small>${esc(r[i] ?? '')}</small></div>`).join('');
+  return `<div class="colunas" role="img" aria-label="Evolução da carga">${cols}</div>`;
+}
+

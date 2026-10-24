@@ -9,6 +9,7 @@ import { CAMPOS_CORPO, ultimoValor } from '../corpo.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { comprimirImagem, salvarFoto, apagarFoto, urlFoto } from '../fotos.js';
 import { confirmar, toast, aoSairDaTela } from '../ui.js';
+import { ic } from '../icones.js';
 
 const POSICOES = [['frente', 'Frente'], ['lado', 'Lado'], ['costas', 'Costas']];
 
@@ -95,12 +96,12 @@ export function montar(raiz, param) {
     const mini = slot.querySelector('.foto-mini');
     const id = reg.fotos[pos];
     slot.querySelector('[data-acao="remover"]').hidden = !id;
-    if (!id) { mini.innerHTML = '<span aria-hidden="true">📷</span>'; return; }
+    if (!id) { mini.innerHTML = ic('camera'); return; }
     mini.innerHTML = '<img alt="">';
     urlFoto(id).then(url => {
       if (reg.fotos[pos] !== id) return;
       if (url) mini.firstElementChild.src = url;
-      else mini.innerHTML = '<span aria-hidden="true">⚠️</span>';
+      else mini.innerHTML = ic('info');
     });
   };
 

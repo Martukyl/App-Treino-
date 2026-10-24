@@ -3,14 +3,14 @@
 // Privacidade: o card só leva o que está nestes dados (nada de nome de exercício nem carga por série).
 import { formatarNumero, formatarDuracao, formatarDia } from './util.js';
 import {
-  ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro
+  ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro
 } from './cardio.js';
 import { CAMPOS_CORPO, resumoCampo, direcaoDiferenca, ordenarPorData } from './corpo.js';
 import { diaLocal, inicioSemana, somarDias, totaisPeriodo, diasDaSemana, diasAtivos, sequencia } from './pontos.js';
 
 export const LARGURA = 1080;
 export const ALTURA = 1350;
-export const RODAPE = 'Treino 💪';
+export const RODAPE = 'Treino';
 export const MAX_MEDIDAS_CARD = 6;
 
 const LETRAS_SEMANA = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
@@ -41,7 +41,7 @@ export function dadosCardTreino(est, sessao) {
   return {
     tipo: 'treino',
     dia,
-    saudacao: nome ? `Mandou bem, ${nome}! 💪` : 'Treino concluído! 💪',
+    saudacao: nome ? `Mandou bem, ${nome}!` : 'Treino concluído!',
     titulo,
     data: formatarDia(dia),
     metricas: [
@@ -52,7 +52,7 @@ export function dadosCardTreino(est, sessao) {
     ],
     // faixa decorativa só dos treinos A–E
     foto: /^[A-E]$/.test(sessao.treinoId) ? `./img/treino-${sessao.treinoId.toLowerCase()}.jpg` : null,
-    texto: 'Treino concluído 💪'
+    texto: 'Treino concluído'
   };
 }
 
@@ -60,7 +60,6 @@ export function dadosCardTreino(est, sessao) {
 
 export function dadosCardCardio(c) {
   const gps = c.modo === 'gps';
-  const icone = ICONE_CARDIO[c.tipo] || '❤️';
   const rotulo = ROTULO_CARDIO[c.tipo] || 'Cardio';
   const dia = diaLocal(c.fim);
   const temDist = Number.isFinite(c.distanciaM) && c.distanciaM > 0;
@@ -88,13 +87,12 @@ export function dadosCardCardio(c) {
     tipo: 'cardio',
     modo: gps ? 'gps' : 'aparelho',
     dia,
-    icone,
-    titulo: `${icone} ${rotulo}`,
+    titulo: rotulo,
     data: formatarDia(dia),
     destaque,
     metricas,
     trajetoId: gps ? c.trajetoId || null : null,
-    texto: `${rotulo} concluída ${icone}`
+    texto: `Cardio concluído · ${rotulo}`
   };
 }
 
@@ -122,8 +120,8 @@ export function dadosCardSemana(est, hoje) {
       { rotulo: 'Pontos', valor: String(t.pontos) }
     ],
     sequencia: seq,
-    textoSequencia: seq > 0 ? `🔥 ${seq} ${seq === 1 ? 'dia seguido' : 'dias seguidos'}` : '🔥 Comece hoje a sua sequência',
-    texto: 'Minha semana 💪'
+    textoSequencia: seq > 0 ? `${seq} ${seq === 1 ? 'dia seguido' : 'dias seguidos'}` : 'Comece hoje a sua sequência',
+    texto: 'Minha semana'
   };
 }
 
@@ -168,7 +166,7 @@ export function dadosCardCorpo(est, { incluirFotos = false } = {}) {
     peso,
     medidas: linhas,
     fotos,
-    texto: 'Minha evolução 💪'
+    texto: 'Minha evolução'
   };
 }
 
@@ -222,6 +220,6 @@ export function dadosCardRanking({ grupo, periodo, lista, hoje, inicio, fim }) {
     subtitulo: `${grupo} · ${curto(inicio)} a ${curto(fim)}`,
     podio: itens.slice(0, 3),
     linhas: itens.slice(3),
-    texto: `${titulo} — ${grupo} 💪`
+    texto: `${titulo} — ${grupo}`
   };
 }

@@ -1,5 +1,5 @@
 // Controlador da gravação de cardio por GPS. Vive no módulo (não na tela): o watchPosition e o
-// wake lock continuam ativos quando ela troca de aba. A tela só "assina" para redesenhar.
+// wake lock continuam ativos quando a pessoa troca de aba. A tela só "assina" para redesenhar.
 //
 // Quem liga o GPS: iniciarGravacao() e sincronizar() (chamado na abertura do app e após importar
 // backup, se houver cardioAtual). Quem desliga: finalizar(), descartar() e sincronizar() sem cardioAtual.

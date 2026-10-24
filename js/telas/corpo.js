@@ -3,7 +3,8 @@ import { esc, parseCarga, formatarNumero, formatarCampo, formatarDia, hojeISO } 
 import {
   CAMPOS_CORPO, idade, imc, faixaImc, ordenarPorData, serieCampo, resumoCampo, faltaParaMeta, contarMedidas
 } from '../corpo.js';
-import { graficoLinha } from '../grafico.js';
+import { graficoLinha, miniGrafico } from '../grafico.js';
+import { ic } from '../icones.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { comprimirImagem, salvarFoto, apagarFoto } from '../fotos.js';
 import { confirmar, toast } from '../ui.js';
@@ -25,84 +26,93 @@ function resumoPerfil(est) {
   return partes.join(' · ');
 }
 
+// "1,70 m · 34 anos · IMC 22,1 (Normal)"; sem nada preenchido, o convite para preencher
+function textoPerfil(est) {
+  const p = est.perfil;
+  const altura = p.altura != null ? `${(p.altura / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m` : null;
+  return [altura, resumoPerfil(est)].filter(Boolean).join(' · ') || 'Toque para preencher altura, nascimento e meta';
+}
+
 function htmlPerfil(est) {
   const p = est.perfil;
   const temFoto = !!p.fotoId;
+  const nome = (est.nome || '').trim();
   return `
-    <section class="card" data-sec="perfil">
-      <h2 class="sec-card">Perfil</h2>
-      <div class="perfil-foto">
+    <details class="bloco bloco-white perfil-bloco a" data-sec="perfil">
+      <summary class="perfil-resumo-linha">
         ${htmlAvatar(est, 'avatar-grande')}
+        <span class="perfil-textos"><b>${nome ? esc(nome) : 'Meu perfil'}</b><span class="rotulo perfil-resumo" data-derivado="perfil">${esc(textoPerfil(est))}</span></span>
+        ${ic('dir', 'perfil-seta')}
+      </summary>
+      <div class="perfil-campos">
         <div class="perfil-foto-acoes">
-          <button type="button" class="btn btn-sec" data-acao="foto-perfil">${temFoto ? 'Trocar foto' : 'Escolher foto'}</button>
-          ${temFoto ? '<button type="button" class="btn btn-sec" data-acao="remover-foto-perfil">Remover</button>' : ''}
+          <button type="button" class="pilula pilula-mini" data-acao="foto-perfil">${ic('camera')}${temFoto ? 'Trocar foto' : 'Escolher foto'}</button>
+          ${temFoto ? '<button type="button" class="pilula pilula-mini" data-acao="remover-foto-perfil">Remover</button>' : ''}
+          <input type="file" accept="image/*" hidden data-campo="arquivo-perfil">
         </div>
-        <input type="file" accept="image/*" hidden data-campo="arquivo-perfil">
+        <label>Nome<input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Seu nome (opcional)" value="${esc(est.nome || '')}"></label>
+        <div class="campos-presc">
+          <label>Altura (cm)<input type="text" inputmode="decimal" data-campo="altura" placeholder="170" value="${p.altura != null ? esc(formatarCampo(p.altura)) : ''}"></label>
+          <label>Meta de peso (kg)<input type="text" inputmode="decimal" data-campo="metaPeso" placeholder="70" value="${p.metaPeso != null ? esc(formatarCampo(p.metaPeso)) : ''}"></label>
+        </div>
+        <label>Data de nascimento<input type="date" data-campo="nascimento" max="${hojeISO()}" value="${esc(p.nascimento || '')}"></label>
       </div>
-      <label>Nome<input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Como quer ser chamada?" value="${esc(est.nome || '')}"></label>
-      <div class="campos-presc">
-        <label>Altura (cm)<input type="text" inputmode="decimal" data-campo="altura" placeholder="165" value="${p.altura != null ? esc(formatarCampo(p.altura)) : ''}"></label>
-        <label>Meta de peso (kg)<input type="text" inputmode="decimal" data-campo="metaPeso" placeholder="60" value="${p.metaPeso != null ? esc(formatarCampo(p.metaPeso)) : ''}"></label>
-      </div>
-      <label>Data de nascimento<input type="date" data-campo="nascimento" max="${hojeISO()}" value="${esc(p.nascimento || '')}"></label>
-      <p class="muted perfil-resumo" data-derivado="perfil">${esc(resumoPerfil(est))}</p>
-    </section>`;
+    </details>`;
 }
 
-// ---------- Peso ----------
+// ---------- Peso e meta ----------
 
 function htmlPeso(est) {
   const serie = serieCampo(est.medidas, 'peso');
   if (!serie.length) return '';
   const r = resumoCampo(est.medidas, 'peso');
   const ctx = ctxPeso(est);
-  const falta = faltaParaMeta(r.atual, est.perfil.metaPeso);
-  let linhaMeta = '';
-  if (falta != null) {
-    linhaMeta = Math.abs(falta) < 0.1
-      ? '<p class="ok-texto">meta atingida 🎉</p>'
-      : `<p class="muted">faltam ${formatarNumero(Math.abs(falta))} kg para a meta</p>`;
-  }
-  const desdeInicio = r.difPrimeiro != null
-    ? `<p class="muted">desde o início: ${spanDif('peso', r.difPrimeiro, ctx)} kg</p>` : '';
-  const grafico = serie.length >= 2 ? graficoLinha(serie, { unidade: 'kg', meta: est.perfil.metaPeso }) : MSG_GRAFICO;
+  const variacao = r.difAnterior != null ? `<span class="chip-dif">${spanDif('peso', r.difAnterior, ctx)} kg vs anterior</span>` : '';
+  const grafico = serie.length >= 2 ? graficoLinha(serie, { unidade: 'kg', meta: est.perfil.metaPeso, desenhar: true }) : MSG_GRAFICO;
   return `
-    <a class="card card-link" data-sec="peso" href="#/corpo/medida/peso">
-      <h2 class="sec-card">Peso</h2>
-      <p class="peso-grande">${formatarNumero(r.atual)} <small>kg</small></p>
-      ${desdeInicio}
-      ${linhaMeta}
+    <a class="bloco bloco-sand peso-bloco tocavel a" data-sec="peso" href="#/corpo/medida/peso">
+      <div class="peso-topo">
+        <div><div class="rotulo">Peso</div><div class="num-grande num peso-grande"><span data-contar="${r.atual}" data-casas="1">${formatarNumero(r.atual)}</span><small>kg</small></div></div>
+        ${variacao}
+      </div>
       <div class="grafico">${grafico}</div>
     </a>`;
+}
+
+function htmlMeta(est) {
+  const r = resumoCampo(est.medidas, 'peso');
+  const meta = est.perfil.metaPeso;
+  const falta = faltaParaMeta(r.atual, meta);
+  if (falta == null) return '';
+  if (Math.abs(falta) < 0.1) return '<div class="bloco bloco-sage a" data-sec="meta"><strong class="ok-texto">Meta de peso atingida</strong></div>';
+  const inicio = serieCampo(est.medidas, 'peso')[0].valor;
+  const total = Math.abs(inicio - meta);
+  const feito = total ? Math.max(0, Math.min(1, (Math.abs(inicio - meta) - Math.abs(r.atual - meta)) / total)) : 0;
+  return `
+    <div class="bloco bloco-sage a" data-sec="meta">
+      <div class="meta-topo"><strong>Faltam ${formatarNumero(Math.abs(falta))} kg para a meta</strong><span class="rotulo num">${Math.round(feito * 100)}%</span></div>
+      <div class="meta-barra"><b data-crescer="x" style="width:${Math.round(feito * 100)}%"></b></div>
+    </div>`;
 }
 
 // ---------- Medidas ----------
 
 function htmlMedidas(est) {
   const ctx = ctxPeso(est);
-  const grupos = ['Superiores', 'Inferiores'].map(grupo => {
-    const linhas = CAMPOS_CORPO.filter(c => c.grupo === grupo).map(c => {
-      const r = resumoCampo(est.medidas, c.campo);
-      if (r.atual == null) return '';
-      return `
-        <a class="linha-medida" href="#/corpo/medida/${encodeURIComponent(c.campo)}">
-          <span class="linha-medida-nome">${esc(c.rotulo)}</span>
-          <span class="linha-medida-atual">${formatarNumero(r.atual)}</span>
-          ${spanDif(c.campo, r.difAnterior, ctx)}
-          ${spanDif(c.campo, r.difPrimeiro, ctx)}
-        </a>`;
-    }).join('');
-    return linhas ? `<h3 class="sec-troca">${grupo}</h3>${linhas}` : '';
+  const blocos = CAMPOS_CORPO.filter(c => c.campo !== 'peso').map(c => {
+    const r = resumoCampo(est.medidas, c.campo);
+    if (r.atual == null) return '';
+    const valores = serieCampo(est.medidas, c.campo).map(p => p.valor);
+    return `
+      <a class="bloco bloco-white medida-bloco tocavel a" href="#/corpo/medida/${encodeURIComponent(c.campo)}">
+        <span class="rotulo">${esc(c.rotulo)}</span>
+        <span class="medida-linha"><span class="num-grande num">${formatarNumero(r.atual)}<small>cm</small></span>${miniGrafico(valores)}</span>
+        ${r.difAnterior != null ? `<span class="chip-dif">${spanDif(c.campo, r.difAnterior, ctx)} cm</span>` : ''}
+      </a>`;
   }).join('');
-  if (!grupos) return '';
-  return `
-    <section class="card">
-      <h2 class="sec-card">Medidas <span class="muted">(cm)</span></h2>
-      <div class="linha-medida linha-medida-cab muted" aria-hidden="true">
-        <span class="linha-medida-nome"></span><span class="linha-medida-atual">Atual</span><span class="dif">Anterior</span><span class="dif">Início</span>
-      </div>
-      ${grupos}
-    </section>`;
+  if (!blocos) return '';
+  const ultima = ordenarPorData(est.medidas).filter(m => contarMedidas(m)).at(-1);
+  return `<div class="secao a">Medidas${ultima ? ` · ${esc(formatarDia(ultima.data).slice(0, 5))}` : ''}</div><div class="grade">${blocos}</div>`;
 }
 
 // ---------- Registros ----------
@@ -110,15 +120,15 @@ function htmlMedidas(est) {
 function htmlRegistros(est) {
   const lista = ordenarPorData(est.medidas).reverse();
   const linhas = lista.map(m => {
-    const partes = [formatarDia(m.data)];
+    const partes = [];
     if (typeof m.peso === 'number') partes.push(`${formatarNumero(m.peso)} kg`);
     const n = contarMedidas(m);
     if (n) partes.push(`${n} ${n === 1 ? 'medida' : 'medidas'}`);
     const fotos = Object.values(m.fotos || {}).filter(Boolean).length;
-    if (fotos) partes.push(`📷 ${fotos}`);
-    return `<a class="linha-lista" href="#/corpo/registro/${encodeURIComponent(m.id)}"><span class="linha-nome">${esc(partes.join(' · '))}</span><span class="muted" aria-hidden="true">›</span></a>`;
+    if (fotos) partes.push(`${fotos} ${fotos === 1 ? 'foto' : 'fotos'}`);
+    return `<a class="linha-lista" href="#/corpo/registro/${encodeURIComponent(m.id)}"><span class="linha-nome"><b>${esc(formatarDia(m.data))}</b><span class="sub">${esc(partes.join(' · '))}</span></span>${ic('dir')}</a>`;
   }).join('');
-  return `<section class="card"><h2 class="sec-card">Registros</h2>${linhas}</section>`;
+  return `<div class="secao a">Registros</div><div class="a">${linhas}</div>`;
 }
 
 // o card da evolução só faz sentido com peso ou alguma medida registrados
@@ -135,14 +145,17 @@ export function render() {
   const comFoto = est.medidas.filter(temFoto).length;
   return `
     <div class="tela-corpo">
-      <h1 class="titulo">Corpo</h1>
-      ${htmlPerfil(est)}
-      <a class="btn btn-principal btn-bloco" href="#/corpo/registro/novo">+ Registrar medidas</a>
-      ${vazio ? '<section class="card"><p>Registre seu peso e suas medidas de tempos em tempos (e, se quiser, fotos). Aqui você vê a evolução, quanto falta para a meta e compara as fotos antes e depois.</p></section>' : ''}
-      ${htmlPeso(est)}
+      <header class="cab-tela a"><h1 class="titulo-tela">Corpo</h1>
+        <a class="pilula pilula-esc tocavel" href="#/corpo/registro/novo">${ic('mais')}Registrar</a></header>
+      <div class="pilha">
+        ${htmlPerfil(est)}
+        ${vazio ? '<div class="bloco bloco-sky a"><p>Registre seu peso e suas medidas de tempos em tempos (e, se quiser, fotos). Aqui você vê a evolução, quanto falta para a meta e compara as fotos antes e depois.</p></div>' : ''}
+        ${htmlPeso(est)}
+        ${htmlMeta(est)}
+      </div>
       ${htmlMedidas(est)}
-      ${temDadosParaCard(est) ? '<button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar-corpo">Compartilhar evolução</button>' : ''}
-      ${comFoto >= 2 ? '<section class="card"><h2 class="sec-card">Fotos</h2><p class="muted">Compare suas fotos de duas datas.</p><a class="btn btn-sec btn-bloco" href="#/corpo/fotos">Comparar fotos</a></section>' : ''}
+      ${comFoto >= 2 ? `<a class="bloco bloco-sky fotos-bloco tocavel a" href="#/corpo/fotos"><span><b>Comparar fotos</b><span class="rotulo">Veja duas datas lado a lado</span></span>${ic('camera')}</a>` : ''}
+      ${temDadosParaCard(est) ? `<button type="button" class="btn-grande claro a" data-acao="compartilhar-corpo">${ic('share')}Compartilhar evolução</button>` : ''}
       ${vazio ? '' : htmlRegistros(est)}
     </div>`;
 }
@@ -155,9 +168,12 @@ export function montar(raiz) {
   // recalcula só o que depende do perfil, sem redesenhar a tela (o foco não se perde)
   const atualizarDerivados = () => {
     const est = obterEstado();
-    tela.querySelector('[data-derivado="perfil"]').textContent = resumoPerfil(est);
+    tela.querySelector('[data-derivado="perfil"]').textContent = textoPerfil(est);
     const peso = tela.querySelector('[data-sec="peso"]');
     if (peso) peso.outerHTML = htmlPeso(est);
+    const meta = tela.querySelector('[data-sec="meta"]');
+    if (meta) meta.outerHTML = htmlMeta(est);
+    else if (peso && htmlMeta(est)) tela.querySelector('[data-sec="peso"]').insertAdjacentHTML('afterend', htmlMeta(est));
   };
 
   const botaoCompartilhar = tela.querySelector('[data-acao="compartilhar-corpo"]');

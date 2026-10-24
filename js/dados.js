@@ -25,7 +25,7 @@ const lista = [
   ex('stiff', 'Stiff com barra', 'posterior', 'composto', 'barra', false, 2.5,
     'Joelhos levemente flexionados e fixos. Leve o quadril para trás com a barra rente às pernas e a coluna neutra. Desça até alongar o posterior e volte contraindo o glúteo.'),
   ex('abducao', 'Cadeira abdutora', 'gluteo', 'isolado', 'maquina', false, 2.5,
-    'Tronco levemente inclinado à frente aumenta o trabalho do glúteo. Abra com controle, segure 1 s aberta e volte devagar.'),
+    'Tronco levemente inclinado à frente aumenta o trabalho do glúteo. Abra com controle, segure 1 s com as pernas abertas e volte devagar.'),
   ex('flexora_sentada', 'Cadeira flexora', 'posterior', 'isolado', 'maquina', false, 2.5,
     'Ajuste o encosto para o joelho ficar alinhado ao eixo da máquina. Flexione até o fim e volte em 2–3 s sem deixar o peso bater.'),
   ex('agachamento', 'Agachamento livre (ou no smith)', 'quadriceps', 'composto', 'barra', false, 2.5,
@@ -41,9 +41,9 @@ const lista = [
   ex('terra_romeno', 'Terra romeno com halteres', 'posterior', 'composto', 'halter', false, 2,
     'Halteres à frente das coxas, joelhos levemente flexionados. Leve o quadril para trás deslizando os halteres pelas pernas, coluna neutra, e suba contraindo o glúteo.'),
   ex('glute_bridge', 'Ponte de glúteo com barra', 'gluteo', 'composto', 'barra', false, 2.5,
-    'Deitada no chão com a barra no quadril (use protetor). Pés próximos ao glúteo; suba contraindo e segure 1–2 s no topo.'),
+    'Deite no chão com a barra no quadril (use protetor). Pés próximos ao glúteo; suba contraindo e segure 1–2 s no topo.'),
   ex('mesa_flexora', 'Mesa flexora', 'posterior', 'isolado', 'maquina', false, 2.5,
-    'Deitada, quadril colado no banco. Flexione até o fim sem levantar o quadril e desça em 2–3 s.'),
+    'Deite com o quadril colado no banco. Flexione até o fim sem levantar o quadril e desça em 2–3 s.'),
   ex('coice_cabo', 'Coice de glúteo no cabo', 'gluteo', 'isolado', 'cabo', true, 2.5,
     'Tornozeleira no cabo, tronco levemente inclinado e abdômen firme. Leve a perna para trás e para cima sem arquear a lombar; contraia o glúteo no fim.'),
   ex('puxada_frente', 'Puxada frontal aberta', 'costas', 'composto', 'cabo', false, 2.5,
@@ -67,7 +67,7 @@ const lista = [
   ex('rosca_alternada', 'Rosca alternada com halteres', 'biceps', 'isolado', 'halter', false, 1,
     'Gire a palma para cima durante a subida. Cotovelo parado, um braço de cada vez.'),
   ex('triceps_frances', 'Tríceps francês com halter', 'triceps', 'isolado', 'halter', false, 1,
-    'Sentada, segure um halter com as duas mãos atrás da cabeça. Estenda os braços sem abrir os cotovelos.')
+    'Sente e segure um halter com as duas mãos atrás da cabeça. Estenda os braços sem abrir os cotovelos.')
 ];
 
 export const exerciciosPadrao = Object.fromEntries(lista.map(e => [e.id, e]));
@@ -117,3 +117,31 @@ export const treinosPadrao = [
     it('panturrilha', 4, 12, 15, 45)
   ] }
 ];
+
+// Dicas antigas (no feminino) do catálogo, para a migração trocar pelas neutras só quando o
+// texto salvo ainda for exatamente este (dica editada pela pessoa não muda). v2.0.
+export const DICAS_ANTIGAS = {
+  glute_bridge: 'Deitada no chão com a barra no quadril (use protetor). Pés próximos ao glúteo; suba contraindo e segure 1–2 s no topo.',
+  mesa_flexora: 'Deitada, quadril colado no banco. Flexione até o fim sem levantar o quadril e desça em 2–3 s.',
+  triceps_frances: 'Sentada, segure um halter com as duas mãos atrás da cabeça. Estenda os braços sem abrir os cotovelos.',
+  abducao: 'Tronco levemente inclinado à frente aumenta o trabalho do glúteo. Abra com controle, segure 1 s aberta e volte devagar.'
+};
+
+// Foto de academia de cada treino do programa (A–E); treinos criados pela pessoa não têm foto.
+export function fotoDoTreino(id) {
+  return /^[A-E]$/.test(id || '') ? `./img/treino-${id.toLowerCase()}.jpg` : null;
+}
+
+// Cor do bloco de um treino (usada quando não há foto e nas miniaturas): rodízio pela letra.
+const CORES_TREINO = ['sage', 'sky', 'sand', 'clay'];
+export function corDoTreino(id) {
+  const n = (String(id || 'A').toUpperCase().charCodeAt(0) - 65) % CORES_TREINO.length;
+  return CORES_TREINO[n < 0 ? 0 : n];
+}
+
+// Grupos que têm ao menos um exercício: os conhecidos na ordem de GRUPOS, os personalizados no fim.
+export function gruposComExercicios(exercicios) {
+  const usados = new Set(Object.values(exercicios || {}).map(x => x.grupo).filter(Boolean));
+  return [...Object.keys(GRUPOS).filter(g => usados.has(g)), ...[...usados].filter(g => !(g in GRUPOS))];
+}
+

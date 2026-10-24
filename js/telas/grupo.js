@@ -29,7 +29,7 @@ export function renderGrupo() {
     return `
       <section class="card" data-sec="grupo">
         <h2 class="sec-card">Grupo</h2>
-        <p class="muted">Compare seus pontos com os das amigas. Só totais por dia saem do aparelho (nada de fotos, medidas ou exercícios).</p>
+        <p class="muted">Compare seus pontos com o pessoal do grupo. Só totais por dia saem do aparelho (nada de fotos, medidas ou exercícios).</p>
         <button type="button" class="btn btn-principal btn-bloco" data-acao="criar-grupo">Criar grupo</button>
         <button type="button" class="btn btn-sec btn-bloco" data-acao="entrar-grupo">Entrar com código</button>
       </section>`;
@@ -63,12 +63,12 @@ function htmlMembros(res) {
   if (!res.ok) {
     return `<li class="muted">${res.motivo === 'offline' ? 'Sem conexão.' : esc(res.mensagem || 'Não consegui carregar os membros.')}</li>`;
   }
-  const souCriadora = res.criadoPor && res.membros.some(m => m.eu && m.userId === res.criadoPor);
+  const criouOGrupo = res.criadoPor && res.membros.some(m => m.eu && m.userId === res.criadoPor);
   return res.membros.map(m => `
     <li class="membro-linha" data-user="${esc(m.userId)}">
       <span class="membro-emoji">${esc(m.emoji)}</span>
-      <span class="membro-nome">${esc(m.apelido)}${m.eu ? ' <span class="muted">(você)</span>' : ''}${m.userId === res.criadoPor ? ' <span title="Criou o grupo">👑</span>' : ''}</span>
-      ${souCriadora && !m.eu ? `<button type="button" class="btn btn-sec btn-mini" data-acao="remover-membro" data-user="${esc(m.userId)}" data-apelido="${esc(m.apelido)}">Remover</button>` : ''}
+      <span class="membro-nome">${esc(m.apelido)}${m.eu ? ' <span class="muted">(você)</span>' : ''}${m.userId === res.criadoPor ? ' <span class="selo-criou">criou o grupo</span>' : ''}</span>
+      ${criouOGrupo && !m.eu ? `<button type="button" class="btn btn-sec btn-mini" data-acao="remover-membro" data-user="${esc(m.userId)}" data-apelido="${esc(m.apelido)}">Remover</button>` : ''}
     </li>`).join('');
 }
 

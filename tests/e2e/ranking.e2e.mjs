@@ -1,11 +1,14 @@
 // E2E do ranking com Supabase REAL: 2 navegadores (Ana e Bia).
 import { chromium } from 'playwright-core';
 
-const BASE = 'http://localhost:8080/';
+const BASE = process.env.BASE_URL || 'http://localhost:8080/';
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (n, c, x = '') => res.push([c ? 'OK ' : 'FALHA', n, x]);
-const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
+// navegador: CDP_URL (Chrome já aberto com --remote-debugging-port) ou BROWSER_PATH (padrão: Edge no Windows)
+const browser = process.env.CDP_URL
+  ? await chromium.connectOverCDP(process.env.CDP_URL)
+  : await chromium.launch({ executablePath: process.env.BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
 const erros = [];
 
 async function nova(nome) {
@@ -29,7 +32,7 @@ const ana = await nova('Ana'), bia = await nova('Bia');
 // ---------- Ana cria grupo ----------
 await ir(ana, '#/ajustes');
 await ana.click('[data-sec="grupo"] [data-acao="criar-grupo"]');
-await ana.fill('#sheet [data-campo="nome"]', 'Amigas Fit');
+await ana.fill('#sheet [data-campo="nome"]', 'Galera Fit');
 await ana.fill('#sheet [data-campo="apelido"]', 'Ana');
 await ana.click('#sheet [data-emoji="🔥"]');
 await ana.click('#sheet [data-acao="enviar"]');
@@ -47,7 +50,7 @@ await bia.fill('#sheet [data-campo="codigo"]', codigo.toLowerCase());
 await bia.fill('#sheet [data-campo="apelido"]', 'Bia');
 await bia.click('#sheet [data-acao="enviar"]');
 await bia.waitForSelector('[data-campo="nome-grupo"]', { timeout: 15000 }).catch(() => {});
-ok('Bia entrou no grupo', (await bia.locator('[data-campo="nome-grupo"]').innerText().catch(() => '')).includes('Amigas Fit'));
+ok('Bia entrou no grupo', (await bia.locator('[data-campo="nome-grupo"]').innerText().catch(() => '')).includes('Galera Fit'));
 
 // ---------- Ana registra cardio (bicicleta 30 min = 6 pts) ----------
 await ir(ana, '#/cardio/aparelho/novo');
@@ -58,9 +61,9 @@ await ana.waitForTimeout(5000); // debounce 3 s + envio
 
 // ---------- Bia faz um treino (10 pts) ----------
 await ir(bia, '#/hoje');
-await bia.click('.card-destaque [data-acao="comecar"]'); await bia.waitForTimeout(400);
-await bia.fill('.exercicio[data-i="0"] .serie[data-s="0"] .carga', '20');
-await bia.click('.exercicio[data-i="0"] .serie[data-s="0"] [data-acao="feita"]'); await bia.waitForTimeout(200);
+await bia.click('[data-sec="treino-do-dia"] [data-acao="comecar"]'); await bia.waitForTimeout(600);
+await bia.click('.passo-valor[data-campo="carga"]'); await bia.fill('.passo-campo', '20'); await bia.press('.passo-campo', 'Enter');
+await bia.click('.exercicio [data-acao="feita"]'); await bia.waitForTimeout(200);
 await bia.keyboard.press('Escape');
 await bia.click('[data-acao="finalizar"]'); await bia.waitForTimeout(300);
 if (await bia.locator('#sheet [data-acao="ok"]').count()) await bia.click('#sheet [data-acao="ok"]');
@@ -78,7 +81,7 @@ await bia.screenshot({ path: `${OUT}/r2-ranking-bia.png`, fullPage: true });
 await ir(ana, '#/hoje');
 await ana.waitForTimeout(3500);
 const cardHoje = await ana.locator('[data-sec="ranking-semana"]').innerText().catch(() => '');
-ok('Hoje da Ana: card ranking com Bia e posição', /Bia/.test(cardHoje) && /2º/.test(cardHoje), cardHoje.replace(/\n/g, ' | '));
+ok('Hoje da Ana: bloco de pontos com a posição', /2º no grupo/.test(cardHoje), cardHoje.replace(/\n/g, ' | '));
 await ana.locator('[data-sec="ranking-semana"]').screenshot({ path: `${OUT}/r3-hoje-ana.png` }).catch(() => {});
 
 // ---------- card 5 ----------
