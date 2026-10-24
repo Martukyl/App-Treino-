@@ -1,0 +1,124 @@
+/* Visual "Blocos" (v2.0): tokens, fontes e componentes comuns. Só tema claro.
+   Referência: protótipo aprovado em 23/10/2026 (ver docs/superpowers/specs/2026-10-23-visual-blocos-design.md). */
+
+@font-face {
+  font-family: 'Unbounded';
+  src: url('../vendor/fonts/unbounded-latin-wght.woff2') format('woff2');
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Figtree';
+  src: url('../vendor/fonts/figtree-latin-wght.woff2') format('woff2');
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  --bg: #f3f2ee; --ink: #1c1f23; --mut: #646a71; --white: #fff; --linha: #e3e1da;
+  --sage: #d9e3cf; --sky: #d3e2ee; --sand: #efe3cc; --clay: #e9d3c6;
+  --ok: #3f7a4a; --sage-ink: #4a5a40; --erro: #a8432f; --aviso: #8a5a12;
+  --vidro: rgba(255, 255, 255, .52); --vidro-borda: rgba(255, 255, 255, .65);
+  --vidro-escuro: rgba(28, 31, 35, .7);
+  --disp: 'Unbounded', system-ui, sans-serif; --txt: 'Figtree', system-ui, sans-serif;
+  --suave: cubic-bezier(.2, .8, .2, 1); --mola: cubic-bezier(.3, 1.35, .5, 1);
+  /* nomes antigos (app.css) apontando para a paleta nova enquanto as telas migram */
+  --surface: var(--white); --surface-2: var(--bg); --text: var(--ink); --muted: var(--mut);
+  --accent: var(--ink); --accent-2: var(--sand); --warn: var(--aviso); --danger: var(--erro);
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--txt);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select, textarea { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- tipografia ---------- */
+.titulo-tela { font-family: var(--disp); font-weight: 500; font-size: 24px; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
+.num-grande { font-family: var(--disp); font-weight: 600; font-size: 30px; line-height: 1; letter-spacing: -.03em; }
+.num-grande small { font-family: var(--txt); font-size: 14px; font-weight: 600; letter-spacing: 0; margin-left: 3px; }
+.rotulo { font-size: 12.5px; color: var(--mut); font-weight: 500; }
+.secao { font-size: 12.5px; font-weight: 600; color: var(--mut); margin: 16px 4px 8px; letter-spacing: .02em; }
+
+/* ---------- cabeçalho de tela ---------- */
+.cab-tela { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 4px 12px; }
+.cab-tela small { font-size: 13px; color: var(--mut); }
+.cab-tela .titulo-tela { flex: 1; min-width: 0; }
+
+/* ---------- blocos ---------- */
+.bloco { border-radius: 24px; padding: 14px; position: relative; overflow: hidden; min-width: 0; }
+.bloco-sage { background: var(--sage); }
+.bloco-sky { background: var(--sky); }
+.bloco-sand { background: var(--sand); }
+.bloco-clay { background: var(--clay); }
+.bloco-white { background: var(--white); }
+.bloco-ink { background: var(--ink); color: #fff; }
+.bloco-ink .rotulo { color: rgba(255, 255, 255, .68); }
+.grade { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grade > * + * { margin: 0; }
+.s2 { grid-column: span 2; }
+.pilha { display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- botões ---------- */
+.pilula {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px;
+  border: 0; border-radius: 99px; padding: 9px 14px; font-weight: 600; font-size: 13.5px;
+  background: var(--white); color: var(--ink); text-decoration: none; cursor: pointer;
+}
+.pilula-esc { background: var(--ink); color: #fff; }
+.pilula-mini { min-height: 32px; padding: 6px 11px; font-size: 12.5px; }
+.btn-grande {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 50px;
+  border: 0; border-radius: 99px; padding: 14px; background: var(--ink); color: #fff;
+  font-weight: 600; font-size: 15px; text-decoration: none; cursor: pointer;
+}
+.btn-grande.claro { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn-grande.perigo { background: var(--erro); }
+.btn-grande[disabled] { background: var(--ok); cursor: default; }
+.redondo {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--white); color: var(--ink);
+  display: inline-grid; place-items: center; flex: none; border: 0; cursor: pointer; text-decoration: none;
+}
+.tocavel { transition: transform .16s var(--suave); }
+.tocavel:active { transform: scale(.97); }
+svg.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- listas ---------- */
+.linhas { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.linhas > * {
+  background: var(--white); border-radius: 18px; padding: 11px 14px; min-height: 48px;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500; color: var(--ink); text-decoration: none; text-align: left; width: 100%; border: 0;
+}
+.linhas .sub { color: var(--mut); font-weight: 400; font-size: 12.5px; }
+
+/* ---------- campos ---------- */
+.campo-bloco { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--mut); font-weight: 500; }
+.campo-bloco input, .campo-bloco select, .campo-bloco textarea {
+  border: 0; background: var(--bg); border-radius: 14px; min-height: 44px; padding: 0 14px;
+  font-size: 15px; color: var(--ink);
+}
+.campo-bloco textarea { padding: 10px 14px; }
+.invalido { box-shadow: inset 0 0 0 2px var(--erro) !important; }
+
+/* ---------- capa com foto ---------- */
+.capa { position: relative; overflow: hidden; margin: 0 -16px; height: 240px; }
+.capa::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28, 31, 35, .3) 0%, rgba(243, 242, 238, 0) 45%, var(--bg) 100%); }
+.foto-capa { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- vidro ---------- */
+.vidro { background: rgba(255, 255, 255, .92); border: 1px solid var(--vidro-borda); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 10px 30px rgba(28, 31, 35, .12); }
+.vidro-escuro { background: rgba(28, 31, 35, .94); color: #fff; border: 1px solid rgba(255, 255, 255, .14); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 12px 30px rgba(28, 31, 35, .28); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .vidro { background: var(--vidro); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); }
+  .vidro-escuro { background: var(--vidro-escuro); -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; }
+}
