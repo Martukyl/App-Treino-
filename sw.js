@@ -3,7 +3,7 @@
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
 const CACHE = 'treino-2.0.0';
 const ARQUIVOS = [
-  './', './index.html', './manifest.webmanifest', './css/app.css', './css/base.css', './css/telas.css', './js/semana.js', './js/sessao-ui.js', './js/calendario.js',
+  './', './index.html', './manifest.webmanifest', './css/base.css', './css/telas.css', './js/semana.js', './js/sessao-ui.js', './js/calendario.js',
   './js/app.js', './js/navegacao.js', './js/movimento.js', './js/icones.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
   './js/progressao.js', './js/armazenamento.js', './js/cronometro.js', './js/grafico.js',
   './js/telas/hoje.js', './js/telas/treino.js', './js/telas/trocar.js',
@@ -15,7 +15,7 @@ const ARQUIVOS = [
   './js/pontos.js', './js/cards.js', './js/cards-canvas.js', './js/compartilhar.js', './js/telas/boas-vindas.js',
   './js/telas/cardio-gps.js', './js/telas/cardio-aparelho.js', './js/telas/cardio-detalhe.js',
   './js/config-ranking.js', './js/supabase.js', './js/ranking-calculo.js', './js/ranking.js', './js/telas/ranking.js', './js/telas/grupo.js',
-  './vendor/leaflet/leaflet.js', './vendor/leaflet/leaflet.css', './vendor/fonts/outfit-latin-wght.woff2', './vendor/fonts/unbounded-latin-wght.woff2', './vendor/fonts/figtree-latin-wght.woff2',
+  './vendor/leaflet/leaflet.js', './vendor/leaflet/leaflet.css', './vendor/fonts/unbounded-latin-wght.woff2', './vendor/fonts/figtree-latin-wght.woff2',
   './img/treino-a.jpg', './img/treino-b.jpg', './img/treino-c.jpg', './img/treino-d.jpg', './img/treino-e.jpg', './img/boas-vindas.jpg', './img/resumo.jpg', './img/exercicio.jpg',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];

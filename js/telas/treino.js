@@ -98,7 +98,7 @@ function renderCartao(est, sa) {
           <button type="button" data-acao="reps" data-d="1" aria-label="Mais repetições">${ic('mais')}</button></div></div>
       </div>
       <button type="button" class="btn-grande" data-acao="feita">${ic('ok')}Série ${s + 1} feita</button>`
-    : `<button type="button" class="btn-grande" disabled>${ic('ok')}Exercício concluído</button>`;
+    : `<button type="button" class="btn-grande concluido" disabled>${ic('ok')}Exercício concluído</button>`;
   return `
     <article class="bloco bloco-sky exercicio" data-i="${i}">
       <div class="cartao-topo rotulo"><span>Exercício ${i + 1} de ${sa.itens.length}</span><span>${esc(grupo)}${ex?.unilateral ? ' · cada lado' : ''}</span></div>

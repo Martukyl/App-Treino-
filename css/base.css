@@ -26,7 +26,17 @@
   color-scheme: light;
 }
 
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+img, svg { max-width: 100%; }
+h1, h2, h3, p { margin: 0 0 8px; }
+h1, h2, h3 { font-weight: 600; }
+a { color: var(--ink); }
+
 body {
+  min-height: 100vh;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--txt);
@@ -80,7 +90,8 @@ button, input, select, textarea { font-family: inherit; }
 }
 .btn-grande.claro { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
 .btn-grande.perigo { background: var(--erro); }
-.btn-grande[disabled] { background: var(--ok); cursor: default; }
+.btn-grande[disabled] { opacity: .45; cursor: not-allowed; }
+.btn-grande.concluido, .btn-grande.concluido[disabled] { background: var(--ok); opacity: 1; cursor: default; }
 .redondo {
   width: 44px; height: 44px; border-radius: 50%; background: var(--white); color: var(--ink);
   display: inline-grid; place-items: center; flex: none; border: 0; cursor: pointer; text-decoration: none;
@@ -140,7 +151,8 @@ svg.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-wid
   box-shadow: none; background-image: none;
 }
 .btn-principal { background: var(--ink); color: #fff; border: 0; }
-.btn-sec { background: var(--bg); color: var(--ink); border: 0; }
+.btn-sec { background: var(--white); color: var(--ink); border: 0; }
+.card .btn-sec, .bloco-white .btn-sec { background: var(--bg); }
 .btn-perigo { background: var(--erro); color: #fff; }
 .btn-bloco { display: flex; width: 100%; margin-top: 10px; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; }
@@ -173,6 +185,65 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--ink); }
 .dif-boa { color: var(--ok); } .dif-ruim { color: var(--aviso); } .dif-neutra { color: var(--mut); }
 .sinal { font-size: 13px; color: var(--mut); }
 .sinal-ok { color: var(--ok); } .sinal-fraco { color: var(--aviso); }
+
+/* ---------- peças das sub-telas (folhas, troca de exercício, fotos, listas) ---------- */
+.sheet-titulo { font-family: var(--disp); font-weight: 500; font-size: 18px; margin: 0 0 10px; }
+.sheet-msg { font-size: 16px; margin-bottom: 14px; }
+.sheet-acoes { display: flex; gap: 10px; }
+.sheet-acoes .btn { flex: 1; }
+.card-botoes { display: flex; gap: 8px; margin: 8px 0; }
+.card-botoes .btn { flex: 1; min-width: 48px; }
+.selo-ok, .selo-warn { display: inline-block; padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; }
+.selo-ok { background: var(--sage); color: var(--sage-ink); }
+.selo-warn { background: var(--sand); color: var(--aviso); }
+.sec-troca, .sec-exercicios { font-size: 12.5px; font-weight: 600; color: var(--mut); letter-spacing: .02em; margin: 16px 4px 6px; }
+.lista-troca { margin-top: 10px; }
+.lista-ex-troca { list-style: none; margin: 0; padding: 0; }
+.linha-ex {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 48px; padding: 10px 14px; margin-bottom: 6px;
+  text-align: left; border: 0; border-radius: 16px; background: var(--white); color: var(--ink); font: inherit; font-size: 14.5px; cursor: pointer;
+}
+.linha-ex small { color: var(--mut); font-size: 12.5px; flex: 0 0 auto; }
+.vazio-troca { color: var(--mut); text-align: center; padding: 16px 0; }
+.opcao-troca { flex-direction: column; gap: 2px; min-height: 64px; padding: 8px 20px; }
+.opcao-troca small { font-weight: 400; font-size: 12.5px; opacity: .8; }
+.check-linha { display: flex; align-items: center; gap: 10px; color: var(--ink); font-size: 15px; min-height: 48px; margin: 0; }
+.check-linha input { width: 22px; height: 22px; min-height: 22px; flex: 0 0 auto; }
+.grafico-legenda { min-height: 1.4em; margin: 8px 0 0; }
+.grafico circle { cursor: pointer; }
+.peso-grande { font-family: var(--disp); font-weight: 600; font-size: 36px; letter-spacing: -.03em; margin: 0 0 4px; }
+.peso-grande small { font-family: var(--txt); font-size: 16px; font-weight: 600; color: var(--mut); letter-spacing: 0; }
+.dif { font-variant-numeric: tabular-nums; }
+.lista-sessoes { list-style: none; margin: 0; padding: 0; }
+.lista-sessoes li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--linha); }
+.lista-sessoes li:last-child { border-bottom: 0; }
+.lista-sessoes li span:last-child { text-align: right; }
+.foto-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.foto-slot { display: flex; flex-direction: column; align-items: stretch; gap: 6px; min-width: 0; }
+.foto-mini {
+  width: 100%; aspect-ratio: 3 / 4; padding: 0; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 16px; background: var(--bg); color: var(--mut);
+}
+.foto-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-slot.carregando .foto-mini { opacity: .5; }
+.foto-rotulo { text-align: center; color: var(--mut); font-size: 12.5px; }
+.foto-remover { min-height: 38px; padding: 0 8px; font-size: 12.5px; }
+.posicoes { margin: 12px 0; }
+.comparacao { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.comparacao > p { grid-column: 1 / -1; }
+.comp-foto { margin: 0; min-width: 0; }
+.comp-img { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.comp-img img { display: block; width: 100%; height: auto; border-radius: 16px; }
+.comp-foto figcaption { margin-top: 6px; font-size: 12.5px; color: var(--mut); text-align: center; }
+.foto-cheia-fundo { display: block; width: 100%; padding: 0; border: 0; background: none; }
+.foto-cheia { display: block; max-width: 100%; max-height: 68vh; margin: 0 auto; object-fit: contain; border-radius: 16px; }
+.previa { text-align: center; margin-bottom: 12px; min-height: 80px; }
+.previa img { display: block; width: auto; height: auto; max-width: 100%; max-height: 52vh; margin: 0 auto; border-radius: 16px; }
+.mapa-detalhe { height: 280px; }
+.leaflet-container { font: inherit; }
+.leaflet-container .leaflet-control-attribution { background: rgba(255, 255, 255, .88); color: var(--mut); }
+.leaflet-container .leaflet-control-attribution a { color: var(--ink); }
+.grupo-eu { margin-top: 12px; }
 
 /* ---------- casca: área das telas ---------- */
 #app {
