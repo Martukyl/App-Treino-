@@ -67,7 +67,7 @@ function htmlMembros(res) {
   return res.membros.map(m => `
     <li class="membro-linha" data-user="${esc(m.userId)}">
       <span class="membro-emoji">${esc(m.emoji)}</span>
-      <span class="membro-nome">${esc(m.apelido)}${m.eu ? ' <span class="muted">(você)</span>' : ''}${m.userId === res.criadoPor ? ' <span title="Criou o grupo">👑</span>' : ''}</span>
+      <span class="membro-nome">${esc(m.apelido)}${m.eu ? ' <span class="muted">(você)</span>' : ''}${m.userId === res.criadoPor ? ' <span class="selo-criou">criou o grupo</span>' : ''}</span>
       ${criouOGrupo && !m.eu ? `<button type="button" class="btn btn-sec btn-mini" data-acao="remover-membro" data-user="${esc(m.userId)}" data-apelido="${esc(m.apelido)}">Remover</button>` : ''}
     </li>`).join('');
 }
