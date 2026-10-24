@@ -55,7 +55,7 @@
 .link-mini { display: inline-block; margin-top: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink); }
 
 .semana-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.redondo-mini { width: 36px; height: 36px; background: rgba(255, 255, 255, .7); }
+.redondo-mini { width: 44px; height: 44px; background: rgba(255, 255, 255, .7); }
 .redondo-mini svg.ic { width: 17px; height: 17px; }
 .semana-dias { display: flex; justify-content: space-between; margin-top: 8px; }
 .semana-dia { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--mut); }
@@ -96,7 +96,7 @@
 .cartao-meta { margin: 0; font-size: 12.5px; color: #46505a; }
 .etapas { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
 .etapa {
-  flex: 1 0 64px; border: 0; border-radius: 14px; padding: 8px 6px; min-height: 36px; font-size: 12px; font-weight: 600;
+  flex: 1 0 64px; border: 0; border-radius: 14px; padding: 8px 6px; min-height: 44px; font-size: 12px; font-weight: 600;
   background: rgba(255, 255, 255, .55); color: var(--mut); cursor: pointer; white-space: nowrap;
   transition: background .3s, color .3s, box-shadow .3s;
 }
@@ -107,12 +107,12 @@
 .passo small { font-size: 11px; font-weight: 600; color: var(--mut); letter-spacing: .06em; }
 .passo-r { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 2px; }
 .passo-r > button:not(.passo-valor) {
-  width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--bg); color: var(--ink);
+  width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--bg); color: var(--ink);
   display: grid; place-items: center; cursor: pointer; flex: none; transition: transform .12s;
 }
 .passo-r > button:not(.passo-valor):active { transform: scale(.88); }
 .passo-valor {
-  border: 0; background: none; color: var(--ink); cursor: text; min-width: 0; flex: 1; padding: 0;
+  border: 0; background: none; color: var(--ink); cursor: text; min-width: 44px; min-height: 44px; flex: 1; padding: 0;
   font-family: var(--disp); font-weight: 600; font-size: 25px; letter-spacing: -.03em; display: inline-block;
 }
 .passo-valor small { font-family: var(--txt); font-size: 12px; letter-spacing: 0; margin-left: 2px; }
@@ -151,7 +151,7 @@
 
 /* ---------- Cardio ---------- */
 .seletor { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; background: var(--bg); border-radius: 99px; padding: 4px; }
-.seletor-op { border: 0; border-radius: 99px; min-height: 40px; background: transparent; color: var(--ink); font-weight: 600; font-size: 13.5px; cursor: pointer; transition: background .3s, color .3s; }
+.seletor-op { border: 0; border-radius: 99px; min-height: 44px; background: transparent; color: var(--ink); font-weight: 600; font-size: 13.5px; cursor: pointer; transition: background .3s, color .3s; }
 .seletor-op.on { background: var(--ink); color: #fff; }
 .cardio-iniciar { margin-top: 10px; }
 .mapa-caixa { padding: 0; height: 240px; background: #e9ece4; border: 0; margin: 0; }
@@ -183,7 +183,7 @@
 .grupo-linha { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 8px; }
 .grupo-pos { font-size: 40px; }
 .grupo-pos small { color: #fff; }
-.selo-zera { background: rgba(255, 255, 255, .14); color: #fff; }
+.selo-zera { background: rgba(255, 255, 255, .14); color: #fff; min-height: 30px; } /* selo é texto, não botão */
 .tela-ranking .seletor { margin-top: 10px; background: var(--white); }
 .seletor-vidro {
   position: sticky; top: calc(10px + env(safe-area-inset-top)); z-index: 5; margin-top: 8px; padding: 4px; border-radius: 99px;
@@ -264,7 +264,7 @@
 .capa-voltar { position: absolute; z-index: 2; top: calc(12px + env(safe-area-inset-top)); left: 16px; }
 .ex-titulo { font-size: 22px; padding: 0 4px; margin-top: -8px; position: relative; }
 .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; padding: 0 4px; }
-.etiquetas .pilula { min-height: 30px; }
+.etiquetas .pilula { min-height: 30px; } /* etiquetas são texto, não botões */
 .tela-exercicio > .rotulo { padding: 0 4px; margin: 4px 0 10px; }
 .bloco-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .colunas { display: flex; align-items: flex-end; gap: 7px; height: 120px; margin-top: 10px; }

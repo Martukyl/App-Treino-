@@ -26,17 +26,22 @@ function resumoPerfil(est) {
   return partes.join(' · ');
 }
 
+// "1,70 m · 34 anos · IMC 22,1 (Normal)"; sem nada preenchido, o convite para preencher
+function textoPerfil(est) {
+  const p = est.perfil;
+  const altura = p.altura != null ? `${(p.altura / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m` : null;
+  return [altura, resumoPerfil(est)].filter(Boolean).join(' · ') || 'Toque para preencher altura, nascimento e meta';
+}
+
 function htmlPerfil(est) {
   const p = est.perfil;
   const temFoto = !!p.fotoId;
   const nome = (est.nome || '').trim();
-  const altura = p.altura != null ? `${(p.altura / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m` : null;
-  const resumo = [altura, resumoPerfil(est)].filter(Boolean).join(' · ');
   return `
     <details class="bloco bloco-white perfil-bloco a" data-sec="perfil">
       <summary class="perfil-resumo-linha">
         ${htmlAvatar(est, 'avatar-grande')}
-        <span class="perfil-textos"><b>${nome ? esc(nome) : 'Meu perfil'}</b><span class="rotulo perfil-resumo" data-derivado="perfil">${esc(resumo) || 'Toque para preencher altura, nascimento e meta'}</span></span>
+        <span class="perfil-textos"><b>${nome ? esc(nome) : 'Meu perfil'}</b><span class="rotulo perfil-resumo" data-derivado="perfil">${esc(textoPerfil(est))}</span></span>
         ${ic('dir', 'perfil-seta')}
       </summary>
       <div class="perfil-campos">
@@ -163,7 +168,7 @@ export function montar(raiz) {
   // recalcula só o que depende do perfil, sem redesenhar a tela (o foco não se perde)
   const atualizarDerivados = () => {
     const est = obterEstado();
-    tela.querySelector('[data-derivado="perfil"]').textContent = resumoPerfil(est);
+    tela.querySelector('[data-derivado="perfil"]').textContent = textoPerfil(est);
     const peso = tela.querySelector('[data-sec="peso"]');
     if (peso) peso.outerHTML = htmlPeso(est);
     const meta = tela.querySelector('[data-sec="meta"]');

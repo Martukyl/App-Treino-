@@ -113,6 +113,58 @@ if (await page.locator('#sheet [data-acao="ok"]').count()) { await page.click('#
 ok('Resumo do treino', page.url().includes('#/resumo/') && (await page.locator('.tela-resumo').innerText()).includes('Treino concluído'));
 await capturar('v03-resumo');
 
+// ---------- correções da revisão final ----------
+await ir('#/hoje');
+// a tela antiga não pode saltar ao sair (mantém a posição durante o fade)
+const antes = await page.evaluate(() => { const r = document.querySelector('#app > .tela').getBoundingClientRect(); return [r.left, r.top, r.width]; });
+const saindo = await page.evaluate(() => new Promise(fim => {
+  location.hash = '#/corpo';
+  setTimeout(() => { const t = document.querySelector('#app > .tela.saindo'); if (!t) return fim(null); const r = t.getBoundingClientRect(); fim([r.left, r.top, r.width]); }, 30);
+}));
+ok('Tela antiga não salta ao sair', !!saindo && saindo.every((v, i) => Math.abs(v - antes[i]) < 1.5), `${JSON.stringify(antes)} → ${JSON.stringify(saindo)}`);
+await espera(700);
+await ir('#/hoje');
+await page.click('[data-sec="treino-do-dia"] [data-acao="comecar"]'); await espera(900);
+// digitar e tocar direto em "Série feita" (sem Enter): a série tem de ser marcada
+await page.click('.passo-valor[data-campo="carga"]'); await page.fill('.passo-campo', '30');
+await page.click('.exercicio [data-acao="feita"]'); await espera(600);
+ok('Digitar e tocar em Série feita (sem Enter) marca a série', await page.locator('.etapa.f').count() === 1 && (await page.locator('.etapa.f').first().innerText()).includes('30'));
+ok('… e começa o descanso', await page.locator('#cronometro.on').count() === 1);
+// digitar e tocar em + (sem Enter): o + vale sobre o valor digitado
+await page.click('.passo-valor[data-campo="reps"]'); await page.fill('.passo-campo', '9');
+await page.click('[data-acao="reps"][data-d="1"]'); await espera(300);
+ok('Digitar e tocar em + (sem Enter) soma sobre o digitado', (await page.locator('.passo-valor[data-campo="reps"]').innerText()).trim() === '10', await page.locator('.passo-valor[data-campo="reps"]').innerText());
+// alvos de toque do cartão do treino ≥ 44 px
+const pequenos = await page.evaluate(() => [...document.querySelectorAll('.tela-treino button, .tela-treino a, #cronometro button')]
+  .filter(b => b.offsetParent).map(b => { const r = b.getBoundingClientRect(); return [b.dataset.acao || b.dataset.cron || b.className, Math.round(r.width), Math.round(r.height)]; })
+  .filter(([, w, h]) => w < 44 || h < 44));
+ok('Treino: alvos de toque ≥ 44 px', pequenos.length === 0, JSON.stringify(pequenos));
+// com descanso ativo, o menu da Hoje continua tocável
+await ir('#/hoje');
+const noMenu = await page.evaluate(() => { const r = document.querySelector('.nav').getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!el && !!el.closest('.nav'); });
+ok('Descanso ativo não cobre o menu', noMenu);
+await capturar('v17-hoje-descanso');
+// contraste do texto secundário sobre os blocos coloridos ≥ 4,5:1
+const contraste = await page.evaluate(() => {
+  const rgb = s => s.match(/[\d.]+/g).slice(0, 4).map(Number);
+  const lum = ([r, g, b]) => [r, g, b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const fundo = el => { for (let e = el; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor); if (c.length < 4 || c[3] > 0.9) return c; } return [255, 255, 255]; };
+  return [...document.querySelectorAll('.bloco-sage .rotulo, .bloco-sky .rotulo, .bloco-sand .rotulo, .bloco-clay .rotulo, .bloco-sage .dif-boa, .bloco-sand .dif-boa')]
+    .filter(e => e.offsetParent && e.textContent.trim())
+    .map(e => { const a = lum(rgb(getComputedStyle(e).color)), b = lum(fundo(e)); return [e.textContent.trim().slice(0, 20), +((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toFixed(2)]; })
+    .filter(([, c]) => c < 4.5);
+});
+ok('Contraste do texto secundário nos blocos ≥ 4,5', contraste.length === 0, JSON.stringify(contraste));
+await page.evaluate(() => { location.hash = '#/treino'; }); await espera(700);
+await page.click('[data-acao="menu"]'); await espera(400); await page.click('#sheet [data-acao="descartar"]'); await espera(500);
+if (await page.locator('#sheet [data-acao="ok"]').count()) { await page.click('#sheet [data-acao="ok"]'); await espera(600); }
+
+// resumo do perfil no Corpo continua completo depois de editar um campo
+await ir('#/corpo');
+await page.click('[data-sec="perfil"] summary'); await espera(200);
+await page.fill('[data-campo="altura"]', '170'); await page.press('[data-campo="altura"]', 'Tab'); await espera(200);
+ok('Perfil: resumo mantém a altura depois de editar', (await page.locator('[data-derivado="perfil"]').innerText()).includes('1,70 m'), await page.locator('[data-derivado="perfil"]').innerText());
+
 // ---------- abrir direto numa rota interna (Foco 5) ----------
 for (const h of ['#/treino', '#/ranking']) {
   await page.goto(BASE + h); await espera(1200);

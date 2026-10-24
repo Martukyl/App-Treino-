@@ -37,7 +37,7 @@ repo, `IMG_DIR` (caminho da pasta `img/` do app).
    - `cardio.e2e.mjs` — caminhada com GPS falso + relógio simulado (roda com movimento reduzido,
      porque o relógio simulado congela as animações), aparelho, backup.
    - `ranking.e2e.mjs` — 2 navegadores contra o Supabase REAL (cria e apaga um grupo de teste;
-     deixa 2 usuários anônimos em Authentication → Users, filtro "Anonymous"). Só com ok do Tiago.
+     deixa 2 usuários anônimos em Authentication → Users, filtro "Anonymous"). Só com ok do dono do projeto.
    - `seguranca-supabase.mjs` — regras do banco com 3 usuários anônimos via REST.
      Uso: `SUPA_URL=... SUPA_KEY=<chave publishable> node seguranca-supabase.mjs`
      (só a chave pública; nunca a secret).

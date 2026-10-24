@@ -250,7 +250,11 @@ function abrirDigitacao(raiz, botao) {
       if (!regs || regs[s].feita) return;
       if (ehCarga) { regs[s].carga = valor; copiarCargaSeguintes(regs, s, valor); } else regs[s].reps = valor;
     }, { renderizar: false });
-    redesenhar(raiz);
+    // volta o botão no lugar do campo sem redesenhar o cartão: um toque em "Série feita", + ou −
+    // que causou este blur continua valendo (o botão tocado não é trocado no meio do toque)
+    botao.innerHTML = ehCarga ? textoCarga(valor) : String(valor);
+    if (campo.isConnected) campo.replaceWith(botao);
+    redesenhar(raiz, { cartao: false });
   };
   campo.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); confirmarCampo(); } };
   campo.onblur = confirmarCampo;

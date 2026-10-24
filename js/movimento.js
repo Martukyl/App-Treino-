@@ -102,8 +102,12 @@ export function trocarTela(velha, nova, dir) {
   if (!velha) return;
   if (!podeAnimar(nova)) { velha.remove(); return; }
   const dx = dir * 34;
+  // fixa a tela antiga onde ela está (dentro do padding do #app) antes de tirá-la do fluxo
+  const { offsetLeft, offsetTop, offsetWidth } = velha;
   velha.style.position = 'absolute';
-  velha.style.inset = '0 0 auto 0';
+  velha.style.left = `${offsetLeft}px`;
+  velha.style.top = `${offsetTop}px`;
+  velha.style.width = `${offsetWidth}px`;
   velha.style.pointerEvents = 'none';
   // remove pelo fim da animação ou, se a linha do tempo parar (aba em segundo plano), pelo relógio
   const tirar = () => velha.remove();
