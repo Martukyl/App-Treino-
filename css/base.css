@@ -157,6 +157,8 @@ input:where(:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([
   background-image: none; color: var(--ink); font-size: 15px; box-shadow: none;
 }
 textarea { min-height: 96px; resize: vertical; }
+/* campo solto na tela (fora de bloco branco) fica branco para aparecer sobre o fundo */
+[class^="tela-"] > label > input, [class^="tela-"] > label > select, [class^="tela-"] > label > textarea { background: var(--white); }
 input::placeholder, textarea::placeholder { color: var(--mut); opacity: 1; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--ink); }

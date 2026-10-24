@@ -310,3 +310,38 @@
 .linha-sessao .linha-nome { flex: 1; }
 .linha-sessao > svg.ic { color: var(--mut); }
 
+/* ---------- Ajustes ---------- */
+.linha-treino { gap: 12px; }
+.linha-treino .linha-nome { flex: 1; }
+.linha-treino > svg.ic { color: var(--mut); }
+.novo-treino { width: 100%; min-height: 48px; background: transparent; box-shadow: inset 0 0 0 1.5px #cfcdc5; }
+.tela-ajustes > .a + .bloco, .tela-ajustes > .a + .a { margin-top: 10px; }
+.tela-ajustes .grade .pilula { min-height: 46px; }
+.restaurar { background: var(--bg); }
+.rodape-app { text-align: center; margin-top: 16px; }
+
+/* ---------- Boas-vindas ---------- */
+.capa-boas { height: 320px; }
+.marca { display: flex; align-items: center; gap: 12px; margin-top: -34px; position: relative; z-index: 2; padding: 0 4px; }
+.marca .titulo-tela { font-size: 25px; }
+.logo { display: grid; grid-template-columns: repeat(2, 16px); gap: 4px; flex: none; }
+.logo i { width: 16px; height: 16px; border-radius: 5px; }
+.bv-texto { margin: 10px 4px 14px; color: #3d4248; font-size: 15px; }
+.escolha { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.opcao-programa {
+  position: relative; display: flex; align-items: center; gap: 12px; margin: 0; padding: 14px; border-radius: 22px;
+  background: var(--white); color: var(--ink); cursor: pointer; transition: box-shadow .25s;
+}
+.opcao-programa input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opcao-programa:has(input:checked) { box-shadow: inset 0 0 0 2px var(--ink); }
+.opcao-programa:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.op-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.op-txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.op-txt b { font-size: 15px; }
+.op-txt small { color: var(--mut); font-size: 13px; }
+.op-marca { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px #cfcdc5; display: grid; place-items: center; flex: none; color: transparent; transition: background .25s, box-shadow .25s, color .25s; }
+.op-marca svg.ic { width: 14px; height: 14px; stroke-width: 2.8; }
+.opcao-programa:has(input:checked) .op-marca { background: var(--ink); box-shadow: none; color: #fff; }
+.tela-boas-vindas .btn-grande { margin-top: 14px; }
+.bv-rodape { text-align: center; margin-top: 12px; }
+
