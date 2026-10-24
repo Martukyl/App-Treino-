@@ -1,24 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-  <defs>
-    <linearGradient id="aco" x1="0.2" y1="0" x2="0.8" y2="1">
-      <stop offset="0" stop-color="#8d939b"/>
-      <stop offset="0.42" stop-color="#5d636b"/>
-      <stop offset="1" stop-color="#2d3136"/>
-    </linearGradient>
-    <linearGradient id="cobre" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="20" y2="0">
-      <stop offset="0" stop-color="#93491f"/>
-      <stop offset="0.24" stop-color="#bf6a37"/>
-      <stop offset="0.5" stop-color="#eaa274"/>
-      <stop offset="0.76" stop-color="#bf6a37"/>
-      <stop offset="1" stop-color="#93491f"/>
-    </linearGradient>
-  </defs>
-  <rect width="20" height="20" rx="4" fill="url(#aco)"/>
-  <g fill="url(#cobre)">
-    <rect x="6" y="9.25" width="8" height="1.5" rx="0.5"/>
-    <rect x="4.5" y="7" width="1.5" height="6" rx="0.5"/>
-    <rect x="14" y="7" width="1.5" height="6" rx="0.5"/>
-    <rect x="3.5" y="8" width="1" height="4" rx="0.4"/>
-    <rect x="15.5" y="8" width="1" height="4" rx="0.4"/>
-  </g>
+  <!-- visual Blocos (v2.0): quatro blocos (grafite, sálvia, areia, céu) sobre o fundo claro -->
+  <rect width="20" height="20" rx="4" fill="#f3f2ee"/>
+  <rect x="5.5" y="5.5" width="4.25" height="4.25" rx="1.2" fill="#1c1f23"/>
+  <rect x="10.25" y="5.5" width="4.25" height="4.25" rx="1.2" fill="#d9e3cf"/>
+  <rect x="5.5" y="10.25" width="4.25" height="4.25" rx="1.2" fill="#efe3cc"/>
+  <rect x="10.25" y="10.25" width="4.25" height="4.25" rx="1.2" fill="#d3e2ee"/>
 </svg>
