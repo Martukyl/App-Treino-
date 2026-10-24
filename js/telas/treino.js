@@ -13,7 +13,7 @@ import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
 import { sincronizarRanking } from '../ranking.js';
 import { indiceAtual, ajustarCarga, ajustarReps, copiarCargaSeguintes, lerIndiceGuardado, guardarIndice } from '../sessao-ui.js';
-import { pop, rolarNumero } from '../movimento.js';
+import { pop, rolarNumero, confete } from '../movimento.js';
 import { ic } from '../icones.js';
 
 let intervaloTempo = null;
@@ -411,17 +411,17 @@ export function renderResumo(sessaoId) {
   if (!s) {
     return `
       <div class="tela-resumo">
-        <h1 class="titulo">Treino não encontrado</h1>
-        <a class="btn btn-principal btn-bloco" href="#/hoje">Voltar ao início</a>
+        <div class="cab-tela"><h1 class="titulo-tela">Treino não encontrado</h1></div>
+        <a class="btn-grande" href="#/hoje">Voltar ao início</a>
       </div>`;
   }
   const treino = est.treinos.find(t => t.id === s.treinoId);
-  const nome = treino ? `Treino ${treino.id} — ${treino.nome}` : 'Treino';
+  const nome = treino ? `Treino ${treino.id} · ${treino.nome}` : 'Treino';
   const { total } = contarSeries(s);
-  const volume = s.itens.reduce((v, it) => v + it.registros.reduce((a, r) => a + (r.carga || 0) * r.reps, 0), 0);
-  const duracao = formatarDuracao(new Date(s.fim).getTime() - new Date(s.inicio).getTime());
+  const volume = Math.round(s.itens.reduce((v, it) => v + it.registros.reduce((a, r) => a + (r.carga || 0) * r.reps, 0), 0));
+  const minutos = Math.max(1, Math.round((new Date(s.fim).getTime() - new Date(s.inicio).getTime()) / 60000));
   const lista = s.itens.map(it =>
-    `<li><span>${esc(nomeDe(est, it.exercicioId))}</span><span class="muted">${esc(resumirRegistros(it.registros))}</span></li>`
+    `<div><span>${esc(nomeDe(est, it.exercicioId))}</span><span class="sub num">${esc(resumirRegistros(it.registros))}</span></div>`
   ).join('');
   const subir = s.itens.map(it => {
     const ex = est.exercicios[it.exercicioId];
@@ -431,19 +431,30 @@ export function renderResumo(sessaoId) {
   }).filter(Boolean);
   return `
     <div class="tela-resumo">
-      <h1 class="titulo">Treino concluído 🎉</h1>
-      <section class="card card-destaque">
-        <h2 class="treino-nome">${esc(nome)}</h2>
-        <p class="muted">${duracao} · ${total} séries · ${formatarNumero(volume)} kg de volume</p>
-      </section>
-      <section class="card"><ul class="lista-ex">${lista}</ul></section>
-      <section class="card">
+      <div class="capa capa-resumo">
+        <img class="foto-capa zoom" src="./img/resumo.jpg" alt="">
+        <div class="capa-texto">
+          <span class="check-grande" aria-hidden="true"><svg viewBox="0 0 24 24"><path data-desenhar d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <h1 class="titulo-tela">Treino concluído</h1>
+          <p>${esc(nome)}</p>
+        </div>
+      </div>
+      <div class="grade resumo-numeros">
+        <div class="bloco bloco-sky a"><div class="num-grande num" data-contar="${minutos}">${minutos}</div><div class="rotulo">minutos</div></div>
+        <div class="bloco bloco-sand a"><div class="num-grande num" data-contar="${total}">${total}</div><div class="rotulo">séries</div></div>
+        <div class="bloco bloco-sage s2 a"><div class="num-grande num"><span data-contar="${volume}">${formatarNumero(volume)}</span><small>kg</small></div><div class="rotulo">de volume (carga × repetições)</div></div>
+      </div>
+      <div class="secao a">O que você fez</div>
+      <div class="linhas a">${lista}</div>
+      <div class="bloco ${subir.length ? 'bloco-sage' : 'bloco-white'} resumo-proxima a">
         ${subir.length
-          ? `<h2>Na próxima, pode aumentar:</h2><ul class="lista-ex">${subir.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
-          : '<p>Continue firme — mesma carga na próxima.</p>'}
-      </section>
-      <button type="button" class="btn btn-sec btn-bloco" data-acao="compartilhar">Compartilhar</button>
-      <a class="btn btn-principal btn-bloco" href="#/hoje">Voltar ao início</a>
+          ? `<strong>Na próxima, pode aumentar</strong><ul>${subir.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
+          : '<strong>Mesma carga na próxima.</strong>'}
+      </div>
+      <div class="grade resumo-botoes a">
+        <button type="button" class="pilula tocavel" data-acao="compartilhar">${ic('share')}Compartilhar</button>
+        <a class="pilula pilula-esc tocavel" href="#/hoje">Voltar ao início</a>
+      </div>
     </div>`;
 }
 
@@ -455,4 +466,5 @@ export function montarResumo(raiz, sessaoId) {
     const s = est.sessoes.find(x => x.id === sessaoId);
     if (s) compartilharCard('Treino concluído', () => dadosCardTreino(obterEstado(), s));
   };
+  setTimeout(() => { if (raiz.isConnected) confete(document.body); }, 350);
 }

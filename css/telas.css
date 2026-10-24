@@ -135,3 +135,17 @@
 .ok-ic svg.ic { width: 14px; height: 14px; stroke-width: 2.6; }
 .fim-treino { margin-top: 12px; }
 
+/* ---------- Resumo do treino ---------- */
+.capa-resumo { height: 260px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; }
+.capa-resumo::after { background: linear-gradient(180deg, rgba(28, 31, 35, .2), rgba(28, 31, 35, .9)); }
+.capa-texto { position: relative; z-index: 1; padding: 0 20px 22px; }
+.capa-texto .titulo-tela { font-size: 26px; }
+.capa-texto p { margin: 2px 0 0; opacity: .82; font-size: 13.5px; }
+.check-grande { width: 58px; height: 58px; border-radius: 50%; background: var(--sage); display: grid; place-items: center; margin-bottom: 12px; }
+.check-grande svg { width: 30px; height: 30px; fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.resumo-numeros { margin-top: 12px; }
+.resumo-proxima { margin-top: 10px; }
+.resumo-proxima ul { margin: 6px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--sage-ink); }
+.resumo-botoes { margin-top: 10px; }
+.resumo-botoes .pilula { min-height: 50px; }
+
