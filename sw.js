@@ -3,7 +3,7 @@
 // Deve ser igual a VERSAO_APP em js/util.js (treino-<VERSAO_APP>).
 const CACHE = 'treino-2.0.0';
 const ARQUIVOS = [
-  './', './index.html', './manifest.webmanifest', './css/app.css', './css/base.css', './css/telas.css', './js/semana.js', './js/sessao-ui.js',
+  './', './index.html', './manifest.webmanifest', './css/app.css', './css/base.css', './css/telas.css', './js/semana.js', './js/sessao-ui.js', './js/calendario.js',
   './js/app.js', './js/navegacao.js', './js/movimento.js', './js/icones.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
   './js/progressao.js', './js/armazenamento.js', './js/cronometro.js', './js/grafico.js',
   './js/telas/hoje.js', './js/telas/treino.js', './js/telas/trocar.js',

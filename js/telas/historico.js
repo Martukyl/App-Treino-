@@ -1,11 +1,15 @@
 // Histórico de treinos (#/historico) e detalhe de uma sessão (#/sessao/<id>).
-import { esc, formatarDataCompleta, formatarDuracao, formatarKg, formatarNumero } from '../util.js';
+import { esc, formatarDataCompleta, formatarDuracao, formatarKg, formatarNumero, hojeISO } from '../util.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
 import { sincronizarRanking } from '../ranking.js';
-import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarCronometro, itensHistorico } from '../cardio.js';
+import { ROTULO_CARDIO, formatarKm, formatarCronometro, itensHistorico } from '../cardio.js';
+import { diasDoMes, resumoDoMes, mesVizinho } from '../calendario.js';
+import { fotoDoTreino, corDoTreino } from '../dados.js';
+import { diaLocal } from '../pontos.js';
+import { ic } from '../icones.js';
 
 const duracaoMs = s => new Date(s.fim).getTime() - new Date(s.inicio).getTime();
 const totalSeries = s => s.itens.reduce((n, it) => n + it.registros.length, 0);
@@ -22,42 +26,89 @@ function textoSerie(r) {
 
 // ---------- Lista ----------
 
+// mês mostrado no calendário (vale enquanto o app estiver aberto); null = mês atual
+let mesVisto = null;
+
+const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+function miniatura(treinoId) {
+  const foto = fotoDoTreino(treinoId);
+  return `<span class="mini-treino ${foto ? '' : 'fundo-' + corDoTreino(treinoId)}">${foto ? `<img src="${foto}" alt="">` : ''}<span>${esc(treinoId || '')}</span></span>`;
+}
+
 function linhaTreino(est, s) {
   return `
-    <a class="linha-lista linha-sessao" data-tipo="treino" href="#/sessao/${encodeURIComponent(s.id)}">
-      <span class="linha-nome"><strong>${esc(formatarDataCompleta(s.fim))}</strong><br><span class="muted">🏋️ ${esc(tituloTreino(est, s))}</span></span>
-      <span class="linha-info muted">${esc(formatarDuracao(duracaoMs(s)))} · ${totalSeries(s)} séries</span>
+    <a class="linha-lista linha-sessao tocavel" data-tipo="treino" data-dia="${esc(diaLocal(s.fim) || '')}" href="#/sessao/${encodeURIComponent(s.id)}">
+      ${miniatura(s.treinoId)}
+      <span class="linha-nome"><b>${esc(tituloTreino(est, s))}</b><span class="sub">${esc(formatarDataCompleta(s.fim))} · ${esc(formatarDuracao(duracaoMs(s)))} · ${totalSeries(s)} séries</span></span>
+      ${ic('dir')}
     </a>`;
 }
 
-// "🚶 Caminhada · 3,42 km · 41:20" (GPS) ou "🚴 Bicicleta · 30 min" (aparelho)
+// "Caminhada · 3,42 km · 41:20" (GPS) ou "Bicicleta · 30 min" (aparelho)
 function linhaCardio(c) {
-  const nome = `${ICONE_CARDIO[c.tipo] || '❤️'} ${ROTULO_CARDIO[c.tipo] || 'Cardio'}`;
+  const nome = ROTULO_CARDIO[c.tipo] || 'Cardio';
   const dist = c.distanciaM > 0 ? formatarKm(c.distanciaM) : null;
   const info = c.modo === 'gps'
     ? [dist, formatarCronometro(c.duracaoSeg * 1000)]
     : [`${formatarNumero(Math.round(c.duracaoSeg / 60))} min`, dist];
   return `
-    <a class="linha-lista linha-sessao" data-tipo="cardio" href="#/cardio/${encodeURIComponent(c.id)}">
-      <span class="linha-nome"><strong>${esc(formatarDataCompleta(c.fim))}</strong><br><span class="muted">${esc(nome)}</span></span>
-      <span class="linha-info muted">${esc(info.filter(Boolean).join(' · '))}</span>
+    <a class="linha-lista linha-sessao tocavel" data-tipo="cardio" data-dia="${esc(diaLocal(c.fim) || '')}" href="#/cardio/${encodeURIComponent(c.id)}">
+      <span class="mini-treino fundo-sage">${ic(c.modo === 'gps' ? 'anda' : 'aparelho')}</span>
+      <span class="linha-nome"><b>${esc(nome)}</b><span class="sub">${esc([formatarDataCompleta(c.fim), ...info.filter(Boolean)].join(' · '))}</span></span>
+      ${ic('dir')}
     </a>`;
 }
 
 export function render() {
   const est = obterEstado();
-  // musculação e cardio juntos, por data (mais recente primeiro)
-  const linhas = itensHistorico(est.sessoes, est.cardios).map(item => (item.tipo === 'cardio'
-    ? linhaCardio(item.ref)
-    : linhaTreino(est, item.ref))).join('');
+  const hoje = hojeISO();
+  const { ano, mes } = mesVisto || { ano: Number(hoje.slice(0, 4)), mes: Number(hoje.slice(5, 7)) };
+  const prefixo = `${ano}-${String(mes).padStart(2, '0')}-`;
+  const celulas = diasDoMes(ano, mes, est.sessoes, est.cardios, hoje).map(d => d.dia == null ? '<b class="vazio"></b>'
+    : `<button type="button" class="dia${d.treino ? ' tr' : ''}${d.cardio ? ' cd' : ''}${d.hoje ? ' hj' : ''}" data-surgir data-acao="dia" data-iso="${d.iso}" aria-label="${d.dia}${d.treino ? ', treino' : ''}${d.cardio ? ', cardio' : ''}">${d.dia}</button>`).join('');
+  const r = resumoDoMes(ano, mes, est.sessoes, est.cardios);
+  // musculação e cardio juntos, por data (mais recente primeiro), só do mês mostrado
+  const linhas = itensHistorico(est.sessoes, est.cardios)
+    .filter(item => (diaLocal(item.ref.fim) || '').startsWith(prefixo))
+    .map(item => (item.tipo === 'cardio' ? linhaCardio(item.ref) : linhaTreino(est, item.ref))).join('');
   return `
     <div class="tela-historico">
-      <h1 class="titulo">Histórico</h1>
-      ${linhas || '<p class="muted">Nenhum treino registrado ainda.</p>'}
+      <header class="cab-tela a"><h1 class="titulo-tela">Histórico</h1></header>
+      <div class="bloco bloco-white calendario a">
+        <div class="cal-topo"><b>${NOMES_MES[mes - 1]} ${ano}</b>
+          <span class="cal-setas"><button type="button" class="redondo redondo-mini" data-acao="mes" data-d="-1" aria-label="Mês anterior">${ic('volta')}</button>
+          <button type="button" class="redondo redondo-mini" data-acao="mes" data-d="1" aria-label="Próximo mês">${ic('dir')}</button></span></div>
+        <div class="cal-grade num">${['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map(l => `<span>${l}</span>`).join('')}${celulas}</div>
+        <div class="cal-legenda"><span><i></i>Treino</span><span><i class="v"></i>Cardio</span></div>
+      </div>
+      <div class="grade resumo-mes">
+        <div class="bloco bloco-sky a"><div class="num-grande num" data-contar="${r.treinos}">${r.treinos}</div><div class="rotulo">treinos</div></div>
+        <div class="bloco bloco-sage a"><div class="num-grande num" data-contar="${r.cardios}">${r.cardios}</div><div class="rotulo">cardios</div></div>
+        <div class="bloco bloco-sand a"><div class="num-grande num"><span data-contar="${r.horas}">${r.horas}</span><small>h</small></div><div class="rotulo">no mês</div></div>
+      </div>
+      <div class="secao a">${linhas ? 'Neste mês' : ''}</div>
+      <div class="a">${linhas || '<p class="rotulo">Nenhum treino registrado neste mês.</p>'}</div>
     </div>`;
 }
 
-export function montar() {}
+export function montar(raiz) {
+  const tela = raiz.querySelector('.tela-historico');
+  if (!tela) return;
+  tela.onclick = ev => {
+    const b = ev.target.closest('[data-acao]');
+    if (!b) return;
+    if (b.dataset.acao === 'mes') {
+      const hoje = hojeISO();
+      const atual = mesVisto || { ano: Number(hoje.slice(0, 4)), mes: Number(hoje.slice(5, 7)) };
+      mesVisto = mesVizinho(atual.ano, atual.mes, Number(b.dataset.d));
+      atualizar(() => {});
+    } else if (b.dataset.acao === 'dia') {
+      const alvo = tela.querySelector(`.linha-sessao[data-dia="${b.dataset.iso}"]`);
+      if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+}
 
 // ---------- Detalhe ----------
 

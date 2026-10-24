@@ -278,3 +278,35 @@
 .ex-excluir:not([disabled]) { color: var(--erro); }
 .ex-excluir[disabled] { opacity: .45; }
 
+/* ---------- Histórico ---------- */
+.cal-topo { display: flex; justify-content: space-between; align-items: center; }
+.cal-topo b { font-family: var(--disp); font-weight: 500; font-size: 16px; }
+.cal-setas { display: flex; gap: 4px; }
+.cal-setas .redondo-mini { background: var(--bg); }
+.cal-grade { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; text-align: center; }
+.cal-grade > span { font-size: 11px; font-weight: 600; color: var(--mut); padding-bottom: 2px; }
+.cal-grade .dia, .cal-grade .vazio {
+  aspect-ratio: 1; max-width: 100%; border-radius: 50%; display: grid; place-items: center; position: relative;
+  font-size: 12.5px; font-weight: 600; border: 0; background: none; color: var(--ink); padding: 0; cursor: pointer;
+}
+.cal-grade .dia.tr { background: var(--ink); color: #fff; }
+.cal-grade .dia.cd::after { content: ""; position: absolute; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--ok); }
+.cal-grade .dia.tr.cd::after { background: var(--sage); }
+.cal-grade .dia.hj { box-shadow: inset 0 0 0 2px var(--ink); }
+.cal-legenda { display: flex; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--mut); font-weight: 500; }
+.cal-legenda i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); margin-right: 5px; }
+.cal-legenda i.v { background: var(--ok); }
+.resumo-mes { grid-template-columns: repeat(3, 1fr); margin-top: 8px; }
+.resumo-mes .num-grande { font-size: 24px; }
+.mini-treino {
+  width: 46px; height: 46px; border-radius: 14px; overflow: hidden; position: relative; flex: none;
+  display: grid; place-items: center; font-family: var(--disp); font-weight: 600; color: var(--ink);
+}
+.mini-treino img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mini-treino:has(img) { color: #fff; }
+.mini-treino:has(img)::after { content: ""; position: absolute; inset: 0; background: rgba(28, 31, 35, .45); }
+.mini-treino span { position: relative; z-index: 1; }
+.linha-sessao { gap: 12px; }
+.linha-sessao .linha-nome { flex: 1; }
+.linha-sessao > svg.ic { color: var(--mut); }
+
