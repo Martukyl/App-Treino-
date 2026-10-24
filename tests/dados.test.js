@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GRUPOS, EQUIPAMENTOS, exerciciosPadrao, treinosPadrao, DICAS_ANTIGAS, fotoDoTreino, corDoTreino } from '../js/dados.js';
+import { GRUPOS, EQUIPAMENTOS, exerciciosPadrao, treinosPadrao, DICAS_ANTIGAS, fotoDoTreino, corDoTreino, gruposComExercicios } from '../js/dados.js';
 
 test('cinco treinos A a E na ordem', () => {
   assert.deepEqual(treinosPadrao.map(t => t.id), ['A', 'B', 'C', 'D', 'E']);
@@ -67,4 +67,15 @@ test('corDoTreino faz rodízio de 4 cores pela letra', () => {
   assert.equal(corDoTreino('E'), 'sage');
   assert.equal(corDoTreino('F'), 'sky');
   assert.equal(corDoTreino('Z'), 'sky');
+});
+
+test('gruposComExercicios: só grupos com exercício, na ordem de GRUPOS', () => {
+  const exs = { a: { grupo: 'costas' }, b: { grupo: 'gluteo' }, c: { grupo: 'gluteo' } };
+  assert.deepEqual(gruposComExercicios(exs), ['gluteo', 'costas']);
+});
+
+test('gruposComExercicios: grupo personalizado vem por último', () => {
+  const exs = { a: { grupo: 'mobilidade' }, b: { grupo: 'ombro' } };
+  assert.deepEqual(gruposComExercicios(exs), ['ombro', 'mobilidade']);
+  assert.deepEqual(gruposComExercicios({}), []);
 });

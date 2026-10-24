@@ -138,3 +138,10 @@ export function corDoTreino(id) {
   const n = (String(id || 'A').toUpperCase().charCodeAt(0) - 65) % CORES_TREINO.length;
   return CORES_TREINO[n < 0 ? 0 : n];
 }
+
+// Grupos que têm ao menos um exercício: os conhecidos na ordem de GRUPOS, os personalizados no fim.
+export function gruposComExercicios(exercicios) {
+  const usados = new Set(Object.values(exercicios || {}).map(x => x.grupo).filter(Boolean));
+  return [...Object.keys(GRUPOS).filter(g => usados.has(g)), ...[...usados].filter(g => !(g in GRUPOS))];
+}
+

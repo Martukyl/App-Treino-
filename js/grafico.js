@@ -58,3 +58,13 @@ export function miniGrafico(valores, { largura = 46, altura = 20 } = {}) {
   return `<svg class="mini-grafico" viewBox="0 0 ${largura} ${altura}" aria-hidden="true"><path data-desenhar d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
+// Colunas (até as 8 últimas), altura proporcional à maior; a mais recente em destaque.
+export function graficoColunas(valores, rotulos) {
+  const v = (valores || []).slice(-8), r = (rotulos || []).slice(-8);
+  if (!v.length) return '';
+  const max = Math.max(...v) || 1;
+  const cols = v.map((x, i) => `
+    <div class="coluna${i === v.length - 1 ? ' atual' : ''}"><small class="num">${formatarNumero(x)}</small><i data-crescer style="height:${Math.max(6, Math.round((x / max) * 100))}%"></i><small>${esc(r[i] ?? '')}</small></div>`).join('');
+  return `<div class="colunas" role="img" aria-label="Evolução da carga">${cols}</div>`;
+}
+

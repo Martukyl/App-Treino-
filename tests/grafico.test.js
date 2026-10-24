@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { graficoLinha, miniGrafico } from '../js/grafico.js';
+import { graficoLinha, miniGrafico, graficoColunas } from '../js/grafico.js';
 
 test('menos de 2 pontos → mensagem', () => {
   assert.match(graficoLinha([{ data: '2026-10-02T10:00:00Z', carga: 40 }]), /depois de 2 treinos/);
@@ -83,4 +83,19 @@ test('graficoLinha com desenhar: true marca o traço para animar', () => {
   const pts = [{ data: '2026-10-01', valor: 70 }, { data: '2026-10-08', valor: 69 }];
   assert.match(graficoLinha(pts, { desenhar: true }), /<polyline[^>]*data-desenhar/);
   assert.doesNotMatch(graficoLinha(pts), /data-desenhar/);
+});
+
+test('graficoColunas: uma coluna por valor, a última destacada', () => {
+  const html = graficoColunas([10, 20], ['a', 'b']);
+  assert.equal((html.match(/<i /g) || []).length, 2);
+  assert.match(html, /class="coluna atual"[\s\S]*b<\/small>/);
+  assert.match(html, /data-crescer/);
+});
+
+test('graficoColunas mostra só as 8 últimas', () => {
+  const v = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const html = graficoColunas(v, v.map(String));
+  assert.equal((html.match(/<i /g) || []).length, 8);
+  assert.doesNotMatch(html, />1<\/small>/);
+  assert.equal(graficoColunas([], []), '');
 });

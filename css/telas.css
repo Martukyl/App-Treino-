@@ -247,3 +247,34 @@
 .tela-corpo .btn-grande { margin-top: 10px; }
 .linha-nome { display: flex; flex-direction: column; min-width: 0; }
 
+/* ---------- Exercícios ---------- */
+.busca-bloco { display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 99px; padding: 0 14px; min-height: 46px; margin: 0; color: var(--mut); }
+.busca-bloco input { flex: 1; min-width: 0; border: 0; background: none; min-height: 44px; padding: 0; font-size: 15px; color: var(--ink); }
+.busca-bloco input:focus { outline: 0; }
+.busca-bloco:focus-within { box-shadow: inset 0 0 0 2px var(--ink); }
+.filtros { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 10px -16px; padding: 0 16px; }
+.filtros::-webkit-scrollbar { display: none; }
+.filtros .seletor-op { flex: none; background: var(--white); padding: 0 14px; }
+.filtros .seletor-op.on { background: var(--ink); }
+.ex-linha .linha-nome b { font-weight: 600; font-size: 14px; }
+.ponto-subir { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-left: 6px; vertical-align: 1px; }
+.ex-direita { display: flex; align-items: center; gap: 8px; flex: none; }
+.ex-carga { font-family: var(--disp); font-weight: 600; font-size: 14px; }
+.capa-exercicio { height: 220px; }
+.capa-voltar { position: absolute; z-index: 2; top: calc(12px + env(safe-area-inset-top)); left: 16px; }
+.ex-titulo { font-size: 22px; padding: 0 4px; margin-top: -8px; position: relative; }
+.etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; padding: 0 4px; }
+.etiquetas .pilula { min-height: 30px; }
+.tela-exercicio > .rotulo { padding: 0 4px; margin: 4px 0 10px; }
+.bloco-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.colunas { display: flex; align-items: flex-end; gap: 7px; height: 120px; margin-top: 10px; }
+.coluna { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; min-width: 0; }
+.coluna i { width: 100%; border-radius: 8px 8px 4px 4px; background: rgba(28, 31, 35, .18); }
+.coluna.atual i { background: var(--ink); }
+.coluna small { font-size: 10.5px; color: var(--mut); font-weight: 600; white-space: nowrap; }
+.dica { margin: 6px 0 0; color: #3d4248; font-size: 14px; }
+.ex-acoes { margin-top: 12px; }
+.ex-acoes .pilula { min-height: 48px; }
+.ex-excluir:not([disabled]) { color: var(--erro); }
+.ex-excluir[disabled] { opacity: .45; }
+
