@@ -105,3 +105,14 @@ export const ordinal = pos => `${pos}º`;
 export const normalizarApelido = txt => String(txt ?? '').trim();
 export const normalizarCodigo = txt => String(txt ?? '').replace(/\s+/g, '').toUpperCase();
 export const CODIGO_VALIDO = /^[A-HJ-NP-Z2-9]{6}$/;
+
+// Círculo de cada pessoa no ranking: o emoji que ela escolheu ou, sem ele, as 2 primeiras letras do apelido.
+export function avatarMembro({ apelido, emoji } = {}) {
+  if (emoji && String(emoji).trim()) return { tipo: 'emoji', texto: String(emoji).trim() };
+  const letras = [...String(apelido ?? '').trim()].slice(0, 2).join('').toUpperCase();
+  return { tipo: 'iniciais', texto: letras || '?' };
+}
+
+// Quando o período do ranking recomeça.
+export const seloZera = periodo => (periodo === 'mes' ? 'zera no dia 1º' : 'zera na segunda');
+

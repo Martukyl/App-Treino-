@@ -179,3 +179,41 @@
 .bloco-botao svg.ic { width: 26px; height: 26px; }
 .tela-cardio-detalhe .mapa-caixa { border-radius: 18px; overflow: hidden; position: relative; }
 
+/* ---------- Ranking ---------- */
+.grupo-linha { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.grupo-pos { font-size: 40px; }
+.grupo-pos small { color: #fff; }
+.selo-zera { background: rgba(255, 255, 255, .14); color: #fff; }
+.tela-ranking .seletor { margin-top: 10px; background: var(--white); }
+.seletor-vidro {
+  position: sticky; top: calc(10px + env(safe-area-inset-top)); z-index: 5; margin-top: 8px; padding: 4px; border-radius: 99px;
+  display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none;
+}
+.seletor-vidro::-webkit-scrollbar { display: none; }
+.seletor-vidro .seletor-op { flex: 1 0 auto; padding: 0 14px; }
+.rank { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.rank-linha { background: var(--white); border-radius: 18px; padding: 10px 12px; display: grid; grid-template-columns: 22px 36px 1fr auto; align-items: center; gap: 8px; }
+.rank-linha.eu { box-shadow: inset 0 0 0 2px var(--ink); }
+.rank-pos { font-family: var(--disp); font-weight: 600; font-size: 15px; }
+.rank-av { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; color: var(--ink); }
+.rank-av.emoji { font-size: 18px; }
+.rank-meio { min-width: 0; display: flex; flex-direction: column; }
+.rank-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-barra { height: 6px; border-radius: 9px; background: var(--bg); margin-top: 5px; overflow: hidden; }
+.rank-barra b { display: block; height: 100%; border-radius: 9px; background: var(--ink); transition: width .6s var(--suave); }
+.rank-valor { font-family: var(--disp); font-weight: 600; font-size: 15px; white-space: nowrap; }
+.rank-rodape { text-align: center; margin: 10px 4px 0; }
+.tela-ranking .btn-grande { margin-top: 12px; }
+
+/* ---------- Grupo (Ajustes) ---------- */
+.grupo-codigo { font-family: var(--disp); font-weight: 600; font-size: 22px; letter-spacing: .08em; color: var(--ink); }
+.grupo-nome { font-weight: 600; }
+.lista-membros { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.membro-linha { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: 16px; padding: 8px 10px; }
+.membro-nome { flex: 1; min-width: 0; font-weight: 500; }
+.membro-emoji { font-size: 18px; }
+.emoji-grade { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.emoji-op { min-height: 40px; border: 0; border-radius: 12px; background: var(--bg); font-size: 18px; cursor: pointer; }
+.emoji-op.sel { background: var(--ink); }
+.btn-mini { min-height: 34px; padding: 6px 12px; font-size: 12.5px; }
+
