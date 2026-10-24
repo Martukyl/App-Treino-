@@ -4,7 +4,7 @@
 
 export const CAMPOS_CORPO = [
   { campo: 'peso', rotulo: 'Peso', unidade: 'kg', grupo: null, direcao: 'meta' },
-  { campo: 'busto', rotulo: 'Busto', unidade: 'cm', grupo: 'Superiores', direcao: 'subir' },
+  { campo: 'busto', rotulo: 'Peitoral', unidade: 'cm', grupo: 'Superiores', direcao: 'subir' },
   { campo: 'ombros', rotulo: 'Ombros', unidade: 'cm', grupo: 'Superiores', direcao: 'subir' },
   { campo: 'bracoD', rotulo: 'Braço direito', unidade: 'cm', grupo: 'Superiores', direcao: 'subir' },
   { campo: 'bracoE', rotulo: 'Braço esquerdo', unidade: 'cm', grupo: 'Superiores', direcao: 'subir' },

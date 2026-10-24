@@ -6,19 +6,19 @@ export function render() {
   const est = obterEstado();
   return `
     <div class="tela-boas-vindas">
-      <h1 class="titulo">Bem-vinda ao Treino 💪</h1>
+      <h1 class="titulo">Boas-vindas ao Treino</h1>
       <section class="card">
-        <label>Como quer ser chamada?
+        <label>Seu nome (opcional)
           <input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Seu nome" value="${esc(est.nome || '')}">
         </label>
         <div class="escolha-programa" role="radiogroup" aria-label="Programa de treino">
           <label class="opcao-programa">
             <input type="radio" name="programa" value="padrao" checked>
-            <span>Usar o programa padrão (5 treinos A–E, foco em glúteo)</span>
+            <span>Programa pronto · 5 treinos (A a E), um por dia</span>
           </label>
           <label class="opcao-programa">
             <input type="radio" name="programa" value="vazio">
-            <span>Começar sem treinos e montar os meus</span>
+            <span>Começar do zero · você monta os seus treinos</span>
           </label>
         </div>
         <p class="muted">Seus dados ficam só neste celular. Exporte um backup em Ajustes de vez em quando.</p>

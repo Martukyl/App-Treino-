@@ -12,7 +12,7 @@ import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
 import { sincronizarRanking } from '../ranking.js';
 
-// Cards que a usuária expandiu/recolheu na mão (índice → true = aberto), por sessão.
+// Cards que a pessoa expandiu/recolheu na mão (índice → true = aberto), por sessão.
 let aberturaManual = new Map();
 let sessaoDaAbertura = null;
 let intervaloTempo = null;

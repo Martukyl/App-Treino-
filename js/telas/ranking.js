@@ -1,4 +1,4 @@
-// Ranking entre amigas: tela #/ranking e o card "Ranking da semana" da tela Hoje.
+// Ranking do grupo: tela #/ranking e o card "Ranking da semana" da tela Hoje.
 // Apelidos e nomes de grupo vêm de outras pessoas: SEMPRE passam por esc() antes de virar HTML.
 import { esc } from '../util.js';
 import { obterEstado, atualizar } from '../estado.js';
@@ -12,7 +12,7 @@ import { dadosCardRanking } from '../cards.js';
 
 const MEDALHAS = ['🥇', '🥈', '🥉'];
 const ABAS = [
-  ['pontos', 'Pontos'], ['treinos', 'Treinos'], ['cardioMin', 'Cardio (min)'], ['km', 'Km'], ['sequencia', '🔥']
+  ['pontos', 'Pontos'], ['treinos', 'Treinos'], ['cardioMin', 'Cardio (min)'], ['km', 'Km'], ['sequencia', 'Sequência']
 ];
 
 // escolhas da tela (valem enquanto o app estiver aberto)

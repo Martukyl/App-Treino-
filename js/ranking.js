@@ -1,4 +1,4 @@
-// Ranking entre amigas — cola do app: sincroniza os totais diários, carrega o ranking do grupo
+// Ranking do grupo — cola do app: sincroniza os totais diários, carrega o ranking do grupo
 // e executa as ações do grupo (criar, entrar, sair, remover, editar perfil).
 // Tudo é assíncrono e silencioso quando offline ou não configurado: nunca bloqueia a interface.
 import { obterEstado, atualizar } from './estado.js';
@@ -98,7 +98,7 @@ async function buscarDados(forcar) {
     const r = obterEstado().ranking;
     const dados = { chave, em: Date.now(), hoje, inicio, membros, dias, criadoPor: null, desde: null, removida: false };
     if (!membros.some(m => m.user_id === r.userId)) {
-      // a criadora me removeu (ou o grupo acabou): volta ao estado "sem grupo"
+      // quem criou o grupo me removeu (ou o grupo acabou): volta ao estado "sem grupo"
       dados.removida = true;
       cache = null;
       mudarRanking(x => (x ? { ...x, grupo: null, criador: false } : x));

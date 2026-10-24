@@ -1,6 +1,6 @@
 // Persistência do estado em localStorage, migração e backup.
 // carregar/salvar recebem o storage por parâmetro para poderem ser testados no Node.
-import { exerciciosPadrao, treinosPadrao } from './dados.js';
+import { exerciciosPadrao, treinosPadrao, DICAS_ANTIGAS } from './dados.js';
 
 export const CHAVE = 'appTreino.v1';
 export const VERSAO = 3;
@@ -22,7 +22,7 @@ export function estadoInicial() {
     cardioAtual: null,
     // instalação nova: mostra as boas-vindas antes de tudo (estados antigos migram com false)
     boasVindasPendente: true,
-    // ranking entre amigas (Supabase): null = nunca usou; ver normalizarRanking
+    // ranking do grupo (Supabase): null = nunca usou; ver normalizarRanking
     ranking: null
   };
 }
@@ -49,6 +49,11 @@ export function migrar(estado) {
   const e = { ...estado, exercicios: { ...(estado.exercicios || {}) } };
   for (const [id, ex] of Object.entries(exerciciosPadrao)) {
     if (!e.exercicios[id]) e.exercicios[id] = copiar(ex);
+  }
+  // textos neutros (v2.0): troca a dica antiga do catálogo só se ninguém a editou
+  for (const [id, antiga] of Object.entries(DICAS_ANTIGAS)) {
+    const ex = e.exercicios[id];
+    if (ex && ex.personalizado === false && ex.dica === antiga) e.exercicios[id] = { ...ex, dica: exerciciosPadrao[id].dica };
   }
   if (!Array.isArray(e.treinos)) e.treinos = copiar(treinosPadrao);
   if (!Array.isArray(e.sessoes)) e.sessoes = [];

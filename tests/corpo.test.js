@@ -151,3 +151,8 @@ test('contarMedidas: só os 10 campos em cm, sem peso', () => {
   assert.equal(contarMedidas({ peso: 60 }), 0);
   assert.equal(contarMedidas({}), 0);
 });
+
+test('medida busto aparece como Peitoral (campo salvo continua busto)', () => {
+  const c = CAMPOS_CORPO.find(x => x.campo === 'busto');
+  assert.equal(c.rotulo, 'Peitoral');
+});

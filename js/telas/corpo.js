@@ -39,7 +39,7 @@ function htmlPerfil(est) {
         </div>
         <input type="file" accept="image/*" hidden data-campo="arquivo-perfil">
       </div>
-      <label>Nome<input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Como quer ser chamada?" value="${esc(est.nome || '')}"></label>
+      <label>Nome<input type="text" data-campo="nome" maxlength="30" autocomplete="given-name" placeholder="Seu nome (opcional)" value="${esc(est.nome || '')}"></label>
       <div class="campos-presc">
         <label>Altura (cm)<input type="text" inputmode="decimal" data-campo="altura" placeholder="165" value="${p.altura != null ? esc(formatarCampo(p.altura)) : ''}"></label>
         <label>Meta de peso (kg)<input type="text" inputmode="decimal" data-campo="metaPeso" placeholder="60" value="${p.metaPeso != null ? esc(formatarCampo(p.metaPeso)) : ''}"></label>

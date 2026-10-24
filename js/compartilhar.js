@@ -17,7 +17,7 @@ function baixar(blob, nomeArquivo) {
 }
 
 // Compartilha o PNG pelo menu do sistema; sem suporte a arquivos, baixa a imagem.
-// Devolve 'compartilhado' | 'cancelado' | 'baixado'. AbortError (ela fechou o menu) não é erro.
+// Devolve 'compartilhado' | 'cancelado' | 'baixado'. AbortError (a pessoa fechou o menu) não é erro.
 export async function compartilharImagem(blob, nomeArquivo, texto) {
   try {
     const arquivo = new File([blob], nomeArquivo, { type: 'image/png' });
