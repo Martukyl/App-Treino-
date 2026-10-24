@@ -2,7 +2,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
-const BASE = 'http://localhost:8080/';
+const BASE = process.env.BASE_URL || 'http://localhost:8080/';
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (nome, cond, extra = '') => res.push([cond ? 'OK ' : 'FALHA', nome, extra]);
@@ -26,7 +26,10 @@ const FAKE = `
     window.__watchers = () => w.length;
   })();`;
 
-const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
+// navegador: CDP_URL (Chrome já aberto com --remote-debugging-port) ou BROWSER_PATH (padrão: Edge no Windows)
+const browser = process.env.CDP_URL
+  ? await chromium.connectOverCDP(process.env.CDP_URL)
+  : await chromium.launch({ executablePath: process.env.BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, serviceWorkers: 'block' });
 await ctx.addInitScript(FAKE);
 await ctx.route(/tile\.openstreetmap\.org/, r => r.abort());

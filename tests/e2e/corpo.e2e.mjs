@@ -2,13 +2,17 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
-const BASE = 'http://localhost:8080/';
-const IMG = new URL('../../img/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+const BASE = process.env.BASE_URL || 'http://localhost:8080/';
+// pasta img/ do app (IMG_DIR quando o script roda copiado fora do repo)
+const IMG = process.env.IMG_DIR || new URL('../../img/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (nome, cond, extra = '') => { res.push([cond ? 'OK ' : 'FALHA', nome, extra]); };
 
-const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
+// navegador: CDP_URL (Chrome já aberto com --remote-debugging-port) ou BROWSER_PATH (padrão: Edge no Windows)
+const browser = process.env.CDP_URL
+  ? await chromium.connectOverCDP(process.env.CDP_URL)
+  : await chromium.launch({ executablePath: process.env.BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, serviceWorkers: 'block' });
 const page = await ctx.newPage();
 const erros = [];
