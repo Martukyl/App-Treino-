@@ -126,3 +126,15 @@ export const DICAS_ANTIGAS = {
   triceps_frances: 'Sentada, segure um halter com as duas mãos atrás da cabeça. Estenda os braços sem abrir os cotovelos.',
   abducao: 'Tronco levemente inclinado à frente aumenta o trabalho do glúteo. Abra com controle, segure 1 s aberta e volte devagar.'
 };
+
+// Foto de academia de cada treino do programa (A–E); treinos criados pela pessoa não têm foto.
+export function fotoDoTreino(id) {
+  return /^[A-E]$/.test(id || '') ? `./img/treino-${id.toLowerCase()}.jpg` : null;
+}
+
+// Cor do bloco de um treino (usada quando não há foto e nas miniaturas): rodízio pela letra.
+const CORES_TREINO = ['sage', 'sky', 'sand', 'clay'];
+export function corDoTreino(id) {
+  const n = (String(id || 'A').toUpperCase().charCodeAt(0) - 65) % CORES_TREINO.length;
+  return CORES_TREINO[n < 0 ? 0 : n];
+}

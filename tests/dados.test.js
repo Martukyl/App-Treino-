@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GRUPOS, EQUIPAMENTOS, exerciciosPadrao, treinosPadrao, DICAS_ANTIGAS } from '../js/dados.js';
+import { GRUPOS, EQUIPAMENTOS, exerciciosPadrao, treinosPadrao, DICAS_ANTIGAS, fotoDoTreino, corDoTreino } from '../js/dados.js';
 
 test('cinco treinos A a E na ordem', () => {
   assert.deepEqual(treinosPadrao.map(t => t.id), ['A', 'B', 'C', 'D', 'E']);
@@ -52,4 +52,19 @@ test('DICAS_ANTIGAS só tem ids do catálogo e textos diferentes dos atuais', ()
     assert.ok(exerciciosPadrao[id], id);
     assert.notEqual(exerciciosPadrao[id].dica, antiga, id);
   }
+});
+
+test('fotoDoTreino: só A a E têm foto', () => {
+  assert.equal(fotoDoTreino('C'), './img/treino-c.jpg');
+  assert.equal(fotoDoTreino('A'), './img/treino-a.jpg');
+  assert.equal(fotoDoTreino('F'), null);
+  assert.equal(fotoDoTreino(''), null);
+});
+
+test('corDoTreino faz rodízio de 4 cores pela letra', () => {
+  assert.equal(corDoTreino('A'), 'sage');
+  assert.equal(corDoTreino('B'), 'sky');
+  assert.equal(corDoTreino('E'), 'sage');
+  assert.equal(corDoTreino('F'), 'sky');
+  assert.equal(corDoTreino('Z'), 'sky');
 });
