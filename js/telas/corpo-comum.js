@@ -2,6 +2,7 @@
 import { esc, formatarNumero } from '../util.js';
 import { direcaoDiferenca, resumoCampo } from '../corpo.js';
 import { carregarImagens } from '../fotos.js';
+import { ic } from '../icones.js';
 
 // "+1,2" / "−0,5" / "0"; sem valor, traço
 export function fmtDif(d) {
@@ -20,11 +21,13 @@ export function spanDif(campo, dif, ctx) {
   return `<span class="dif dif-${direcaoDiferenca(campo, dif, ctx)}">${fmtDif(dif)}</span>`;
 }
 
-// letra inicial do nome; sem nome, um rostinho
+// letra inicial do nome; sem nome, vazio (o avatar mostra o ícone de pessoa)
 export function inicialAvatar(nome) {
   const n = (nome || '').trim();
-  return n ? [...n][0].toUpperCase() : '🙂';
+  return n ? [...n][0].toUpperCase() : '';
 }
+
+const conteudoLetra = nome => esc(inicialAvatar(nome)) || ic('pessoa');
 
 // Círculo de avatar: foto do perfil (carregada depois, via ligarAvatares) ou a inicial.
 export function htmlAvatar(est, classe = '') {
@@ -32,7 +35,7 @@ export function htmlAvatar(est, classe = '') {
   if (fotoId) {
     return `<span class="avatar ${classe}"><img data-foto="${esc(fotoId)}" alt=""></span>`;
   }
-  return `<span class="avatar avatar-letra ${classe}">${esc(inicialAvatar(est.nome))}</span>`;
+  return `<span class="avatar avatar-letra ${classe}">${conteudoLetra(est.nome)}</span>`;
 }
 
 // Carrega as fotos dos avatares; se a foto sumiu do banco, cai na inicial.
@@ -41,6 +44,6 @@ export function ligarAvatares(raiz, est) {
     const av = img.closest('.avatar');
     if (!av) return;
     av.classList.add('avatar-letra');
-    av.textContent = inicialAvatar(est.nome);
+    av.innerHTML = conteudoLetra(est.nome);
   });
 }

@@ -31,42 +31,40 @@ function htmlIndisponivel(res) {
   }
 }
 
-// ---------- Card "Ranking da semana" na tela Hoje ----------
+// ---------- Bloco de pontos na tela Hoje ----------
 
-function htmlPodio(res) {
-  if (!res.lista.length) return '<p class="muted">Ainda sem dados.</p>';
+// Texto curto da posição no grupo (só o resultado; as mensagens longas ficam na tela #/ranking).
+function textoPosicaoHoje(res) {
+  if (!res) return 'pontos · carregando…';
+  if (!res.ok) {
+    if (res.motivo === 'offline') return 'pontos · sem conexão';
+    if (res.motivo === 'sessao-expirada') return 'pontos · entre no grupo de novo';
+    return 'pontos na semana';
+  }
   const eu = obterEstado().ranking?.userId;
-  const top = res.lista.slice(0, 3).map((x, i) => `
-    <li class="podio-item${x.userId === eu ? ' eu' : ''}" data-user="${esc(x.userId)}">
-      <span class="podio-medalha" aria-hidden="true">${MEDALHAS[i]}</span>
-      <span class="podio-emoji">${esc(x.emoji)}</span>
-      <span class="podio-nome">${esc(x.apelido)}</span>
-      <span class="podio-valor">${esc(formatarValor('pontos', x.pontos))}</span>
-    </li>`).join('');
   const pos = res.lista.findIndex(x => x.userId === eu);
-  const minha = pos >= 0
-    ? `<p data-campo="minha-posicao">Sua posição: <strong>${ordinal(pos + 1)}</strong> · ${esc(formatarValor('pontos', res.lista[pos].pontos))}</p>` : '';
-  const aviso = res.offline ? '<p class="muted" data-msg="offline">Sem conexão — últimos dados.</p>' : '';
-  return `<ol class="podio">${top}</ol>${minha}${aviso}`;
+  return pos >= 0 ? `pontos · ${ordinal(pos + 1)} no grupo` : 'pontos na semana';
 }
 
-const htmlConteudoHoje = res => (res.ok ? htmlPodio(res) : htmlIndisponivel(res));
-
-// Só aparece com grupo (e ranking configurado). O conteúdo é preenchido em montarCardRankingHoje.
-export function renderCardRankingHoje() {
-  const grupo = grupoAtual();
-  if (!rankingConfigurado() || !grupo) return '';
-  const emCache = rankingEmCache('semana');
-  return `
-    <section class="card card-ranking" data-sec="ranking-semana">
-      <h2 class="sec-card">Ranking da semana · ${esc(grupo.nome)}</h2>
-      <div data-campo="ranking-conteudo">${emCache ? htmlConteudoHoje(emCache) : '<p class="muted">Carregando…</p>'}</div>
-      <a class="btn btn-sec btn-bloco" data-acao="ver-ranking" href="#/ranking">Ver ranking</a>
-    </section>`;
+// pontos: pontos da semana calculados no aparelho; porDia: pontos de seg a dom (barrinhas)
+export function renderCardRankingHoje(pontos, porDia) {
+  const max = Math.max(1, ...porDia);
+  const barras = porDia.map(v =>
+    `<i data-crescer class="${v ? 'on' : ''}" style="height:${v ? Math.max(18, Math.round(v / max * 100)) : 12}%"></i>`).join('');
+  const comGrupo = rankingConfigurado() && !!grupoAtual();
+  const conteudo = `
+      <div class="num-grande num" data-contar="${pontos}">${pontos}</div>
+      <div class="rotulo" data-campo="ranking-conteudo">${comGrupo ? textoPosicaoHoje(rankingEmCache('semana')) : 'pontos na semana'}</div>
+      <div class="barras" aria-hidden="true">${barras}</div>`;
+  if (comGrupo) {
+    return `<a class="bloco bloco-sand tocavel a" data-sec="ranking-semana" data-acao="ver-ranking" href="#/ranking">${conteudo}</a>`;
+  }
+  const convite = rankingConfigurado() ? '<a class="link-mini" href="#/ajustes">Criar ou entrar em um grupo</a>' : '';
+  return `<div class="bloco bloco-sand a" data-sec="ranking-semana">${conteudo}${convite}</div>`;
 }
 
 export async function montarCardRankingHoje(raiz) {
-  const alvo = raiz.querySelector('[data-campo="ranking-conteudo"]');
+  const alvo = raiz.querySelector('[data-sec="ranking-semana"][href] [data-campo="ranking-conteudo"]');
   if (!alvo) return;
   const res = await carregarRanking('semana');
   if (!alvo.isConnected) return; // a tela mudou enquanto buscava
@@ -75,7 +73,7 @@ export async function montarCardRankingHoje(raiz) {
     atualizar(() => {});
     return;
   }
-  alvo.innerHTML = htmlConteudoHoje(res);
+  alvo.textContent = textoPosicaoHoje(res);
 }
 
 // ---------- Tela #/ranking ----------
