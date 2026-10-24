@@ -16,11 +16,25 @@ Abra `http://localhost:8080/`.
 node --test "tests/*.test.js"
 ```
 
+Testes no navegador real (Edge no Windows ou Chrome no Linux): ver `tests/e2e/README.md`.
+
+## Visual
+
+Visual "Blocos" (v2.0): blocos coloridos, fontes Unbounded e Figtree (locais, em `vendor/fonts/`),
+vidro fosco no menu, no topo ao rolar, no descanso e nas folhas. Estilos em `css/base.css`
+(tokens e componentes) e `css/telas.css` (cada tela); animações em `js/movimento.js`. Só tema claro.
+Fotos de academia sem pessoas (créditos em `img/CREDITOS.md`).
+
 ## Ícones
+
+O desenho está em `icons/icon.svg`. Para gerar os PNGs:
 
 ```
 powershell -ExecutionPolicy Bypass -File tools/gerar-icones.ps1
 ```
+
+ou, com o ImageMagick (Linux), a partir do SVG sem os cantos arredondados do fundo
+(`magick -background none -density 1200 icone.svg -resize 512x512 icons/icon-512.png`, idem 192 e 180).
 
 ## Publicar no GitHub Pages
 
