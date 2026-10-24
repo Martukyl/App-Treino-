@@ -1,6 +1,6 @@
 // Detalhe de um cardio (#/cardio/<id>), GPS ou aparelho.
 import { esc, formatarDataCompleta, formatarNumero } from '../util.js';
-import { ICONE_CARDIO, ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro } from '../cardio.js';
+import { ROTULO_CARDIO, formatarKm, formatarRitmo, formatarCronometro } from '../cardio.js';
 import { parciaisKm } from '../geo.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast, aoSairDaTela } from '../ui.js';
@@ -27,7 +27,7 @@ export function render(id) {
       </div>`;
   }
   const gps = c.modo === 'gps';
-  const titulo = `${ICONE_CARDIO[c.tipo] || '❤️'} ${ROTULO_CARDIO[c.tipo] || 'Cardio'} · ${formatarDataCompleta(c.inicio)} ${hora(c.inicio)}`;
+  const titulo = `${ROTULO_CARDIO[c.tipo] || 'Cardio'} · ${formatarDataCompleta(c.inicio)} ${hora(c.inicio)}`;
   const temDist = c.distanciaM != null && c.distanciaM > 0;
   const kmh = temDist && c.duracaoSeg > 0 ? (c.distanciaM / 1000) / (c.duracaoSeg / 3600) : null;
   const ritmo = temDist ? c.duracaoSeg / (c.distanciaM / 1000) : null;

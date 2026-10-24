@@ -105,8 +105,11 @@ export function trocarTela(velha, nova, dir) {
   velha.style.position = 'absolute';
   velha.style.inset = '0 0 auto 0';
   velha.style.pointerEvents = 'none';
+  // remove pelo fim da animação ou, se a linha do tempo parar (aba em segundo plano), pelo relógio
+  const tirar = () => velha.remove();
   velha.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-dx}px)` }],
-    { duration: 240, easing: 'ease-in', fill: 'forwards' }).onfinish = () => velha.remove();
+    { duration: 240, easing: 'ease-in', fill: 'forwards' }).onfinish = tirar;
+  setTimeout(tirar, 320);
   nova.animate([{ opacity: 0, transform: `translateX(${dx}px)` }, { opacity: 1, transform: 'none' }],
     { duration: 340, easing: SUAVE });
 }

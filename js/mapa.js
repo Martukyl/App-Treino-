@@ -1,7 +1,18 @@
 // Mapa (Leaflet 1.9.4, carregado sob demanda) para a gravação ao vivo e o detalhe do cardio.
 // Só L.map, L.tileLayer, L.polyline e L.circleMarker (as imagens de marcador não existem no app).
 
-const COR_TRAJETO = '#bf6a37'; // cobre do tema
+const COR_TRAJETO = '#1c1f23'; // grafite do visual Blocos
+const COR_BORDA = '#efe3cc';   // borda areia por baixo do traço
+
+// Trajeto com borda: duas polylines (borda larga embaixo, traço por cima) que andam juntas.
+function linhaDupla(L, mapa, pts) {
+  const borda = L.polyline(pts, { color: COR_BORDA, weight: 11, opacity: 1 }).addTo(mapa);
+  const traco = L.polyline(pts, { color: COR_TRAJETO, weight: 5, opacity: 1 }).addTo(mapa);
+  return {
+    addLatLng(ll) { borda.addLatLng(ll); traco.addLatLng(ll); },
+    remove() { borda.remove(); traco.remove(); }
+  };
+}
 const URL_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 let carregando = null;
@@ -62,8 +73,7 @@ export async function criarMapaAoVivo(el, { aoSoltarSeguir } = {}) {
     // redesenha tudo: segmentos = [[ [lat, lon, alt, t], … ], …]
     definirTrajeto(segmentos) {
       linhas.forEach(l => l.remove());
-      linhas = segmentos.filter(s => s.length).map(s =>
-        L.polyline(s.map(linha(L)), { color: COR_TRAJETO, weight: 5, opacity: 0.95 }).addTo(mapa));
+      linhas = segmentos.filter(s => s.length).map(s => linhaDupla(L, mapa, s.map(linha(L))));
       const ultimoSeg = segmentos.filter(s => s.length).at(-1);
       if (ultimoSeg) this.posicao(ultimoSeg.at(-1)[0], ultimoSeg.at(-1)[1]);
     },
@@ -71,7 +81,7 @@ export async function criarMapaAoVivo(el, { aoSoltarSeguir } = {}) {
     adicionarPonto(lat, lon, novo) {
       const ll = L.latLng(lat, lon);
       if (novo || !linhas.length) {
-        linhas.push(L.polyline([ll], { color: COR_TRAJETO, weight: 5, opacity: 0.95 }).addTo(mapa));
+        linhas.push(linhaDupla(L, mapa, [ll]));
       } else {
         linhas.at(-1).addLatLng(ll);
       }
@@ -106,11 +116,11 @@ export async function criarMapaEstatico(el, segmentos) {
   for (const s of validos) {
     const pts = s.map(linha(L));
     todos.push(...pts);
-    L.polyline(pts, { color: COR_TRAJETO, weight: 5, opacity: 0.95 }).addTo(mapa);
+    linhaDupla(L, mapa, pts);
   }
   if (todos.length) {
-    L.circleMarker(todos[0], { radius: 8, color: '#fff', weight: 3, fillColor: '#3ddc97', fillOpacity: 1 }).addTo(mapa);
-    L.circleMarker(todos.at(-1), { radius: 8, color: '#fff', weight: 3, fillColor: '#ff4d4f', fillOpacity: 1 }).addTo(mapa);
+    L.circleMarker(todos[0], { radius: 8, color: '#fff', weight: 3, fillColor: '#3f7a4a', fillOpacity: 1 }).addTo(mapa);
+    L.circleMarker(todos.at(-1), { radius: 8, color: '#fff', weight: 3, fillColor: '#a8432f', fillOpacity: 1 }).addTo(mapa);
     if (todos.length === 1) mapa.setView(todos[0], 16);
     else mapa.fitBounds(L.latLngBounds(todos), { padding: [28, 28], maxZoom: 18 });
   } else {

@@ -149,3 +149,33 @@
 .resumo-botoes { margin-top: 10px; }
 .resumo-botoes .pilula { min-height: 50px; }
 
+/* ---------- Cardio ---------- */
+.seletor { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; background: var(--bg); border-radius: 99px; padding: 4px; }
+.seletor-op { border: 0; border-radius: 99px; min-height: 40px; background: transparent; color: var(--ink); font-weight: 600; font-size: 13.5px; cursor: pointer; transition: background .3s, color .3s; }
+.seletor-op.on { background: var(--ink); color: #fff; }
+.cardio-iniciar { margin-top: 10px; }
+.mapa-caixa { padding: 0; height: 240px; background: #e9ece4; border: 0; margin: 0; }
+.mapa-caixa .mapa { position: absolute; inset: 0; height: 100%; border-radius: 0; }
+.mapa.leaflet-container { background: #e9ece4; }
+.selo-gps { position: absolute; z-index: 500; top: 12px; left: 12px; margin: 0; border-radius: 99px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: var(--ink); }
+.selo-gps.sinal-ok::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+.btn-centralizar { position: absolute; z-index: 500; top: 12px; right: 12px; color: var(--ink); }
+.mapa-aviso { position: absolute; z-index: 500; left: 12px; right: 12px; bottom: 12px; margin: 0; }
+.cron-bloco { text-align: center; margin-top: 8px; padding: 16px 14px; }
+.cron-grande { font-family: var(--disp); font-weight: 600; font-size: 44px; letter-spacing: -.03em; line-height: 1.05; }
+.grade-metricas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.metrica { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 18px; border: 0; min-width: 0; }
+.metrica:not(.bloco) { background: var(--bg); }
+.metrica.bloco { border-radius: 20px; }
+.metrica-valor { font-family: var(--disp); font-weight: 600; font-size: 17px; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.metrica-rotulo { font-size: 12px; color: var(--mut); order: -1; }
+.aviso-tela { text-align: center; margin: 8px 0 0; }
+.cardio-botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.bloco-botao {
+  border: 0; border-radius: 24px; padding: 18px 10px; min-height: 84px; cursor: pointer; font-weight: 600; font-size: 15px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--ink);
+}
+.bloco-botao.bloco-ink { color: #fff; }
+.bloco-botao svg.ic { width: 26px; height: 26px; }
+.tela-cardio-detalhe .mapa-caixa { border-radius: 18px; overflow: hidden; position: relative; }
+

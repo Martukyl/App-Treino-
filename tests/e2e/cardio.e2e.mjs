@@ -34,6 +34,8 @@ const page = await ctx.newPage();
 const erros = [];
 page.on('console', m => { if (m.type() === 'error' && !/tile\.openstreetmap|ERR_FAILED|net::/.test(m.text())) erros.push(m.text()); });
 page.on('pageerror', e => erros.push(String(e)));
+// relógio simulado congela as animações (WAAPI): roda com movimento reduzido
+await page.emulateMedia({ reducedMotion: 'reduce' });
 await page.clock.install({ time: new Date('2026-10-03T07:00:00-03:00') });
 
 const estado = () => page.evaluate(() => JSON.parse(localStorage.getItem('appTreino.v1')));
@@ -161,6 +163,8 @@ e = await estado();
 const ap = e.cardios.find(x => x.modo === 'aparelho');
 ok('Esteira salva c/ kcal estimada', ap && ap.kcalEstimada && ap.kcal > 0 && ap.distanciaM === 3200, ap && `${ap.kcal} ${ap.distanciaM}`);
 await ir('#/historico');
+// o redesenho do hashchange pode chegar depois do relógio simulado: espera a lista
+await page.locator('.linha-sessao').nth(1).waitFor();
 const tipos = await page.locator('.linha-sessao').evaluateAll(a => a.map(x => x.dataset.tipo));
 ok('Histórico com 2 cardios', tipos.filter(t => t === 'cardio').length === 2, tipos.join(','));
 await page.screenshot({ path: `${OUT}/c3-historico.png`, fullPage: true });

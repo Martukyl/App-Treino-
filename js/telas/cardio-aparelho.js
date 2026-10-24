@@ -1,6 +1,6 @@
 // Cardio de aparelho, registro manual: #/cardio/aparelho/novo e #/cardio/aparelho/<id>.
 import { esc, parseNumero, formatarCampo, hojeISO, gerarId } from '../util.js';
-import { ICONE_CARDIO, ROTULO_CARDIO, kcalAparelho, pesoAtual } from '../cardio.js';
+import { ROTULO_CARDIO, kcalAparelho, pesoAtual } from '../cardio.js';
 import { obterEstado, atualizar } from '../estado.js';
 import { confirmar, toast } from '../ui.js';
 import { apagarTrajeto } from '../trajetos.js';
@@ -33,7 +33,7 @@ export function render(param) {
   const tipo = c ? c.tipo : 'esteira';
   const chips = TIPOS.map(t => `
     <button type="button" class="chip${t === tipo ? ' chip-ativo' : ''}" data-acao="tipo" data-tipo="${t}" aria-pressed="${t === tipo}">
-      ${ICONE_CARDIO[t]} ${ROTULO_CARDIO[t]}</button>`).join('');
+      ${ROTULO_CARDIO[t]}</button>`).join('');
   const dia = c ? hojeISO(new Date(c.inicio)) : hojeISO();
   const duracaoMin = c ? c.duracaoSeg / 60 : null;
   const semPeso = pesoAtual(est) == null;
