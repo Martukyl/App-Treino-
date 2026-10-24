@@ -181,11 +181,25 @@ body.sem-menu .nav, body.boas-vindas .nav { transform: translate(-50%, 160%); op
   padding: calc(10px + env(safe-area-inset-top)) 16px 10px; font-size: 14px; font-weight: 600; text-align: center;
 }
 
-/* ---------- descanso (pílula; detalhado na Tarefa 7) ---------- */
+/* ---------- descanso: pílula de vidro escuro com anel ---------- */
 .descanso {
   position: fixed; z-index: 25; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
-  width: min(528px, calc(100% - 28px)); transform: translateX(-50%);
-  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 99px;
+  width: min(528px, calc(100% - 28px)); transform: translate(-50%, 160%);
+  display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 7px; border-radius: 99px;
+  transition: transform .5s var(--mola);
+}
+.descanso.on { transform: translate(-50%, 0); }
+.descanso.fim { animation: pulso-descanso .5s ease-in-out 2; }
+@keyframes pulso-descanso { 50% { transform: translate(-50%, 0) scale(1.04); } }
+.descanso-anel { width: 48px; height: 48px; flex: none; }
+.descanso-trilho { fill: none; stroke: rgba(255, 255, 255, .15); stroke-width: 5; }
+.descanso-valor { fill: none; stroke: var(--sand); stroke-width: 5; stroke-linecap: round; transition: stroke-dasharray .25s linear; }
+.descanso-txt { flex: 1; min-width: 0; }
+.descanso-txt small { display: block; font-size: 11.5px; opacity: .65; }
+.descanso-txt b { font-family: var(--disp); font-weight: 600; font-size: 21px; }
+.descanso button {
+  border: 0; border-radius: 99px; min-height: 40px; padding: 0 12px; font-size: 13px; font-weight: 600;
+  color: #fff; background: rgba(255, 255, 255, .14); cursor: pointer; flex: none;
 }
 
 .confete { position: fixed; top: -14px; width: 9px; height: 14px; border-radius: 3px; z-index: 50; pointer-events: none; }
