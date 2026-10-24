@@ -3,7 +3,7 @@ import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
 const BASE = 'http://localhost:8080/';
-const IMG = 'C:/Claude/_pessoal/App Treino/img/';
+const IMG = new URL('../../img/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const OUT = process.env.OUT || '.';
 const res = [];
 const ok = (nome, cond, extra = '') => { res.push([cond ? 'OK ' : 'FALHA', nome, extra]); };
@@ -15,7 +15,8 @@ const erros = [];
 page.on('console', m => { if (m.type() === 'error') erros.push(m.text()); });
 page.on('pageerror', e => erros.push(String(e)));
 
-const ir = async h => { await page.evaluate(x => { location.hash = x; }, h); await page.waitForTimeout(250); };
+// 400 ms: a tela anterior sai em até 320 ms (transição)
+const ir = async h => { await page.evaluate(x => { location.hash = x; }, h); await page.waitForTimeout(400); };
 const nFotos = () => page.evaluate(() => new Promise(r => {
   const q = indexedDB.open('appTreino-fotos');
   q.onsuccess = () => { const t = q.result.transaction('fotos').objectStore('fotos').getAllKeys(); t.onsuccess = () => { r(t.result.length); q.result.close(); }; };
@@ -32,15 +33,16 @@ await page.reload(); await page.waitForTimeout(500);
 await page.check('input[name="programa"][value="padrao"]'); await page.click('[data-acao="comecar-app"]'); await page.waitForTimeout(400); ok('Boas-vindas concluídas', page.url().endsWith('#/hoje'));
 
 // ---------- Hoje ----------
-ok('Hoje: faixa de foto do treino A', await page.locator('.treino-foto img[src*="treino-a.jpg"]').count() === 1);
-const imgOk = await page.locator('.treino-foto img').evaluate(i => i.complete && i.naturalWidth > 0);
+ok('Hoje: foto do treino A', await page.locator('[data-sec="treino-do-dia"] img[src*="treino-a.jpg"]').count() === 1);
+const imgOk = await page.locator('[data-sec="treino-do-dia"] img').evaluate(i => i.complete && i.naturalWidth > 0);
 ok('Hoje: foto carregou', imgOk);
-ok('Hoje: avatar sem nome = 🙂', (await page.locator('.avatar').innerText()).includes('🙂'));
+ok('Hoje: avatar sem nome = ícone de pessoa', await page.locator('.avatar svg').count() === 1);
 await page.screenshot({ path: `${OUT}/01-hoje.png`, fullPage: true });
 
 // ---------- Perfil ----------
 await page.click('.avatar-link'); await page.waitForTimeout(250);
 ok('Avatar leva a #/corpo', page.url().endsWith('#/corpo'));
+await page.click('[data-sec="perfil"] summary'); await page.waitForTimeout(150); // abre o bloco do perfil
 await page.fill('[data-campo="nome"]', 'Maria');
 await page.fill('[data-campo="altura"]', '165'); await page.press('[data-campo="altura"]', 'Tab');
 await page.fill('[data-campo="metaPeso"]', '62'); await page.press('[data-campo="metaPeso"]', 'Tab');
@@ -77,9 +79,9 @@ const txt = await page.locator('.tela-corpo').innerText();
 const agora = new Date();
 const idade = agora.getFullYear() - 1990 - (agora.getMonth() < 9 || (agora.getMonth() === 9 && agora.getDate() < 4) ? 1 : 0);
 ok('Idade + IMC', new RegExp(`${idade} anos · IMC 22,2 \\(Normal\\)`).test(txt), (txt.match(/\d+ anos.*/) || [''])[0]);
-ok('Faltam 1,5 kg', txt.includes('faltam 1,5 kg para a meta'));
+ok('Faltam 1,5 kg', txt.includes('Faltam 1,5 kg para a meta'));
 ok('Desde o início +2,1', txt.includes('+2,1'));
-const cor = async rot => page.locator('.linha-medida', { hasText: rot }).locator('.dif').first().getAttribute('class');
+const cor = async rot => page.locator('.medida-bloco', { hasText: rot }).locator('.dif').first().getAttribute('class');
 ok('Cintura caiu = boa', (await cor('Cintura')).includes('dif-boa'));
 ok('Quadril caiu = ruim', (await cor('Quadril')).includes('dif-ruim'));
 ok('Coxa subiu = boa', (await cor('Coxa direita')).includes('dif-boa'));
@@ -90,7 +92,7 @@ await page.screenshot({ path: `${OUT}/02-corpo.png`, fullPage: true });
 // ---------- Medida ----------
 await ir('#/corpo/medida/cintura');
 const tm = await page.locator('#app').innerText();
-ok('Tela medida cintura', tm.includes('Cintura') && await page.locator('#app svg').count() === 1);
+ok('Tela medida cintura', tm.includes('Cintura') && await page.locator('#app > .tela svg').count() === 1);
 await ir('#/corpo/medida/xyz');
 ok('Medida inexistente tratada', (await page.locator('#app').innerText()).length > 0 && erros.length === 0);
 
@@ -171,11 +173,12 @@ ok('Hoje: avatar com foto', await page.locator('.avatar img[src^="blob:"]').coun
 ok('Hoje: saudação com nome', (await page.locator('.hoje-cab').innerText()).includes('Maria'));
 
 // ---------- Regressão: treino ----------
-await page.click('.card-destaque [data-acao="comecar"]'); await page.waitForTimeout(400);
+await page.click('[data-sec="treino-do-dia"] [data-acao="comecar"]'); await page.waitForTimeout(500);
 ok('Treino abriu', page.url().endsWith('#/treino'));
-await page.fill('.exercicio[data-i="0"] .serie[data-s="0"] .carga', '20'); await page.click('.exercicio[data-i="0"] .serie[data-s="0"] [data-acao="feita"]'); await page.waitForTimeout(200); await page.keyboard.press('Escape');
+await page.click('.passo-valor[data-campo="carga"]'); await page.fill('.passo-campo', '20'); await page.press('.passo-campo', 'Enter');
+await page.click('.exercicio [data-acao="feita"]'); await page.waitForTimeout(200);
 await ir('#/hoje');
-ok('Hoje: card em andamento com faixa', await page.locator('.card-destaque .treino-foto img').count() === 1 && (await page.locator('.card-destaque').innerText()).includes('em andamento'));
+ok('Hoje: bloco em andamento com foto', await page.locator('[data-sec="em-andamento"] img').count() === 1 && (await page.locator('[data-sec="em-andamento"]').innerText()).includes('Em andamento'));
 await ir('#/treino');
 await page.click('[data-acao="finalizar"]'); await page.waitForTimeout(300);
 if (await page.locator('#sheet [data-acao="ok"]').count()) await sheetOk();

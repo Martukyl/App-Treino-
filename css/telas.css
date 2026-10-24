@@ -217,3 +217,33 @@
 .emoji-op.sel { background: var(--ink); }
 .btn-mini { min-height: 34px; padding: 6px 12px; font-size: 12.5px; }
 
+/* ---------- Corpo ---------- */
+.perfil-bloco summary { list-style: none; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.perfil-bloco summary::-webkit-details-marker { display: none; }
+.perfil-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.perfil-textos b { font-size: 15px; }
+.perfil-seta { color: var(--mut); transition: transform .3s var(--suave); }
+.perfil-bloco[open] .perfil-seta { transform: rotate(90deg); }
+.perfil-campos { margin-top: 10px; }
+.perfil-foto-acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.perfil-foto-acoes .pilula { background: var(--bg); }
+.avatar-grande { width: 52px; height: 52px; font-size: 20px; }
+.chip-dif { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; border-radius: 99px; padding: 3px 9px; background: rgba(255, 255, 255, .65); white-space: nowrap; }
+.medida-bloco .chip-dif { background: var(--bg); margin-top: 6px; align-self: flex-start; }
+.peso-bloco { display: block; color: var(--ink); text-decoration: none; }
+.peso-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.peso-bloco .grafico { margin-top: 6px; }
+.grafico svg { display: block; width: 100%; height: auto; }
+.meta-topo { display: flex; justify-content: space-between; gap: 8px; }
+.meta-barra { height: 10px; border-radius: 9px; background: rgba(28, 31, 35, .12); margin-top: 10px; overflow: hidden; }
+.meta-barra b { display: block; height: 100%; border-radius: 9px; background: var(--ink); }
+.ok-texto { color: var(--ok); }
+.medida-bloco { display: flex; flex-direction: column; color: var(--ink); text-decoration: none; }
+.medida-linha { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
+.medida-linha .num-grande { font-size: 22px; }
+.mini-grafico { width: 46px; height: 20px; color: var(--ink); flex: none; }
+.fotos-bloco { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; color: var(--ink); text-decoration: none; }
+.fotos-bloco > span { display: flex; flex-direction: column; }
+.tela-corpo .btn-grande { margin-top: 10px; }
+.linha-nome { display: flex; flex-direction: column; min-width: 0; }
+
