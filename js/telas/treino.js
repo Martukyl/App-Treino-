@@ -1,4 +1,5 @@
 // Tela de treino em andamento (#/treino) e resumo ao finalizar (#/resumo/<id>).
+// Visual Blocos: um exercício por vez (cartão), controles + e − e a lista de exercícios embaixo.
 import {
   esc, parseCarga, parseReps, formatarKg, formatarNumero, formatarCampo,
   formatarDescanso, formatarDuracao, formatarData
@@ -11,11 +12,15 @@ import { prepararAudio, iniciarDescanso, pararDescanso } from '../cronometro.js'
 import { compartilharCard } from '../compartilhar.js';
 import { dadosCardTreino } from '../cards.js';
 import { sincronizarRanking } from '../ranking.js';
+import { indiceAtual, ajustarCarga, ajustarReps, copiarCargaSeguintes, lerIndiceGuardado, guardarIndice } from '../sessao-ui.js';
+import { pop, rolarNumero } from '../movimento.js';
+import { ic } from '../icones.js';
 
-// Cards que a pessoa expandiu/recolheu na mão (índice → true = aberto), por sessão.
-let aberturaManual = new Map();
-let sessaoDaAbertura = null;
 let intervaloTempo = null;
+// série escolhida na mão dentro do exercício aberto ({ i, s }); some quando ela é feita
+let serieEscolhida = null;
+// exercício já concluído aberto pela lista (a regra do exercício atual pularia ele): { sessaoId, i }
+let itemAberto = null;
 
 const nomeDe = (est, id) => est.exercicios[id]?.nome ?? id;
 
@@ -41,60 +46,95 @@ function resumirRegistros(registros) {
     .join(' · ');
 }
 
-function renderSerie(r, s) {
-  const n = s + 1;
-  return `
-    <div class="serie${r.feita ? ' feita' : ''}" data-s="${s}">
-      <span class="serie-n">${n}</span>
-      <input class="carga" inputmode="decimal" placeholder="kg" value="${r.carga == null ? '' : formatarCampo(r.carga)}" aria-label="Carga série ${n}"${r.feita ? ' disabled' : ''}>
-      <input class="reps" inputmode="numeric" placeholder="reps" value="${r.reps == null ? '' : r.reps}" aria-label="Repetições série ${n}"${r.feita ? ' disabled' : ''}>
-      <button type="button" class="btn btn-icone serie-ok" data-acao="feita" aria-pressed="${r.feita}" aria-label="Série ${n} feita">✓</button>
-    </div>`;
+const tempoTreino = sa => {
+  const s = Math.max(0, Math.floor((Date.now() - new Date(sa.inicio).getTime()) / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, seg = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${seg}` : `${m}:${seg}`;
+};
+
+// índice do exercício aberto e da série atual dentro dele
+function posicao(sa) {
+  const i = itemAberto && itemAberto.sessaoId === sa.id && sa.itens[itemAberto.i]
+    ? itemAberto.i : indiceAtual(sa, lerIndiceGuardado(sa.id));
+  const regs = sa.itens[i]?.registros || [];
+  const escolhida = serieEscolhida && serieEscolhida.i === i && regs[serieEscolhida.s] && !regs[serieEscolhida.s].feita
+    ? serieEscolhida.s : null;
+  return { i, s: escolhida ?? regs.findIndex(r => !r.feita) };
 }
 
-function renderSelo(aval) {
+const textoCarga = c => (c == null ? '—' : `${formatarCampo(c)}<small>kg</small>`);
+
+function renderSugestao(aval, i) {
   if (aval.status === 'aumentar') {
-    return `<div class="selo-ok">↑ Pode aumentar → ${formatarKg(aval.cargaSugerida)} <button type="button" class="btn-selo" data-acao="aplicar" data-carga="${aval.cargaSugerida}">Aplicar</button></div>`;
+    return `<div class="bloco bloco-sage sugestao a" data-sec="sugestao"><div><strong>Pode aumentar para ${formatarKg(aval.cargaSugerida)}</strong><span>Você fez o máximo de repetições da última vez</span></div>
+      <button type="button" class="pilula pilula-esc pilula-mini" data-acao="aplicar" data-i="${i}" data-carga="${aval.cargaSugerida}">Aplicar</button></div>`;
   }
   if (aval.status === 'reduzir') {
-    return `<div class="selo-warn">Sugestão: baixar para ${formatarKg(aval.cargaSugerida)} <button type="button" class="btn-selo" data-acao="aplicar" data-carga="${aval.cargaSugerida}">Aplicar</button></div>`;
+    return `<div class="bloco bloco-sand sugestao a" data-sec="sugestao"><div><strong>Sugestão: baixar para ${formatarKg(aval.cargaSugerida)}</strong><span>As repetições ficaram abaixo da faixa</span></div>
+      <button type="button" class="pilula pilula-esc pilula-mini" data-acao="aplicar" data-i="${i}" data-carga="${aval.cargaSugerida}">Aplicar</button></div>`;
   }
   return '';
 }
 
-function renderCard(est, it, i, aberto) {
+function renderCartao(est, sa) {
+  const { i, s } = posicao(sa);
+  const it = sa.itens[i];
+  if (!it) return '';
   const ex = est.exercicios[it.exercicioId];
   const aval = ex ? avaliar(historicoDoExercicio(est.sessoes, it.exercicioId), ex) : { status: 'novo', ultima: null };
-  const feitas = it.registros.filter(r => r.feita);
-  const concluido = it.registros.length > 0 && feitas.length === it.registros.length;
   const grupo = ex ? GRUPOS[ex.grupo] ?? '' : '';
-  const unilateral = ex?.unilateral ? ' · cada lado' : '';
-  const ultima = aval.ultima
-    ? `Última vez: ${resumirRegistros(aval.ultima.registros)} · ${formatarData(aval.ultima.data)}`
-    : 'Primeira vez';
-  const resumo = concluido ? `${resumirRegistros(it.registros)} ✓` : `${feitas.length}/${it.registros.length} séries`;
+  const ultima = aval.ultima ? `última vez ${resumirRegistros(aval.ultima.registros)} · ${formatarData(aval.ultima.data)}` : 'primeira vez';
+  const etapas = it.registros.map((r, k) => `<button type="button" class="etapa num${r.feita ? ' f' : ''}${k === s ? ' a' : ''}" data-acao="etapa" data-s="${k}" aria-pressed="${r.feita}" aria-label="Série ${k + 1}${r.feita ? ' feita (toque para desfazer)' : ''}">${r.feita ? esc(`${r.carga == null ? '' : formatarCampo(r.carga) + ' × '}${r.reps}`) : `Série ${k + 1}`}</button>`).join('');
+  const r = s >= 0 ? it.registros[s] : null;
+  const controles = r ? `
+      <div class="passos num">
+        <div class="passo"><small>CARGA</small><div class="passo-r">
+          <button type="button" data-acao="carga" data-d="-1" aria-label="Menos carga">${ic('menos')}</button>
+          <button type="button" class="passo-valor" data-acao="digitar" data-campo="carga" aria-label="Digitar carga">${textoCarga(r.carga)}</button>
+          <button type="button" data-acao="carga" data-d="1" aria-label="Mais carga">${ic('mais')}</button></div></div>
+        <div class="passo"><small>REPETIÇÕES</small><div class="passo-r">
+          <button type="button" data-acao="reps" data-d="-1" aria-label="Menos repetições">${ic('menos')}</button>
+          <button type="button" class="passo-valor" data-acao="digitar" data-campo="reps" aria-label="Digitar repetições">${r.reps ?? '—'}</button>
+          <button type="button" data-acao="reps" data-d="1" aria-label="Mais repetições">${ic('mais')}</button></div></div>
+      </div>
+      <button type="button" class="btn-grande" data-acao="feita">${ic('ok')}Série ${s + 1} feita</button>`
+    : `<button type="button" class="btn-grande" disabled>${ic('ok')}Exercício concluído</button>`;
   return `
-    <article class="card exercicio${aberto ? '' : ' recolhido'}${concluido ? ' concluido' : ''}" data-i="${i}">
-      <div class="card-cab" data-acao="alternar" role="button" tabindex="0" aria-expanded="${aberto}">
-        <h2 class="ex-nome">${esc(nomeDe(est, it.exercicioId))}</h2>
-        <p class="muted">${esc(grupo)}${unilateral} · ${it.series} × ${it.repMin}–${it.repMax} · ${formatarDescanso(it.descanso)}</p>
-        ${it.trocadoDe ? `<p class="muted">no lugar de ${esc(nomeDe(est, it.trocadoDe))}</p>` : ''}
-        <p class="card-resumo">${esc(resumo)}</p>
+    <article class="bloco bloco-sky exercicio" data-i="${i}">
+      <div class="cartao-topo rotulo"><span>Exercício ${i + 1} de ${sa.itens.length}</span><span>${esc(grupo)}${ex?.unilateral ? ' · cada lado' : ''}</span></div>
+      <h2 class="ex-nome">${esc(nomeDe(est, it.exercicioId))}</h2>
+      ${it.trocadoDe ? `<p class="cartao-meta">no lugar de ${esc(nomeDe(est, it.trocadoDe))}</p>` : ''}
+      <p class="cartao-meta">${it.registros.length} × ${it.repMin}–${it.repMax} · descanso ${formatarDescanso(it.descanso)} · ${esc(ultima)}</p>
+      <div class="etapas">${etapas}</div>
+      ${controles}
+      <div class="cartao-acoes">
+        <button type="button" class="pilula pilula-mini" data-acao="dica">${ic('info')}Como fazer</button>
+        <button type="button" class="pilula pilula-mini" data-acao="trocar">${ic('troca')}Trocar</button>
+        <button type="button" class="pilula pilula-mini" data-acao="mais" aria-label="Mais uma série">+ série</button>
+        <button type="button" class="pilula pilula-mini" data-acao="menos" aria-label="Uma série a menos">− série</button>
       </div>
-      <div class="corpo">
-        <div class="card-botoes">
-          <button type="button" class="btn btn-sec" data-acao="dica" aria-label="Dica do exercício">ⓘ</button>
-          <button type="button" class="btn btn-sec" data-acao="trocar">Trocar</button>
-        </div>
-        <p class="muted">${esc(ultima)}</p>
-        ${renderSelo(aval)}
-        ${it.registros.map((r, s) => renderSerie(r, s)).join('')}
-        <div class="card-botoes">
-          <button type="button" class="btn btn-sec" data-acao="mais">+ série</button>
-          <button type="button" class="btn btn-sec" data-acao="menos">− série</button>
-        </div>
-      </div>
-    </article>`;
+    </article>
+    ${r ? renderSugestao(aval, i) : ''}`;
+}
+
+function renderProgresso(sa) {
+  const { total, feitas } = contarSeries(sa);
+  const segs = sa.itens.map(it => {
+    const f = it.registros.filter(r => r.feita).length;
+    return `<i><b style="width:${it.registros.length ? Math.round(f / it.registros.length * 100) : 0}%"></b></i>`;
+  }).join('');
+  return `<div class="prog" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${feitas}" aria-valuetext="${feitas} de ${total} séries">${segs}</div>
+    <p class="rotulo prog-texto"><span class="progresso">${feitas}/${total} séries</span></p>`;
+}
+
+function renderLista(est, sa) {
+  const { i: atual } = posicao(sa);
+  return sa.itens.map((it, i) => {
+    const f = it.registros.filter(r => r.feita).length, ok = it.registros.length > 0 && f === it.registros.length;
+    return `<button type="button" class="item-lista tocavel${i === atual ? ' agora' : ''}${ok ? ' concluido' : ''}" data-acao="ir-item" data-i="${i}">
+      <span><span class="item-nome">${esc(nomeDe(est, it.exercicioId))}</span><span class="sub num">${ok ? esc(resumirRegistros(it.registros)) : `${it.registros.length} × ${it.repMin}–${it.repMax}`}</span></span>
+      ${ok ? `<span class="ok-ic">${ic('ok')}</span>` : `<span class="sub num">${f}/${it.registros.length}</span>`}</button>`;
+  }).join('');
 }
 
 export function render() {
@@ -103,33 +143,46 @@ export function render() {
   if (!sa) {
     return `
       <div class="tela-treino">
-        <h1 class="titulo">Nenhum treino em andamento</h1>
-        <a class="btn btn-principal btn-bloco" href="#/hoje">Ir para Hoje</a>
+        <div class="cab-tela"><h1 class="titulo-tela">Nenhum treino em andamento</h1></div>
+        <a class="btn-grande" href="#/hoje">Ir para Hoje</a>
       </div>`;
   }
-  if (sessaoDaAbertura !== sa.id) { aberturaManual = new Map(); sessaoDaAbertura = sa.id; }
   const treino = est.treinos.find(t => t.id === sa.treinoId);
-  const nome = treino ? `Treino ${treino.id} — ${treino.nome}` : 'Treino';
-  const { total, feitas } = contarSeries(sa);
-  const primeiroPendente = sa.itens.findIndex(it => it.registros.some(r => !r.feita));
-  const cards = sa.itens.map((it, i) => {
-    const concluido = it.registros.length > 0 && it.registros.every(r => r.feita);
-    const aberto = aberturaManual.has(i) ? aberturaManual.get(i) : (!concluido || i === primeiroPendente);
-    return renderCard(est, it, i, aberto);
-  }).join('');
   return `
     <div class="tela-treino">
-      <header class="treino-cab">
-        <div>
-          <h1 class="treino-nome">${esc(nome)}</h1>
-          <p class="muted"><span class="tempo">${formatarDuracao(Date.now() - new Date(sa.inicio).getTime())}</span> · <span class="progresso">${feitas}/${total} séries</span></p>
-        </div>
-        <button type="button" class="btn btn-sec btn-icone" data-acao="menu" aria-label="Mais opções">⋯</button>
-        <div class="barra-progresso" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${feitas}" aria-valuetext="${feitas} de ${total} séries"><b style="width:${total ? Math.round(feitas / total * 100) : 0}%"></b></div>
+      <header class="cab-tela treino-cab a">
+        <a class="redondo tocavel" href="#/hoje" aria-label="Voltar para Hoje (o treino continua)">${ic('volta')}</a>
+        <h1 class="titulo-tela treino-nome">${esc(treino ? `Treino ${treino.id}` : 'Treino')}</h1>
+        <span class="pilula num tempo" aria-label="Tempo de treino">${tempoTreino(sa)}</span>
+        <button type="button" class="redondo tocavel" data-acao="menu" aria-label="Mais opções">${ic('mais3')}</button>
       </header>
-      ${cards}
-      <button type="button" class="btn btn-principal btn-bloco" data-acao="finalizar">Finalizar treino</button>
+      <div class="a" data-parte="progresso">${renderProgresso(sa)}</div>
+      <div class="a" data-parte="cartao">${renderCartao(est, sa)}</div>
+      <div class="secao a">Exercícios</div>
+      <div class="linhas lista-itens a" data-parte="lista">${renderLista(est, sa)}</div>
+      <button type="button" class="btn-grande claro fim-treino a" data-acao="finalizar">Finalizar treino</button>
     </div>`;
+}
+
+// Redesenha só as partes que mudam (sem re-render da tela inteira: preserva rolagem e animações).
+function redesenhar(raiz, { cartao = true, deslizar = 0 } = {}) {
+  const est = obterEstado(), sa = est.sessaoAtual;
+  if (!sa) return;
+  const tela = raiz.querySelector('.tela-treino');
+  if (!tela) return;
+  tela.querySelector('[data-parte="progresso"]').innerHTML = renderProgresso(sa);
+  tela.querySelector('[data-parte="lista"]').innerHTML = renderLista(est, sa);
+  if (!cartao) return;
+  const box = tela.querySelector('[data-parte="cartao"]');
+  if (!deslizar || typeof box.animate !== 'function' || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    box.innerHTML = renderCartao(est, sa);
+    return;
+  }
+  box.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-deslizar * 44}px)` }], { duration: 220, easing: 'ease-in' })
+    .onfinish = () => {
+      box.innerHTML = renderCartao(obterEstado(), obterEstado().sessaoAtual);
+      box.animate([{ opacity: 0, transform: `translateX(${deslizar * 44}px)` }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.3,1.2,.5,1)' });
+    };
 }
 
 // Aplica uma mudança estrutural (re-render) preservando a rolagem.
@@ -171,65 +224,108 @@ async function finalizar() {
   location.hash = `#/resumo/${idDaSessao}`;
 }
 
-// Edição de um campo: grava sem re-renderizar (o teclado do celular não pode fechar).
-function aoDigitar(campo) {
-  const linha = campo.closest('.serie');
-  // série feita é travada (desmarque o ✓ para editar); defesa extra além do disabled
-  if (linha.classList.contains('feita')) return;
-  const i = Number(campo.closest('.exercicio').dataset.i);
-  const s = Number(linha.dataset.s);
-  const ehCarga = campo.classList.contains('carga');
-  const texto = campo.value.trim();
-  const valor = ehCarga ? (texto === '' ? null : parseCarga(texto)) : parseReps(texto);
-  // carga vazia é válida (grava null); qualquer outro null é entrada inválida
-  if (valor === null && !(ehCarga && texto === '')) {
-    campo.classList.add('invalido');
-    return;
-  }
-  campo.classList.remove('invalido');
+// Toque no número: troca o botão por um campo de texto (Enter ou sair do campo confirma).
+function abrirDigitacao(raiz, botao) {
+  const ehCarga = botao.dataset.campo === 'carga';
+  const sa = obterEstado().sessaoAtual;
+  const { i, s } = posicao(sa);
+  const r = sa.itens[i].registros[s];
+  const campo = document.createElement('input');
+  campo.className = ehCarga ? 'carga passo-campo' : 'reps passo-campo';
+  campo.inputMode = ehCarga ? 'decimal' : 'numeric';
+  campo.value = ehCarga ? (r.carga == null ? '' : formatarCampo(r.carga)) : (r.reps ?? '');
+  campo.setAttribute('aria-label', ehCarga ? `Carga série ${s + 1}` : `Repetições série ${s + 1}`);
+  botao.replaceWith(campo);
+  campo.focus();
+  campo.select();
+  let feito = false;
+  const confirmarCampo = () => {
+    if (feito) return;
+    const texto = campo.value.trim();
+    const valor = ehCarga ? parseCarga(texto) : parseReps(texto);
+    if (valor === null || (!ehCarga && valor < 1)) { campo.classList.add('invalido'); return; }
+    feito = true;
+    atualizar(e => {
+      const regs = e.sessaoAtual?.itens[i]?.registros;
+      if (!regs || regs[s].feita) return;
+      if (ehCarga) { regs[s].carga = valor; copiarCargaSeguintes(regs, s, valor); } else regs[s].reps = valor;
+    }, { renderizar: false });
+    redesenhar(raiz);
+  };
+  campo.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); confirmarCampo(); } };
+  campo.onblur = confirmarCampo;
+}
+
+function ajustar(raiz, botao) {
+  const ehCarga = botao.dataset.acao === 'carga';
+  const d = Number(botao.dataset.d);
+  const est = obterEstado(), sa = est.sessaoAtual;
+  const { i, s } = posicao(sa);
+  if (s < 0) return;
+  const ex = est.exercicios[sa.itens[i].exercicioId];
   atualizar(e => {
-    const regs = e.sessaoAtual?.itens[i]?.registros;
-    if (!regs) return;
-    regs[s][ehCarga ? 'carga' : 'reps'] = valor;
-    // carga da série 1 (ainda não feita) é copiada para as seguintes não feitas
-    if (ehCarga && s === 0 && !regs[0].feita) {
-      regs.forEach((r, k) => { if (k > 0 && !r.feita) r.carga = valor; });
-    }
+    const regs = e.sessaoAtual.itens[i].registros;
+    if (ehCarga) {
+      regs[s].carga = ajustarCarga(regs[s].carga, d, ex?.incremento || 1);
+      copiarCargaSeguintes(regs, s, regs[s].carga);
+    } else regs[s].reps = ajustarReps(regs[s].reps, d);
   }, { renderizar: false });
-  if (ehCarga && s === 0) {
-    const regs = obterEstado().sessaoAtual?.itens[i]?.registros ?? [];
-    campo.closest('.exercicio').querySelectorAll('.serie').forEach(l => {
-      const k = Number(l.dataset.s);
-      if (k > 0 && regs[k] && !regs[k].feita) {
-        const c = l.querySelector('.carga');
-        c.value = texto;
-        c.classList.remove('invalido');
-      }
-    });
+  const r = obterEstado().sessaoAtual.itens[i].registros[s];
+  const alvo = botao.parentElement.querySelector('.passo-valor');
+  if (alvo) rolarNumero(alvo, ehCarga ? textoCarga(r.carga) : String(r.reps), d);
+}
+
+function aoFeita(raiz) {
+  prepararAudio();
+  const sa = obterEstado().sessaoAtual;
+  const { i, s } = posicao(sa);
+  const item = sa.itens[i];
+  const r = item?.registros[s];
+  if (!r) return;
+  if (r.carga == null || parseReps(r.reps) === null) { toast('Preencha carga e repetições'); return; }
+  atualizar(e => { e.sessaoAtual.itens[i].registros[s].feita = true; }, { renderizar: false });
+  serieEscolhida = null;
+  iniciarDescanso(item.descanso);
+  const agora = obterEstado().sessaoAtual;
+  const concluiu = agora.itens[i].registros.every(x => x.feita);
+  redesenhar(raiz);
+  const etapa = raiz.querySelectorAll('.etapa')[s];
+  if (etapa) pop(etapa);
+  if (concluiu) {
+    const prox = indiceAtual(agora, null);
+    if (prox !== i && agora.itens[prox].registros.some(x => !x.feita)) {
+      guardarIndice(agora.id, prox);
+      itemAberto = null;
+      setTimeout(() => { if (obterEstado().sessaoAtual?.id === agora.id) redesenhar(raiz, { deslizar: 1 }); }, 750);
+    } else {
+      toast('Tudo feito! Pode finalizar o treino');
+    }
   }
 }
 
-function aoFeita(botao) {
-  prepararAudio();
-  const linha = botao.closest('.serie');
-  const i = Number(botao.closest('.exercicio').dataset.i);
-  const s = Number(linha.dataset.s);
-  const item = obterEstado().sessaoAtual.itens[i];
-  if (item.registros[s].feita) {
-    mutar(e => { e.sessaoAtual.itens[i].registros[s].feita = false; });
+function tocarEtapa(raiz, k) {
+  const sa = obterEstado().sessaoAtual;
+  const { i } = posicao(sa);
+  const r = sa.itens[i].registros[k];
+  if (!r) return;
+  if (r.feita) {
+    atualizar(e => { e.sessaoAtual.itens[i].registros[k].feita = false; }, { renderizar: false });
     pararDescanso();
-    return;
+    guardarIndice(sa.id, i);
+    itemAberto = null;
   }
-  const campoCarga = linha.querySelector('.carga'), campoReps = linha.querySelector('.reps');
-  const carga = parseCarga(campoCarga.value), reps = parseReps(campoReps.value);
-  campoCarga.classList.toggle('invalido', carga === null);
-  campoReps.classList.toggle('invalido', reps === null);
-  if (carga === null || reps === null) { toast('Preencha carga e repetições'); return; }
-  mutar(e => {
-    const r = e.sessaoAtual.itens[i].registros[s];
-    r.carga = carga; r.reps = reps; r.feita = true;
-  });
-  iniciarDescanso(item.descanso);
+  serieEscolhida = { i, s: k };
+  redesenhar(raiz);
+}
+
+function abrirItem(raiz, i) {
+  const sa = obterEstado().sessaoAtual;
+  const atual = posicao(sa).i;
+  if (i === atual) return;
+  serieEscolhida = null;
+  if (sa.itens[i].registros.some(r => !r.feita)) { guardarIndice(sa.id, i); itemAberto = null; }
+  else itemAberto = { sessaoId: sa.id, i }; // concluído: abre só para ver/corrigir
+  redesenhar(raiz, { deslizar: i > atual ? 1 : -1 });
 }
 
 function abrirDica(i) {
@@ -237,17 +333,19 @@ function abrirDica(i) {
   const it = est.sessaoAtual.itens[i];
   const ex = est.exercicios[it.exercicioId];
   abrirSheet(`
-    <h2>${esc(nomeDe(est, it.exercicioId))}</h2>
-    <p class="muted">${esc(ex ? EQUIPAMENTOS[ex.equipamento] ?? '' : '')}</p>
+    <h2 class="sheet-titulo">${esc(nomeDe(est, it.exercicioId))}</h2>
+    <p class="rotulo">${esc(ex ? EQUIPAMENTOS[ex.equipamento] ?? '' : '')}</p>
     <p>${esc(ex?.dica || 'Sem dica cadastrada.')}</p>
-    <button type="button" class="btn btn-sec btn-bloco" data-acao="fechar">Fechar</button>`,
+    <button type="button" class="btn-grande" data-acao="fechar">Entendi</button>`,
   el => { el.querySelector('[data-acao="fechar"]').onclick = fecharSheet; });
 }
 
 function abrirMenu() {
   abrirSheet(`
-    <button type="button" class="btn btn-perigo btn-bloco" data-acao="descartar">Descartar treino</button>
-    <button type="button" class="btn btn-sec btn-bloco" data-acao="fechar">Fechar</button>`,
+    <div class="pilha">
+      <button type="button" class="btn-grande perigo" data-acao="descartar">Descartar treino</button>
+      <button type="button" class="btn-grande claro" data-acao="fechar">Fechar</button>
+    </div>`,
   el => {
     el.querySelector('[data-acao="fechar"]').onclick = fecharSheet;
     el.querySelector('[data-acao="descartar"]').onclick = async () => {
@@ -258,20 +356,22 @@ function abrirMenu() {
 }
 
 function aoClicar(ev) {
+  const raiz = ev.currentTarget;
   const b = ev.target.closest('[data-acao]');
   if (!b || !b.closest('.tela-treino')) return;
-  const card = b.closest('.exercicio');
-  const i = card ? Number(card.dataset.i) : null;
+  const sa = obterEstado().sessaoAtual;
+  if (!sa) return;
+  const i = b.dataset.i !== undefined ? Number(b.dataset.i) : posicao(sa).i;
   const acao = b.dataset.acao;
-  if (acao === 'alternar') {
-    const recolhido = card.classList.toggle('recolhido');
-    b.setAttribute('aria-expanded', String(!recolhido));
-    aberturaManual.set(i, !recolhido);
-  } else if (acao === 'feita') {
-    aoFeita(b);
-  } else if (acao === 'aplicar') {
+  if (acao === 'feita') aoFeita(raiz);
+  else if (acao === 'carga' || acao === 'reps') ajustar(raiz, b);
+  else if (acao === 'digitar') abrirDigitacao(raiz, b);
+  else if (acao === 'etapa') tocarEtapa(raiz, Number(b.dataset.s));
+  else if (acao === 'ir-item') abrirItem(raiz, i);
+  else if (acao === 'aplicar') {
     const carga = Number(b.dataset.carga);
     mutar(e => e.sessaoAtual.itens[i].registros.forEach(r => { if (!r.feita) r.carga = carga; }));
+    toast(`Carga ajustada para ${formatarKg(carga)}`);
   } else if (acao === 'mais') {
     mutar(e => {
       const item = e.sessaoAtual.itens[i];
@@ -279,45 +379,30 @@ function aoClicar(ev) {
       item.registros.push({ carga: ult ? ult.carga : null, reps: ult ? ult.reps : item.repMax, feita: false });
     });
   } else if (acao === 'menos') {
-    const regs = obterEstado().sessaoAtual.itens[i].registros;
+    const regs = sa.itens[i].registros;
     const k = regs.map(r => r.feita).lastIndexOf(false);
     if (k < 0) toast('Não há série pendente para remover');
     else if (regs.length <= 1) toast('O exercício precisa de ao menos uma série');
     else mutar(e => { e.sessaoAtual.itens[i].registros.splice(k, 1); });
-  } else if (acao === 'dica') {
-    abrirDica(i);
-  } else if (acao === 'trocar') {
-    import('./trocar.js').then(m => m.abrirTrocar(i));
-  } else if (acao === 'menu') {
-    abrirMenu();
-  } else if (acao === 'finalizar') {
-    finalizar();
-  }
+  } else if (acao === 'dica') abrirDica(i);
+  else if (acao === 'trocar') import('./trocar.js').then(m => m.abrirTrocar(i));
+  else if (acao === 'menu') abrirMenu();
+  else if (acao === 'finalizar') finalizar();
 }
 
 export function montar(raiz) {
   // atribuição (e não addEventListener) para não empilhar handlers a cada render
   raiz.onclick = aoClicar;
-  raiz.oninput = ev => {
-    const c = ev.target;
-    if (c.matches?.('.tela-treino input.carga, .tela-treino input.reps')) aoDigitar(c);
-  };
-  raiz.onkeydown = ev => {
-    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches?.('.tela-treino .card-cab')) {
-      ev.preventDefault();
-      ev.target.click();
-    }
-  };
   clearInterval(intervaloTempo);
   intervaloTempo = null;
   if (!raiz.querySelector('.tela-treino .tempo')) return;
-  // atualiza só o texto do tempo; para sozinho quando a tela sai do DOM
+  // relógio do treino a cada segundo; para sozinho quando a tela sai do DOM
   intervaloTempo = setInterval(() => {
     const el = document.querySelector('.tela-treino .tempo');
     const sa = obterEstado().sessaoAtual;
     if (!el || !sa) { clearInterval(intervaloTempo); intervaloTempo = null; return; }
-    el.textContent = formatarDuracao(Date.now() - new Date(sa.inicio).getTime());
-  }, 30000);
+    el.textContent = tempoTreino(sa);
+  }, 1000);
 }
 
 export function renderResumo(sessaoId) {
