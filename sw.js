@@ -4,7 +4,7 @@
 const CACHE = 'treino-2.0.0';
 const ARQUIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/base.css',
-  './js/app.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
+  './js/app.js', './js/navegacao.js', './js/movimento.js', './js/icones.js', './js/estado.js', './js/ui.js', './js/util.js', './js/dados.js',
   './js/progressao.js', './js/armazenamento.js', './js/cronometro.js', './js/grafico.js',
   './js/telas/hoje.js', './js/telas/treino.js', './js/telas/trocar.js',
   './js/telas/exercicios.js', './js/telas/historico.js', './js/telas/ajustes.js',
